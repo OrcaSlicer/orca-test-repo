@@ -1,0 +1,125 @@
+#!/usr/bin/env python3
+"""Slice every .3mf in test_projects/ via OrcaSlicer and check output size."""
+
+import argparse
+import json
+import subprocess
+import sys
+from pathlib import Path
+
+REPO_ROOT = Path(__file__).resolve().parent
+TEST_DIR = REPO_ROOT / "test_projects"
+RESULT_DIR = REPO_ROOT / "result"
+DATA_DIR = REPO_ROOT / "data_dir"
+BASELINE_FILE = REPO_ROOT / "baseline.json"
+RAW_OUTPUT = RESULT_DIR / "plate_1.gcode"
+
+TOLERANCE = 0.20
+
+
+def tail(text: str, n: int = 50) -> str:
+    lines = text.splitlines()
+    return "\n".join(lines[-n:])
+
+
+def slice_one(threemf: Path, baseline: dict[str, int], orca_bin: Path) -> tuple[bool, str]:
+    target_name = threemf.name.replace(".", "_") + ".gcode"
+    target = RESULT_DIR / target_name
+
+    if target_name not in baseline:
+        return False, f"no baseline entry for {target_name} in {BASELINE_FILE.name}"
+    expected = baseline[target_name]
+    min_size = int(expected * (1 - TOLERANCE))
+    max_size = int(expected * (1 + TOLERANCE))
+
+    RAW_OUTPUT.unlink(missing_ok=True)
+
+    proc = subprocess.run(
+        [
+            str(orca_bin),
+            "--slice", "0",
+            "--allow-newer-file",
+            "--datadir", str(DATA_DIR),
+            "--outputdir", str(RESULT_DIR),
+            str(threemf),
+        ],
+        cwd=str(REPO_ROOT),
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    if proc.returncode != 0:
+        signal_note = (
+            f" (killed by signal {-proc.returncode})" if proc.returncode < 0 else ""
+        )
+        return False, f"slicer exited {proc.returncode}{signal_note}\nstderr:\n{tail(proc.stderr)}"
+
+    if not RAW_OUTPUT.exists():
+        return False, "no plate_1.gcode produced"
+
+    RAW_OUTPUT.replace(target)
+    size = target.stat().st_size
+
+    if not (min_size <= size <= max_size):
+        return False, (
+            f"size {size} bytes outside baseline {expected} +/-{int(TOLERANCE * 100)}% "
+            f"[{min_size}, {max_size}]"
+        )
+
+    return True, f"{size / 1_000_000:.2f} MB (baseline {expected / 1_000_000:.2f} MB) -> {target.name}"
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(
+        description="Slice every .3mf in test_projects/ via OrcaSlicer and check output size against baseline.json.",
+    )
+    parser.add_argument(
+        "orca_bin",
+        type=Path,
+        help="Path to the OrcaSlicer executable (e.g. /Applications/OrcaSlicer.app/Contents/MacOS/OrcaSlicer on macOS).",
+    )
+    args = parser.parse_args()
+
+    orca_bin: Path = args.orca_bin.expanduser()
+    if not orca_bin.exists():
+        print(f"ERROR: OrcaSlicer binary not found: {orca_bin}", file=sys.stderr)
+        return 1
+    print(f"Using OrcaSlicer: {orca_bin}")
+
+    if not BASELINE_FILE.exists():
+        print(f"ERROR: baseline file not found: {BASELINE_FILE}", file=sys.stderr)
+        return 1
+    baseline = json.loads(BASELINE_FILE.read_text())
+
+    RESULT_DIR.mkdir(parents=True, exist_ok=True)
+    for entry in RESULT_DIR.iterdir():
+        if entry.is_file():
+            entry.unlink()
+
+    inputs = sorted(TEST_DIR.glob("*.3mf"))
+    if not inputs:
+        print(f"ERROR: no .3mf files found in {TEST_DIR}", file=sys.stderr)
+        return 1
+
+    failures: list[tuple[str, str]] = []
+    for threemf in inputs:
+        print(f">>> slicing {threemf.name}", flush=True)
+        ok, msg = slice_one(threemf, baseline, orca_bin)
+        if ok:
+            print(f"OK   {threemf.name}: {msg}")
+        else:
+            print(f"FAIL {threemf.name}: {msg}", file=sys.stderr)
+            failures.append((threemf.name, msg))
+
+    print()
+    print(f"PASSED: {len(inputs) - len(failures)}")
+    print(f"FAILED: {len(failures)}")
+    for name, reason in failures:
+        print(f"  - {name}: {reason.splitlines()[0]}")
+
+    return 1 if failures else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
