@@ -3,6 +3,8 @@
 
 import argparse
 import json
+import os
+import shlex
 import subprocess
 import sys
 from pathlib import Path
@@ -34,15 +36,26 @@ def slice_one(threemf: Path, baseline: dict[str, int], orca_bin: Path) -> tuple[
 
     RAW_OUTPUT.unlink(missing_ok=True)
 
+    tokens: list[str | Path] = [
+        orca_bin,
+        "--slice", "0",
+        "--allow-newer-file",
+        "--datadir", DATA_DIR,
+        "--outputdir", RESULT_DIR,
+        threemf,
+    ]
+    command = [str(t) for t in tokens]
+    display_command = [
+        t if isinstance(t, str)
+        else t.name if t is orca_bin
+        else os.path.relpath(t, REPO_ROOT)
+        for t in tokens
+    ]
+
+    print(f">>> {shlex.join(display_command)}", flush=True)
+
     proc = subprocess.run(
-        [
-            str(orca_bin),
-            "--slice", "0",
-            "--allow-newer-file",
-            "--datadir", str(DATA_DIR),
-            "--outputdir", str(RESULT_DIR),
-            str(threemf),
-        ],
+        command,
         cwd=str(REPO_ROOT),
         capture_output=True,
         text=True,
@@ -85,7 +98,7 @@ def main() -> int:
     if not orca_bin.exists():
         print(f"ERROR: OrcaSlicer binary not found: {orca_bin}", file=sys.stderr)
         return 1
-    print(f"Using OrcaSlicer: {orca_bin}")
+    print(f"Using OrcaSlicer: {orca_bin.name}")
 
     if not BASELINE_FILE.exists():
         print(f"ERROR: baseline file not found: {BASELINE_FILE}", file=sys.stderr)
@@ -104,7 +117,6 @@ def main() -> int:
 
     failures: list[tuple[str, str]] = []
     for threemf in inputs:
-        print(f">>> slicing {threemf.name}", flush=True)
         ok, msg = slice_one(threemf, baseline, orca_bin)
         if ok:
             print(f"OK   {threemf.name}: {msg}")
