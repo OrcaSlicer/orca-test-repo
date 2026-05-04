@@ -15,6 +15,7 @@ RESULT_DIR = REPO_ROOT / "result"
 DATA_DIR = REPO_ROOT / "data_dir"
 BASELINE_FILE = REPO_ROOT / "baseline.json"
 RAW_OUTPUT = RESULT_DIR / "plate_1.gcode"
+VALIDATOR_BIN = REPO_ROOT / "bin" / "orca_gcode_validator"
 
 TOLERANCE = 0.20
 
@@ -74,11 +75,39 @@ def slice_one(threemf: Path, baseline: dict[str, int], orca_bin: Path) -> tuple[
     RAW_OUTPUT.replace(target)
     size = target.stat().st_size
 
-    if not (min_size <= size <= max_size):
-        return False, (
+    size_ok = min_size <= size <= max_size
+    if not size_ok:
+        size_msg = (
             f"size {size} bytes outside baseline {expected} +/-{int(TOLERANCE * 100)}% "
             f"[{min_size}, {max_size}]"
         )
+
+    # validate gcode (only for Stanford_Bunny)
+    if threemf.name == "Stanford_Bunny.3mf":
+        vproc = subprocess.run(
+            [str(VALIDATOR_BIN), str(target)],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        vout = vproc.stdout.strip()
+        verrors = vproc.returncode != 0
+
+        if verrors:
+            vmsg = f"gcode validation errors:\n{vout}"
+        elif size_ok:
+            vmsg = "gcode validation: clean"
+
+        if not size_ok:
+            return False, f"{size_msg}\n{vmsg}" if verrors else f"{size_msg}\n{vmsg}"
+
+        if verrors:
+            return False, f"{size / 1_000_000:.2f} MB (baseline {expected / 1_000_000:.2f} MB) -> {target.name}\n{vmsg}"
+
+        return True, f"{size / 1_000_000:.2f} MB (baseline {expected / 1_000_000:.2f} MB) -> {target.name}"
+
+    if not size_ok:
+        return False, size_msg
 
     return True, f"{size / 1_000_000:.2f} MB (baseline {expected / 1_000_000:.2f} MB) -> {target.name}"
 
