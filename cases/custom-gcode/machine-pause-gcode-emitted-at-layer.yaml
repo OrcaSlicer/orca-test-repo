@@ -1,0 +1,38 @@
+id: machine-pause-gcode-emitted-at-layer
+title: machine_pause_gcode set on the CLI is emitted once, at the layer of a PausePrint item loaded via --load-custom-gcodes
+category: custom-gcode
+status: fixed
+model: synthetic/cube20.stl
+args:
+- --datadir
+- '{datadir}'
+- --outputdir
+- '{outputdir}'
+- --load-settings
+- '{datadir}/system/BBL/machine/Bambu Lab X1 Carbon 0.4 nozzle.json;{datadir}/system/BBL/process/0.20mm Standard @BBL X1C.json'
+- --load-filaments
+- '{datadir}/system/BBL/filament/Bambu PLA Basic @BBL X1C.json'
+- --load-custom-gcodes
+- '{fixtures}/custom_gcodes_template_pause_custom.json'
+- --machine-pause-gcode=; PROBE_MACHINE_PAUSE_GCODE
+- --slice
+- '0'
+- '{model}'
+checks:
+- no_crash: {}
+- exit_code:
+    equals: 0
+- gcode_config_value:
+    key: machine_pause_gcode
+    equals: ; PROBE_MACHINE_PAUSE_GCODE
+- gcode_body_count:
+    text: PROBE_MACHINE_PAUSE_GCODE
+    equals: 1
+notes: |
+  The pause snippet is only emitted where a per-layer PausePrint item exists;
+  observed once, after the Z=10 layer change. The item's `extra` message is not
+  emitted into the G-code on this profile (it is a printer-display message).
+  Fixture test_projects/settings/custom_gcodes_template_pause_custom.json is the
+  --load-custom-gcodes format (CustomGCode::Info::from_json: `mode` + `gcodes[]`
+  of {type, print_z, color, extruder, extra}); it places a Template item at Z=5,
+  a PausePrint item at Z=10 and a Custom item at Z=15 on the 20 mm cube.

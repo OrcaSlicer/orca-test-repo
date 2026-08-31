@@ -1,0 +1,37 @@
+id: variant-key-zero-filled-on-full-filament-load
+title: A per-filament variant key the presets leave unset must not be zero-filled for filaments 2..N
+category: settings-import
+status: open
+model: p1s_multicolor.3mf
+args:
+  - --datadir
+  - '{datadir}'
+  - --outputdir
+  - '{outputdir}'
+  - --allow-newer-file
+  - --load-filaments
+  - '{datadir}/system/BBL/filament/Bambu PLA Matte @BBL X1C.json;{datadir}/system/BBL/filament/Bambu PLA Basic @BBL X1C.json;{datadir}/system/BBL/filament/Bambu PLA Tough @BBL X1C.json;{datadir}/system/BBL/filament/Bambu PLA Silk @BBL X1C.json'
+  - --slice
+  - '0'
+  - '{model}'
+checks:
+  - no_crash: {}
+  - exit_code: {equals: 0}
+  - gcode_config_vector_nonzero: {key: filament_retract_length_nc}
+  - gcode_config_vector_nonzero: {key: filament_cooling_before_tower}
+  - gcode_config_vector_nonzero: {key: filament_ramming_volumetric_speed_nc}
+notes: >
+  Same variant-stride mechanism as
+  partial-load-filaments-variant-key-zero-filled, but reached without any
+  partial load: a full four-of-four filament load on a four-filament project.
+  Keys none of the loaded presets mention keep the single registered default in
+  the merged config, and the variant-stride read that builds the applied config
+  then writes it for filament 1 and zero for the rest. Observed on main: the
+  G-code block records filament_retract_length_nc and
+  filament_cooling_before_tower as 10,0,0,0 and
+  filament_ramming_volumetric_speed_nc as -1,0,0,0, so three of four filaments
+  would use a nozzle-change retract length of zero. A key the presets do carry
+  (filament_ramming_volumetric_speed) comes out -1,-1,-1,-1, which is what
+  isolates the trigger to "unset in every loaded preset".
+  The checks assert only that no element is zero, so the case does not
+  presuppose whether the fix broadcasts the value or resizes with the default.

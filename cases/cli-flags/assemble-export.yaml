@@ -1,0 +1,23 @@
+id: assemble-export
+title: --assemble merges the loaded objects and exports
+category: cli-flags
+status: fixed
+model: Stanford_Bunny.3mf
+args:
+- --datadir
+- '{datadir}'
+- --outputdir
+- '{outputdir}'
+- --assemble
+- --export-3mf
+- out.3mf
+- '{model}'
+checks:
+- no_crash: {}
+- exit_code:
+    equals: 0
+- file_exists:
+    path: '{outputdir}/out.3mf'
+notes: |
+  Assembling a single-object project is a no-op that must still succeed and
+  export.

@@ -1,2 +1,9 @@
 result/
 __pycache__/
+.venv/
+.pytest_cache/
+cases/_snapshots/*.new.txt
+# runtime artifacts a CLI run can drop in the repo root (see the
+# stray-log-file-without-logfile-flag case)
+*.log
+/result.json

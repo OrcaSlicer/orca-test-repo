@@ -1,0 +1,38 @@
+id: layer-range-overrides-applied
+title: Per-layer-range settings embedded in a 3mf are applied when slicing
+category: per-object
+status: fixed
+model: synthetic/cube_x1c_layer_range.3mf
+args:
+- --datadir
+- '{datadir}'
+- --outputdir
+- '{outputdir}'
+- --slice
+- '0'
+- '{model}'
+checks:
+- no_crash: {}
+- exit_code:
+    equals: 0
+- gcode_metric:
+    name: layers
+    equals: 84
+- gcode_metric:
+    name: filament_mm
+    index: 0
+    min: 1800
+    max: 1900
+- gcode_config_value:
+    key: layer_height
+    equals: '0.2'
+notes: |
+  The 0-10 mm range at 0.3 mm plus the remaining 10 mm at the global 0.2 mm
+  gives 84 layers (100 without the range) and 60% infill in that range raises
+  filament use from 1405 mm to 1855 mm on v2.4.2; the global config block still
+  records 0.2. Fixture test_projects/synthetic/cube_x1c_layer_range.3mf: the X1C
+  cube project plus a Metadata/layer_config_ranges.xml (<objects><object
+  id="1"><range min_z="0" max_z="10"><option
+  opt_key="layer_height">0.3</option><option
+  opt_key="sparse_infill_density">60%</option></range></object></objects>;
+  object ids are 1-based object indices).

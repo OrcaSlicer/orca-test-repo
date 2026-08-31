@@ -1,0 +1,37 @@
+id: filament-end-gcode-emitted-single-filament
+title: filament_end_gcode set on the CLI is recorded AND emitted once at the end of a single-filament print
+category: custom-gcode
+status: fixed
+model: synthetic/cube20.stl
+args:
+- --datadir
+- '{datadir}'
+- --outputdir
+- '{outputdir}'
+- --load-settings
+- '{datadir}/system/BBL/machine/Bambu Lab X1 Carbon 0.4 nozzle.json;{datadir}/system/BBL/process/0.20mm Standard @BBL X1C.json'
+- --load-filaments
+- '{datadir}/system/BBL/filament/Bambu PLA Basic @BBL X1C.json'
+- --filament-end-gcode="; PROBE_FILAMENT_END_GCODE"
+- --slice
+- '0'
+- '{model}'
+checks:
+- no_crash: {}
+- exit_code:
+    equals: 0
+- gcode_config_value:
+    key: filament_end_gcode
+    equals:
+    - ; PROBE_FILAMENT_END_GCODE
+- gcode_body_count:
+    text: PROBE_FILAMENT_END_GCODE
+    equals: 1
+notes: |
+  Emitted once, just before machine_end_gcode (GCode.cpp writes every filament's
+  end snippet at the end of the print, or the active filament's under
+  single_extruder_multi_material). Note that the shipped Bambu PLA preset only
+  carries filament_end_gcode through `inherits` (fdm_filament_common), which the
+  CLI does not resolve, so without an explicit value nothing is emitted -- that
+  is why this case supplies its own. String-vector quoting rule: see filament-
+  start-gcode-emitted-single-filament.

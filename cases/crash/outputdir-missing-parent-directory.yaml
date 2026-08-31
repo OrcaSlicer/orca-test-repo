@@ -1,0 +1,27 @@
+id: outputdir-missing-parent-directory
+title: "--outputdir with a missing parent directory must be created, not abort the process"
+category: crash
+status: fixed
+model: Stanford_Bunny.3mf
+args:
+  - "--datadir"
+  - "{datadir}"
+  - "--outputdir"
+  - "{outputdir}/deep/missing/dir"
+  - "--export-stl"
+  - "{model}"
+checks:
+  - no_crash: {}
+  - exit_code: {equals: 0}
+  - file_exists: {path: "{outputdir}/deep/missing/dir/stl"}
+notes: >
+  Regression class: an output path several levels below an existing directory
+  must be created in full. A single-level, non-recursive directory-create call
+  with no exception handling throws an uncaught filesystem error and aborts the
+  whole process instead of failing cleanly. Reproduced on the public v2.4.2
+  release: SIGABRT with "boost::filesystem::create_directory: No such file or
+  directory" naming the stl subdirectory it could not make. Fixed upstream by
+  creating the tree recursively and bailing out cleanly if that fails.
+  Note --export-stl is a bare flag: a filename after it is parsed as another
+  input, so the export target comes from --outputdir alone, and the case asserts
+  the "stl" subdirectory the exporter creates under it.

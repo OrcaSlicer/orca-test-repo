@@ -1,0 +1,38 @@
+id: vector-override-full-length-multi-filament
+category: settings-import
+status: open
+title: A full-length per-filament CLI override must land element-for-element on a multi-filament project
+model: p1s_multicolor.3mf
+args:
+- --datadir
+- '{datadir}'
+- --outputdir
+- '{outputdir}'
+- --allow-newer-file
+- --allow-mix-temp
+- --nozzle-temperature=211,212,213,214
+- --slice
+- '0'
+- '{model}'
+checks:
+- no_crash: {}
+- exit_code:
+    equals: 0
+- gcode_config_value:
+    key: nozzle_temperature
+    equals:
+    - '211'
+    - '212'
+    - '213'
+    - '214'
+notes: |
+  Regression class (settings import / precedence): CLI overrides have the
+  highest precedence, and for a per-filament option on an N-filament project a
+  value with N elements should be applied as given. On the public v2.4.2 build
+  the 4-filament project ends up with `nozzle_temperature = 211,213,0,0` in the
+  G-code (--export-settings shows the intended 211,212,213,214):
+  nozzle_temperature is an extruder-*variant* key, whose merged config holds N x
+  V elements, and the override is read with the variant stride, so every other
+  element is used and the rest is zero-filled. --allow-mix-temp only silences
+  the temperature-spread validation that would otherwise hide the wrong values
+  behind exit 194.

@@ -1,0 +1,29 @@
+id: machine-end-gcode-emitted
+title: machine_end_gcode set on the CLI is recorded AND emitted once
+category: custom-gcode
+status: fixed
+model: synthetic/cube20.stl
+args:
+- --datadir
+- '{datadir}'
+- --outputdir
+- '{outputdir}'
+- --load-settings
+- '{datadir}/system/BBL/machine/Bambu Lab X1 Carbon 0.4 nozzle.json;{datadir}/system/BBL/process/0.20mm Standard @BBL X1C.json'
+- --load-filaments
+- '{datadir}/system/BBL/filament/Bambu PLA Basic @BBL X1C.json'
+- --machine-end-gcode=; PROBE_MACHINE_END_GCODE
+- --slice
+- '0'
+- '{model}'
+checks:
+- no_crash: {}
+- exit_code:
+    equals: 0
+- gcode_config_value:
+    key: machine_end_gcode
+    equals: ; PROBE_MACHINE_END_GCODE
+- gcode_body_count:
+    text: PROBE_MACHINE_END_GCODE
+    equals: 1
+notes: The custom end G-code must appear exactly once in the emitted body.

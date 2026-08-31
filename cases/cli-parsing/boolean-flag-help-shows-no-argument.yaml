@@ -1,0 +1,23 @@
+id: boolean-flag-help-shows-no-argument
+title: "--help must not document a boolean flag as taking an argument"
+category: cli-parsing
+status: fixed
+args:
+  - "--help"
+checks:
+  - no_crash: {}
+  - exit_code: {equals: 0}
+  - stdout_contains: {text: "--normative-check"}
+  - output_not_contains: {text: "--normative-check option"}
+  - output_not_contains: {text: "--no-check option"}
+  - output_not_contains: {text: "--ensure-on-bed option"}
+notes: >
+  Regression class: boolean flags never consume the following CLI token, so
+  the --help text must not present one as taking a value. Several boolean
+  flags used to be declared with a placeholder argument name and were listed
+  as "--normative-check option"; a user following that documentation wrote
+  "--normative-check 0" and had the bare "0" parsed as a positional input
+  file ("No such file: 0"). Fixed upstream by dropping the placeholder from
+  the boolean flags' definitions; this case pins the help text, which is the
+  contract users read. The parsing itself (a bare token after a boolean flag
+  is a positional argument) is by design and unchanged.

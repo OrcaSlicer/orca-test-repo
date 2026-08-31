@@ -1,0 +1,30 @@
+id: process-only-on-incompatible-printer
+category: settings-import
+status: fixed
+title: Loading a process preset whose compatible_printers exclude the project's printer must fail cleanly
+model: Stanford_Bunny.3mf
+args:
+- --datadir
+- '{datadir}'
+- --outputdir
+- '{outputdir}'
+- --load-settings
+- '{datadir}/system/BBL/process/0.20mm Standard @BBL X1C.json'
+- --slice
+- '0'
+- '{model}'
+checks:
+- no_crash: {}
+- exit_code:
+    equals: 239
+- result_json_field:
+    field: return_code
+    equals: -17
+notes: |
+  Regression class (settings import): --load-settings applies a compatibility
+  check between the process preset and the printer in effect -- the process's
+  compatible_printers list must contain the printer's *system* name (a user
+  machine's `inherits`). Here a BBL X1C process is loaded onto a project whose
+  embedded printer is a Creality profile, so the CLI must report
+  CLI_PROCESS_NOT_COMPATIBLE (-17, exit 239) with a result.json error string,
+  not proceed with a half-applied config. Verified on the public v2.4.2 build.

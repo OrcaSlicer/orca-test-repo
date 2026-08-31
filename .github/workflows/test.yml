@@ -1,0 +1,138 @@
+name: CLI regression suite
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    # catch upstream drift even when nothing in this repo changed
+    - cron: "17 4 * * *"
+  workflow_dispatch:
+    inputs:
+      orca_ref:
+        description: "OrcaSlicer build to test: a release tag such as v2.4.2, or blank for the nightly build of main"
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+jobs:
+  # Fast, no binary required: every cases/**/*.yaml must parse and the whole
+  # suite must collect cleanly. This is the gate for changes to the suite
+  # itself and runs on every push/PR regardless of binary availability.
+  validate-suite:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - run: python -m pytest . -c pytest.ini --collect-only -q
+
+  # A self-check against the nightly build of OrcaSlicer main, NOT the primary
+  # regression gate -- that role belongs to OrcaSlicer's own CI
+  # (build_orca.yml's "Run external slicer regression tests" step), which
+  # clones this repo and runs run_test.py against a real build of the actual
+  # commit under test. This job exists so changes to the suite itself get
+  # feedback without waiting on an OrcaSlicer build.
+  #
+  # It deliberately tests the same code OrcaSlicer's CI does (main), so a
+  # case's `status` means one thing: what main does today. If this job goes
+  # red on a schedule run, main's behavior no longer matches a case's
+  # recorded status -- an [XPASS(strict)] on an `open` case means the bug
+  # got fixed (flip it to `fixed`), a plain failure on a `fixed` case is a
+  # regression. Update the case to match, don't silence it. A release tag
+  # can be tested on demand via the orca_ref input.
+  regression:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+
+      - name: Fetch the orca-slicer build and its source tree
+        run: |
+          set -euo pipefail
+          REF="${{ inputs.orca_ref }}"
+          if [ -z "$REF" ]; then
+            RELEASE=nightly-builds
+            PATTERN="OrcaSlicer_Linux_AppImage_Ubuntu2404_nightly.AppImage"
+            SRC_REF=main
+          else
+            RELEASE="$REF"
+            PATTERN="OrcaSlicer_Linux_AppImage_Ubuntu2404_V*.AppImage"
+            SRC_REF="$REF"
+          fi
+          echo "Testing OrcaSlicer release asset $RELEASE ($PATTERN), sources at $SRC_REF"
+          mkdir -p dl
+          gh release download "$RELEASE" --repo OrcaSlicer/OrcaSlicer \
+            --pattern "$PATTERN" --dir dl --clobber
+          appimage="$(find dl -name '*.AppImage' | head -n1)"
+          chmod +x "$appimage"
+          "$appimage" --appimage-extract >/dev/null
+          # The bare bin/orca-slicer cannot find the libraries bundled in the
+          # AppImage; AppRun sets up its environment and execs the binary, so
+          # exit codes and crash signals still reach the suite unchanged.
+          [ -x squashfs-root/AppRun ] || { echo "no AppRun in the AppImage"; exit 1; }
+          echo "ORCA_BIN=$PWD/squashfs-root/AppRun" >> "$GITHUB_ENV"
+          # The AppImage carries only packed preset caches, no profile JSONs,
+          # and the suite enumerates its CLI option surface from source, so
+          # check out the matching source tree. For the nightly this is main
+          # at run time: a few hours of drift from the build is acceptable for
+          # a self-check, and OrcaSlicer's own CI runs the suite against an
+          # exactly matching build.
+          git clone --depth 1 --branch "$SRC_REF" \
+            https://github.com/OrcaSlicer/OrcaSlicer.git "$RUNNER_TEMP/OrcaSlicer"
+          echo "ORCA_SOURCE=$RUNNER_TEMP/OrcaSlicer" >> "$GITHUB_ENV"
+
+      - name: Install the AppImage's host runtime dependencies
+        run: |
+          # AppRun's preflight checks for host OpenGL and WebKitGTK 4.1
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libopengl0 libglu1-mesa libgl1 libegl1 libwebkit2gtk-4.1-0
+
+      - name: Run suite
+        # same worker count and scheduling as run_test.py uses in OrcaSlicer's CI
+        run: python -m pytest . -c pytest.ini --orca-bin "$ORCA_BIN" --orca-source "$ORCA_SOURCE" -v -n 2 --dist loadfile
+
+  # Keeps cases/_snapshots/cli_surface_full.json in step with upstream: enumerate
+  # the CLI option surface from OrcaSlicer main and open a PR when it changed.
+  # (When the suite runs inside OrcaSlicer's own CI it enumerates live from that
+  # checkout anyway -- see run_test.py -- so the snapshot only matters for runs
+  # without a source tree.)
+  refresh-surface:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Fetch OrcaSlicer source (main, shallow)
+        run: git clone --depth 1 https://github.com/OrcaSlicer/OrcaSlicer.git "$RUNNER_TEMP/OrcaSlicer"
+      - name: Regenerate snapshot
+        run: |
+          python scripts/enumerate_cli_options.py --orca-source "$RUNNER_TEMP/OrcaSlicer" \
+            > cases/_snapshots/cli_surface_full.json
+          git diff --stat -- cases/_snapshots/cli_surface_full.json || true
+      - uses: peter-evans/create-pull-request@v6
+        with:
+          branch: bot/refresh-cli-surface
+          title: "Refresh CLI option surface snapshot from upstream main"
+          commit-message: "Refresh cli_surface_full.json from OrcaSlicer main"
+          body: |
+            Automated regeneration of `cases/_snapshots/cli_surface_full.json` via
+            `scripts/enumerate_cli_options.py` against the current OrcaSlicer `main`.
+            Review the diff for new options that deserve a case, then merge.
+          delete-branch: true

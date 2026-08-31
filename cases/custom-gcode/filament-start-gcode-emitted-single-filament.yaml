@@ -1,0 +1,39 @@
+id: filament-start-gcode-emitted-single-filament
+title: filament_start_gcode set on the CLI is recorded AND emitted once on a single-filament slice
+category: custom-gcode
+status: fixed
+model: synthetic/cube20.stl
+args:
+- --datadir
+- '{datadir}'
+- --outputdir
+- '{outputdir}'
+- --load-settings
+- '{datadir}/system/BBL/machine/Bambu Lab X1 Carbon 0.4 nozzle.json;{datadir}/system/BBL/process/0.20mm Standard @BBL X1C.json'
+- --load-filaments
+- '{datadir}/system/BBL/filament/Bambu PLA Basic @BBL X1C.json'
+- --filament-start-gcode="; PROBE_FILAMENT_START_GCODE"
+- --slice
+- '0'
+- '{model}'
+checks:
+- no_crash: {}
+- exit_code:
+    equals: 0
+- gcode_config_value:
+    key: filament_start_gcode
+    equals:
+    - ; PROBE_FILAMENT_START_GCODE
+- gcode_body_count:
+    text: PROBE_FILAMENT_START_GCODE
+    equals: 1
+notes: |
+  The snippet must be emitted exactly once (after the machine start G-code) on a
+  single-filament slice. filament_start_gcode is a per-filament string *vector*;
+  on the command line its elements are separated by ';' and an element
+  containing ';' or spaces must be double-quoted (libslic3r
+  escape_strings_cstyle format), so a G-code comment has to be passed as
+  --filament-start-gcode='"; TEXT"'. Passing '; TEXT' unquoted splits into an
+  empty first element plus 'TEXT' -- the empty snippet is what gets emitted for
+  filament 1, which looks like the override being ignored. The case uses the
+  quoted form; the recorded value in the config block is the same quoted form.

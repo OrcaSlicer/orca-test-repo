@@ -1,0 +1,42 @@
+id: object-overrides-applied
+title: Per-object settings embedded in a 3mf are applied when slicing
+category: per-object
+status: fixed
+model: synthetic/cube_x1c_object_overrides.3mf
+args:
+- --datadir
+- '{datadir}'
+- --outputdir
+- '{outputdir}'
+- --slice
+- '0'
+- '{model}'
+checks:
+- no_crash: {}
+- exit_code:
+    equals: 0
+- gcode_metric:
+    name: layers
+    equals: 72
+- gcode_metric:
+    name: filament_mm
+    index: 0
+    min: 2150
+    max: 2250
+- gcode_config_value:
+    key: layer_height
+    equals: '0.2'
+- gcode_config_value:
+    key: wall_loops
+    equals: '2'
+notes: |
+  The object's layer_height=0.28 yields 72 layers (the plain cube at 0.2 mm has
+  100) and wall_loops=5 + 37% infill raise filament use from 1405 mm to 2201 mm
+  on v2.4.2; the G-code config block keeps recording the *global* values (0.2 /
+  2), which is correct -- per-object config lives in the 3mf, not in the plate
+  config -- so the effect is asserted through slicing metrics. Fixture
+  test_projects/synthetic/cube_x1c_object_overrides.3mf: the 20 mm cube exported
+  with the X1C 0.4 / 0.20mm Standard / Bambu PLA Basic presets, with <metadata
+  key="layer_height" value="0.28"/>, wall_loops=5 and sparse_infill_density=37%
+  added under the <object> in Metadata/model_settings.config (the per-object
+  config format). Global (plate) values stay 0.2 / 2 / 20%.

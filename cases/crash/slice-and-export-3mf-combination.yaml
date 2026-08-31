@@ -1,0 +1,29 @@
+id: slice-and-export-3mf-combination
+title: "--slice N combined with --export-3mf in one invocation must not crash"
+category: crash
+status: fixed
+model: Stanford_Bunny.3mf
+args:
+  - "--datadir"
+  - "{datadir}"
+  - "--outputdir"
+  - "{outputdir}"
+  - "--slice"
+  - "0"
+  - "--export-3mf"
+  - "out.3mf"
+  - "{model}"
+checks:
+  - no_crash: {}
+  - exit_code: {equals: 0}
+  - file_exists: {path: "{outputdir}/out.3mf"}
+  - file_exists: {path: "{outputdir}/plate_1.gcode"}
+notes: >
+  Regression class: combining a slice action with a 3mf-export action in a
+  single invocation exercises a handoff where per-filament slicing info is
+  populated while a related options vector can still be empty; indexing into
+  that empty vector without a bounds check is an out-of-bounds access that
+  crashed the process. The bug is only reachable via this specific flag
+  combination -- neither flag alone triggers it -- so do not simplify this
+  case down to a single action. Observed behavior on the current build under
+  test: exit 0, with both the exported 3mf and the sliced gcode produced.

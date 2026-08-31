@@ -1,0 +1,25 @@
+id: per-plate-wipe-tower-array-shorter-than-plates
+title: "Per-plate wipe-tower position must not silently reuse another plate's value"
+category: config-precedence
+status: needs_fixture
+fixture_todo: >
+  Needs a 2-plate .3mf whose embedded project config carries wipe-tower
+  x/y position arrays SHORTER than the plate count (length 1 for a 2-plate
+  project). A .3mf is a zip, so this is buildable without the GUI: export
+  any 2-plate project via the CLI, then patch the embedded project config to
+  shrink the arrays. Assertion route: slice with verbose logging to a
+  --logfile and check which wipe-tower position each plate reports -- the
+  broken behavior gives plate 2 plate 1's value; the correct behavior gives
+  each plate its own (or a clean error for the malformed array).
+args: []
+checks: []
+notes: >
+  Regression class: per-plate array-valued settings read by plate index must
+  handle an array shorter than the plate count. The broken behavior clamps
+  the out-of-range index to an existing element, silently reusing another
+  plate's value instead of erroring or extending the array. Confirmed
+  reproducing on the current build under test via an A/B repro, so this is a
+  currently-open bug -- flip to `status: open` with desired-behavior checks
+  once the fixture exists. Open sub-question worth a second case later:
+  whether the misread value actually reaches toolpaths when the prime tower
+  is enabled (the repro so far only proves the value is read wrongly).

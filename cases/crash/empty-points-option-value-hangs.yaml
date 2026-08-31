@@ -1,0 +1,31 @@
+id: empty-points-option-value-hangs
+title: An empty value for a point-list option must fail cleanly (it blocks the CLI when a display is available)
+category: crash
+status: fixed
+model: Stanford_Bunny.3mf
+timeout: 30
+args:
+- --datadir
+- '{datadir}'
+- --outputdir
+- '{outputdir}'
+- --printable-area=
+- --info
+- '{model}'
+checks:
+- no_crash: {}
+- exit_code:
+    not_equals: 0
+notes: |
+  Regression class (CLI parsing): `--printable-area=` (or any coPoints option
+  given an empty value, e.g. --head-wrap-detect-zone=) is a parse error. Run
+  headless -- which is how this suite always runs the binary
+  (DISPLAY/WAYLAND_DISPLAY stripped, see conftest.py) -- the CLI prints its
+  usage text and exits 1, which is the clean behaviour this case pins. With a
+  display available the same invocation never returns (verified with a 25 s
+  timeout on the v2.4.2 build: exit 124 with DISPLAY=:1, exit 1 without), i.e.
+  the error path falls into a GUI/dialog route a command-line tool must never
+  take. That display-dependent hang is a real defect but is not observable from
+  the headless suite; it was first read as an unconditional hang before the
+  display dependency was isolated. Found by the override sweep (an empty vector
+  baseline produced an empty probe value).

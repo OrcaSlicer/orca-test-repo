@@ -1,0 +1,34 @@
+id: load-custom-gcodes-custom-item-emitted-at-layer
+title: '--load-custom-gcodes: a Custom item''s own G-code text is emitted once at its layer'
+category: custom-gcode
+status: fixed
+model: synthetic/cube20.stl
+args:
+- --datadir
+- '{datadir}'
+- --outputdir
+- '{outputdir}'
+- --load-settings
+- '{datadir}/system/BBL/machine/Bambu Lab X1 Carbon 0.4 nozzle.json;{datadir}/system/BBL/process/0.20mm Standard @BBL X1C.json'
+- --load-filaments
+- '{datadir}/system/BBL/filament/Bambu PLA Basic @BBL X1C.json'
+- --load-custom-gcodes
+- '{fixtures}/custom_gcodes_template_pause_custom.json'
+- --slice
+- '0'
+- '{model}'
+checks:
+- no_crash: {}
+- exit_code:
+    equals: 0
+- gcode_body_count:
+    text: PROBE_CUSTOM_ITEM
+    equals: 1
+notes: |
+  A Custom-type item carries its G-code in `extra`; it must be emitted verbatim
+  once, after the Z=15 layer change. This is the behavioural test for the
+  --load-custom-gcodes flag itself. Fixture
+  test_projects/settings/custom_gcodes_template_pause_custom.json is the --load-
+  custom-gcodes format (CustomGCode::Info::from_json: `mode` + `gcodes[]` of
+  {type, print_z, color, extruder, extra}); it places a Template item at Z=5, a
+  PausePrint item at Z=10 and a Custom item at Z=15 on the 20 mm cube.

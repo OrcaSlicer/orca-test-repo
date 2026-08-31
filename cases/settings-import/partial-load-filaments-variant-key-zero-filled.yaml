@@ -1,0 +1,40 @@
+id: partial-load-filaments-variant-key-zero-filled
+title: Loading fewer filaments than the project has must not zero-fill per-filament variant keys for the remaining filaments
+category: settings-import
+status: open
+model: p1s_multicolor.3mf
+args:
+- --datadir
+- '{datadir}'
+- --outputdir
+- '{outputdir}'
+- --allow-newer-file
+- --load-filaments
+- '{datadir}/system/BBL/filament/Bambu PLA Matte @BBL X1C.json;{datadir}/system/BBL/filament/Bambu PLA Basic @BBL X1C.json'
+- --slice
+- '0'
+- '{model}'
+checks:
+- no_crash: {}
+- exit_code:
+    equals: 0
+- gcode_config_value:
+    key: filament_ramming_volumetric_speed
+    equals:
+    - '-1'
+    - '-1'
+    - '-1'
+    - '-1'
+notes: |
+  Regression class (settings import / per-filament vectors): with 2 filament
+  presets loaded onto a 4-filament project, the merged config keeps the
+  project's values for filaments 3-4 (nozzle_temperature etc. come out right, 8
+  = 4 filaments x 2 variants elements). filament_ramming_volumetric_speed
+  however stays at 4 elements in the merged config instead of 8, and the
+  variant-stride read that builds the applied config then yields -1,-1,0,0 in
+  the G-code instead of -1,-1,-1,-1 -- the same stride mechanism as the vector-
+  override-*-multi-filament cases, triggered here without any CLI override.
+  Observed on the cli-mode-bug-sweep worktree release build (2.5.0-dev); the
+  option does not exist on the v2.4.2 reference build, where this case fails
+  inside xfail on "no such key". The full 4-of-4 load is unaffected (all 8
+  elements present).

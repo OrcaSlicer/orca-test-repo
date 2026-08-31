@@ -1,0 +1,39 @@
+id: object-overrides-roundtrip-export-3mf
+title: Per-object settings survive --export-3mf
+category: per-object
+status: fixed
+model: synthetic/cube_x1c_object_overrides.3mf
+args:
+- --datadir
+- '{datadir}'
+- --outputdir
+- '{outputdir}'
+- --slice
+- '0'
+- --export-3mf
+- out.3mf
+- '{model}'
+checks:
+- no_crash: {}
+- exit_code:
+    equals: 0
+- threemf_member_contains:
+    path: '{outputdir}/out.3mf'
+    member: Metadata/model_settings.config
+    text: <metadata key="layer_height" value="0.28"/>
+- threemf_member_contains:
+    path: '{outputdir}/out.3mf'
+    member: Metadata/model_settings.config
+    text: <metadata key="wall_loops" value="5"/>
+- threemf_member_contains:
+    path: '{outputdir}/out.3mf'
+    member: Metadata/model_settings.config
+    text: <metadata key="sparse_infill_density" value="37%"/>
+notes: |
+  The exported project must carry the object-level keys unchanged in
+  model_settings.config. Fixture
+  test_projects/synthetic/cube_x1c_object_overrides.3mf: the 20 mm cube exported
+  with the X1C 0.4 / 0.20mm Standard / Bambu PLA Basic presets, with <metadata
+  key="layer_height" value="0.28"/>, wall_loops=5 and sparse_infill_density=37%
+  added under the <object> in Metadata/model_settings.config (the per-object
+  config format). Global (plate) values stay 0.2 / 2 / 20%.
