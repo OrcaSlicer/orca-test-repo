@@ -1,0 +1,31 @@
+id: nil-value-for-vector-option
+title: "Assigning nil to a non-nullable vector option must error cleanly, not abort"
+category: crash
+status: open
+model: Stanford_Bunny.3mf
+args:
+  - "--datadir"
+  - "{datadir}"
+  - "--outputdir"
+  - "{outputdir}"
+  - "--nozzle-diameter=nil"
+  - "--info"
+  - "{model}"
+checks:
+  - no_crash: {}
+  - exit_code: {equals: 254}
+notes: >
+  Regression class: assigning a null/"nil"-like value to a numeric-vector
+  CLI option (here a per-extruder float array) must produce a clean CLI
+  usage error. Deserializing "nil" into a non-nullable vector option throws;
+  when the CLI parser ignores/discards the deserialization result instead of
+  handling that error, the exception escapes uncaught and aborts the
+  process. Confirmed reproducing on the public v2.4.2 release: aborts with
+  an uncaught Slic3r::ConfigurationError ("Deserializing nil into a
+  non-nullable object"). The checks above assert the desired behavior (a
+  clean, non-crashing usage error, exit 254 matching this CLI's other clean
+  parameter-error exits), so this flips to fixed once a release corrects it.
+  This bug class covers many vector-typed options (float/int/bool/percent
+  vectors), not just nozzle-diameter -- worth adding sibling cases for other
+  vector options and for a nil embedded mid-list (e.g. "0.4,nil,0.6") over
+  time.

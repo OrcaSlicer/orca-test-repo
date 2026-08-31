@@ -1,0 +1,19 @@
+{
+  "type": "process",
+  "from": "User",
+  "name": "Test Process (explicit keys)",
+  "inherits": "0.20mm Standard @BBL X1C",
+  "compatible_printers": [
+    "Bambu Lab X1 Carbon 0.4 nozzle"
+  ],
+  "layer_height": "0.24",
+  "wall_loops": "5",
+  "sparse_infill_density": "37%",
+  "sparse_infill_pattern": "gyroid",
+  "top_shell_layers": "6",
+  "bottom_shell_layers": "4",
+  "brim_type": "outer_only",
+  "brim_width": "7",
+  "seam_position": "back",
+  "infill_direction": "33"
+}

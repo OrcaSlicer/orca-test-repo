@@ -1,0 +1,34 @@
+id: nil-value-for-machine-axis-array-option
+title: "Assigning nil to a third, independently-found vector option must also error cleanly"
+category: crash
+status: open
+model: Stanford_Bunny.3mf
+args:
+  - "--datadir"
+  - "{datadir}"
+  - "--outputdir"
+  - "{outputdir}"
+  - "--machine-max-speed-e=nil"
+  - "--info"
+  - "{model}"
+checks:
+  - no_crash: {}
+notes: >
+  Third independently-confirmed instance of the same class as
+  nil-value-for-vector-option.yaml and nil-value-for-scalar-vector-
+  option.yaml, again found automatically by test_config_fuzz.py rather than
+  by hand. Confirmed reproducing on the public v2.4.2 release build:
+  identical failure ("Deserializing nil into a non-nullable object").
+
+  DELIBERATELY NOT continuing to graduate every further fuzz hit of this
+  same shape one at a time: the root cause is a single, well-understood
+  defect in read_cli()'s vector-deserialization handling (see
+  nil-value-for-vector-option.yaml), and it plausibly affects most of the
+  ~235 coFloats/coInts/coBools/coPercents/coFloatsOrPercents options in the
+  CLI surface, not just these three. Expect test_config_fuzz.py to keep
+  surfacing more of them as its daily sample rotates -- that's expected,
+  not a new discovery each time. Revisit this "graduate individually"
+  policy if the volume becomes unmanageable: e.g. switch to one case that
+  asserts the class holds across a small representative sample of vector
+  types, rather than one file per option, once enough instances exist to
+  be confident that's a fair representation of the whole class.

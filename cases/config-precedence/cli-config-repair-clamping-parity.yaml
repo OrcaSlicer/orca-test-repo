@@ -1,0 +1,40 @@
+id: cli-config-repair-clamping-parity
+title: "CLI must reject a filament-id override that names a filament the project doesn't have"
+category: config-precedence
+status: open
+model: Stanford_Bunny.3mf
+args:
+  - "--datadir"
+  - "{datadir}"
+  - "--outputdir"
+  - "{outputdir}"
+  - "--support-filament=99"
+  - "--slice"
+  - "0"
+  - "{model}"
+checks:
+  - no_crash: {}
+  - exit_code: {not_equals: 0}
+notes: >
+  Regression class: the GUI is understood to clamp/repair several
+  out-of-range config values before slicing (nozzle-derived layer-height
+  bounds, several *_filament_id keys, etc.) via GUI-only code paths the CLI
+  never calls. This case picks one concrete, independently-confirmed
+  instance rather than the general class: --support-filament names a
+  filament index the project doesn't have at all (Stanford_Bunny.3mf has
+  exactly 1 filament; 99 doesn't exist).
+
+  Confirmed on the public v2.4.2 release build: this is accepted silently,
+  with no warning or error -- exit 0, and --export-settings confirms the
+  raw, invalid "99" reaches the resolved config completely unvalidated. The
+  checks above assert the minimal, GUI-comparison-independent bar: whatever
+  the fix, CLI should not silently succeed with a support_filament that
+  cannot exist. (Whether the "correct" fix is to clamp to a valid extruder
+  or reject with a clear error is unresolved -- not_equals is used instead
+  of a specific equals code so this case doesn't presuppose which.)
+
+  This is a narrower, empirically-grounded instance of the general
+  "GUI-only clamping never runs for CLI" class; the class itself covers
+  several other unconfirmed clamps (see the original research) worth their
+  own cases if/when confirmed the same way this one was: try the value,
+  check --export-settings, see if it's rejected or passed through raw.

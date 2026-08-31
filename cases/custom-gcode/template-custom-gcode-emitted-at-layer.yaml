@@ -1,0 +1,37 @@
+id: template-custom-gcode-emitted-at-layer
+title: template_custom_gcode set on the CLI is emitted once, at the layer of a Template item loaded via --load-custom-gcodes
+category: custom-gcode
+status: fixed
+model: synthetic/cube20.stl
+args:
+- --datadir
+- '{datadir}'
+- --outputdir
+- '{outputdir}'
+- --load-settings
+- '{datadir}/system/BBL/machine/Bambu Lab X1 Carbon 0.4 nozzle.json;{datadir}/system/BBL/process/0.20mm Standard @BBL X1C.json'
+- --load-filaments
+- '{datadir}/system/BBL/filament/Bambu PLA Basic @BBL X1C.json'
+- --load-custom-gcodes
+- '{fixtures}/custom_gcodes_template_pause_custom.json'
+- --template-custom-gcode=; PROBE_TEMPLATE_CUSTOM_GCODE
+- --slice
+- '0'
+- '{model}'
+checks:
+- no_crash: {}
+- exit_code:
+    equals: 0
+- gcode_config_value:
+    key: template_custom_gcode
+    equals: ; PROBE_TEMPLATE_CUSTOM_GCODE
+- gcode_body_count:
+    text: PROBE_TEMPLATE_CUSTOM_GCODE
+    equals: 1
+notes: |
+  The template snippet is only emitted where a per-layer Template item exists;
+  observed once, right after the Z=5 layer change on the v2.4.2 build. Fixture
+  test_projects/settings/custom_gcodes_template_pause_custom.json is the --load-
+  custom-gcodes format (CustomGCode::Info::from_json: `mode` + `gcodes[]` of
+  {type, print_z, color, extruder, extra}); it places a Template item at Z=5, a
+  PausePrint item at Z=10 and a Custom item at Z=15 on the 20 mm cube.

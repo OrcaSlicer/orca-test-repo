@@ -1,0 +1,26 @@
+id: outputdir-missing-parent-directory
+title: "--outputdir with a missing parent directory must fail cleanly, not crash"
+category: crash
+status: fixed
+model: Stanford_Bunny.3mf
+args:
+  - "--datadir"
+  - "{datadir}"
+  - "--outputdir"
+  - "{outputdir}/deep/missing/dir"
+  - "--export-stl"
+  - "{outputdir}/deep/missing/dir/x.stl"
+  - "{model}"
+checks:
+  - no_crash: {}
+  - exit_code: {one_of: [253]}
+notes: >
+  Regression class: output-directory creation must recursively create (or
+  cleanly reject) a path whose parent does not exist. A single-level,
+  non-recursive directory-create call with no exception handling throws an
+  uncaught filesystem error and aborts the whole process on this input.
+  Observed behavior on the current build under test: exit 253 with a clean
+  "no such file"-style stderr message and no signal. The pinned exit code is
+  a fingerprint of the current clean-failure behavior; if it ever changes,
+  confirm the new behavior deliberately and update the check rather than
+  loosening it.

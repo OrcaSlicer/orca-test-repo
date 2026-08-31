@@ -1,0 +1,37 @@
+id: transform-rotate-x
+title: --rotate-x rotates the model about X, including on a plain STL input
+category: cli-flags
+status: fixed
+model: synthetic/cube20.stl
+args:
+- --datadir
+- '{datadir}'
+- --outputdir
+- '{outputdir}'
+- --rotate-x
+- '90'
+- --info
+- '{model}'
+checks:
+- no_crash: {}
+- exit_code:
+    equals: 0
+- stdout_contains:
+    text: size_x = 20.000000
+- stdout_contains:
+    text: size_y = 20.000000
+- stdout_contains:
+    text: size_z = 20.000000
+notes: |
+  cube20.stl is a 20mm cube, so a 90-degree X rotation leaves its bounding box
+  unchanged -- the meaningful part of this case is the input type, not the
+  angle. Regression class (CLI transforms): --rotate-x used to work on a 3mf
+  project but segfault on a plain STL/mesh input, with or without
+  --load-settings and regardless of the action (--info or --export-3mf),
+  reproducing deterministically on the public v2.4.2 build. Combined with the
+  former transform-rotate-x-on-stl-segfault case (2026-08-31): same op, same
+  args shape, so one case now covers both "doesn't crash on STL" and "computes
+  the right size" instead of splitting no-crash-only and correctness across
+  two files. Status flipped to fixed after XPASSing against the
+  cli-mode-bug-sweep fix build (2026-08-30); on the v2.4.2 public release this
+  case reports a plain crash, which is accurate.

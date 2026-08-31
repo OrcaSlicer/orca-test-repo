@@ -1,0 +1,24 @@
+id: datadir-missing-parent-directory
+title: "--datadir with a missing parent directory must fail cleanly, not crash"
+category: crash
+status: open
+model: Stanford_Bunny.3mf
+args:
+  - "--datadir"
+  - "{empty_datadir}/deep/missing/config"
+  - "--outputdir"
+  - "{outputdir}"
+  - "--info"
+  - "{model}"
+checks:
+  - no_crash: {}
+notes: >
+  Same regression class as outputdir-missing-parent-directory, on a much
+  hotter path: the data directory is resolved at the very start of every CLI
+  invocation, so a single-level, non-recursive directory-create call with no
+  exception handling aborts literally any CLI run pointed at a not-yet-
+  created --datadir tree. Confirmed reproducing on the public v2.4.2
+  release: aborts with an uncaught boost::filesystem::filesystem_error
+  ("No such file or directory" on create_directory). Only no_crash is
+  asserted (the desired behavior) -- no specific clean-failure exit code has
+  been pinned for this combination yet; tighten once a fix's behavior is known.

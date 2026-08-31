@@ -1,0 +1,32 @@
+id: vector-override-single-value-multi-filament
+category: settings-import
+status: open
+title: A single-value per-filament CLI override on a multi-filament project must not zero the other filaments
+model: p1s_multicolor.3mf
+args:
+- --datadir
+- '{datadir}'
+- --outputdir
+- '{outputdir}'
+- --allow-newer-file
+- --allow-mix-temp
+- --nozzle-temperature=211
+- --slice
+- '0'
+- '{model}'
+checks:
+- no_crash: {}
+- gcode_config_vector_nonzero:
+    key: nozzle_temperature
+notes: |
+  Regression class (settings import / precedence): `--nozzle-temperature=211` on
+  a 4-filament project replaces the whole vector with a 1-element one; the
+  G-code then records `nozzle_temperature = 211,0,0,0`, i.e. three filaments
+  would print at 0 C (without --allow-mix-temp this is masked by exit 194,
+  "temperature difference too large"). Whether the right fix is to broadcast the
+  single value or to reject a short vector is upstream's call; either way no
+  filament may silently end up with a zero temperature, which is what the check
+  asserts (a clean rejection leaves no G-code and fails this case inside xfail,
+  so it stays a tracked open item until a fix that produces G-code with non-zero
+  values lands). On a single-filament project the same override works
+  (verified).

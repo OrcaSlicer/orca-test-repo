@@ -1,0 +1,41 @@
+id: object-overrides-beat-cli-globals
+title: Per-object settings take precedence over CLI overrides of the same keys
+category: per-object
+status: fixed
+model: synthetic/cube_x1c_object_overrides.3mf
+args:
+- --datadir
+- '{datadir}'
+- --outputdir
+- '{outputdir}'
+- --layer-height=0.16
+- --wall-loops=2
+- --sparse-infill-density=10%
+- --slice
+- '0'
+- '{model}'
+checks:
+- no_crash: {}
+- exit_code:
+    equals: 0
+- gcode_metric:
+    name: layers
+    equals: 72
+- gcode_metric:
+    name: filament_mm
+    index: 0
+    min: 2150
+    max: 2250
+- gcode_config_value:
+    key: layer_height
+    equals: '0.16'
+notes: |
+  Precedence: object config > CLI override > preset > 3mf global. With --layer-
+  height=0.16 on the command line the global value changes (recorded as 0.16)
+  but the object still slices at 0.28 -> 72 layers and the same filament use as
+  without the override. Fixture
+  test_projects/synthetic/cube_x1c_object_overrides.3mf: the 20 mm cube exported
+  with the X1C 0.4 / 0.20mm Standard / Bambu PLA Basic presets, with <metadata
+  key="layer_height" value="0.28"/>, wall_loops=5 and sparse_infill_density=37%
+  added under the <object> in Metadata/model_settings.config (the per-object
+  config format). Global (plate) values stay 0.2 / 2 / 20%.

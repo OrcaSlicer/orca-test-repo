@@ -1,0 +1,35 @@
+id: load-filaments-count-exceeds-project
+title: "Loading more filaments than the project defines must not crash"
+category: geometry-bounds
+status: open
+model: Stanford_Bunny.3mf
+args:
+  - "--datadir"
+  - "{datadir}"
+  - "--outputdir"
+  - "{outputdir}"
+  - "--load-filaments"
+  - "{datadir}/system/BBL/filament/Generic PLA @BBL A1M.json;{datadir}/system/BBL/filament/Generic PETG @BBL A1M.json"
+  - "--info"
+  - "{model}"
+checks:
+  - no_crash: {}
+notes: >
+  Regression class: filament-mapping arrays sized to the project's own
+  filament count are indexed up to the number of filaments requested on the
+  command line, with no guard that the requested count does not exceed the
+  project's own filament count.
+
+  Confirmed reproducing on the public v2.4.2 release build: Stanford_Bunny.3mf
+  defines exactly 1 filament; passing 2 filaments via --load-filaments
+  aborts with an uncaught Slic3r::ConfigurationError
+  ("ConfigOptionVector::set_with_restore_2(): invalid size found"). Happens
+  at config-merge time -- reproduces even with --info, no --slice needed, so
+  this case runs fast. A matching-count control (--load-filaments with
+  exactly 1 entry) was verified clean (exit 0) to confirm the count mismatch
+  specifically is what triggers it, not --load-filaments in general.
+
+  A second, narrower suspected indexing bug is believed to exist in the same
+  remapping logic (an index that can overrun or start below zero depending
+  on the first entry's value) -- worth its own case if/when it's isolated,
+  rather than folding it into this assertion.

@@ -1,0 +1,31 @@
+id: project-settings-json-not-loadable-as-preset
+category: settings-import
+status: fixed
+title: A 3mf's project_settings.config (or --export-settings output) must be rejected cleanly by --load-settings
+model: synthetic/cube20.stl
+args:
+- --datadir
+- '{datadir}'
+- --outputdir
+- '{outputdir}'
+- --load-settings
+- '{fixtures}/gui_project_settings.json'
+- --slice
+- '0'
+- '{model}'
+checks:
+- no_crash: {}
+- exit_code:
+    equals: 251
+- result_json_field:
+    field: return_code
+    equals: -5
+notes: |
+  Documented limitation, pinned: --load-settings accepts *preset* files (`type`
+  machine|process|filament, `from` system|User). The merged project config that
+  the GUI stores in a 3mf and that --export-settings writes is a `from: project`
+  file with no `type`, and is rejected with CLI_CONFIG_FILE_ERROR (-5, exit 251,
+  "The input preset file is invalid"). So --export-settings output cannot be fed
+  back in; the supported round trip is --export-3mf -> re-import (covered by
+  test_settings_import.py). Fixture is the project_settings.config extracted
+  from a GUI "export sliced plate" 3mf.

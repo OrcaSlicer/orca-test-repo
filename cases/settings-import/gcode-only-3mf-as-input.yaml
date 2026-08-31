@@ -1,0 +1,26 @@
+id: gcode-only-3mf-as-input
+category: settings-import
+status: fixed
+title: A sliced-plate (G-code only) 3mf export is not a project and must be rejected cleanly
+model: settings/gcode_only_export.3mf
+args:
+- --datadir
+- '{datadir}'
+- --outputdir
+- '{outputdir}'
+- --info
+- '{model}'
+checks:
+- no_crash: {}
+- exit_code:
+    equals: 250
+- result_json_field:
+    field: return_code
+    equals: -6
+notes: |
+  Documented behaviour, pinned: the GUI's "export sliced file" 3mf carries the
+  G-code, thumbnails and project_settings.config but an empty 3D/3dmodel.model
+  (no mesh). It is an *output* artifact -- test_settings_import.py validates its
+  embedded settings -- not a slicing input; loading it must report
+  CLI_DATA_FILE_ERROR (-6, exit 250, "file couldn't be read because it's empty")
+  rather than crash. Verified on the public v2.4.2 build.

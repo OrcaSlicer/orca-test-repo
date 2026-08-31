@@ -1,0 +1,21 @@
+id: transform-convert-unit
+title: --convert-unit completes
+category: cli-flags
+status: fixed
+model: Stanford_Bunny.3mf
+args:
+- --datadir
+- '{datadir}'
+- --outputdir
+- '{outputdir}'
+- --convert-unit
+- --info
+- '{model}'
+checks:
+- no_crash: {}
+- exit_code:
+    equals: 0
+notes: |
+  Inch/mm conversion only triggers for models the heuristic considers tiny; on
+  this model --info is unchanged. Only clean completion is pinned; add a
+  sub-25mm model to observe the conversion.

@@ -1,0 +1,19 @@
+id: export-stl
+title: --export-stl writes the model's STL
+category: cli-flags
+status: fixed
+model: Stanford_Bunny.3mf
+args:
+- --datadir
+- '{datadir}'
+- --outputdir
+- '{outputdir}'
+- --export-stl
+- '{model}'
+checks:
+- no_crash: {}
+- exit_code:
+    equals: 0
+- file_exists:
+    path: '{outputdir}/stl/obj_1_Stanford_Bunny.drc.stl'
+notes: --export-stl is a bare flag (a following filename is parsed as another input); the STL is written under --outputdir as stl/obj_<n>_<object name>.stl (2.6 MB for Stanford_Bunny).

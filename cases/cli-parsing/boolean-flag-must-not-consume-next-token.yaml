@@ -1,0 +1,29 @@
+id: boolean-flag-must-not-consume-next-token
+title: "A bare boolean flag must not swallow the next CLI token as its value"
+category: cli-parsing
+status: open
+model: Stanford_Bunny.3mf
+args:
+  - "--datadir"
+  - "{datadir}"
+  - "--outputdir"
+  - "{outputdir}"
+  - "--normative-check"
+  - "0"
+  - "--info"
+  - "{model}"
+checks:
+  - no_crash: {}
+  - output_not_contains: {text: "No such file: 0"}
+notes: >
+  Regression class: boolean flags never consume the following CLI token, but
+  a handful of boolean flags are declared/documented (in --help) as if they
+  take a following argument. A user who follows that documentation and
+  writes "--normative-check 0" gets the bare "0" misinterpreted as a
+  positional input filename, producing a "no such file: 0"-style error.
+  Confirmed still reproducing on the current build under test (stderr
+  contains "No such file: 0"), hence status: open -- the checks assert the
+  DESIRED behavior (the "0" must not be treated as a filename), so the
+  strict-xfail gate flips this case loudly when upstream fixes it. Several
+  sibling boolean flags share the same mis-declaration and are worth their
+  own cases if they show distinct symptoms.

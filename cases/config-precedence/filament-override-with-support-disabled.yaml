@@ -1,0 +1,50 @@
+id: filament-override-with-support-disabled
+title: "CLI must honor a per-feature filament override even when support is disabled"
+category: config-precedence
+status: open
+model: synthetic/two_filament_single_object.3mf
+args:
+  - "--datadir"
+  - "{datadir}"
+  - "--outputdir"
+  - "{outputdir}"
+  - "--enable-support=0"
+  - "--outer-wall-filament-id=2"
+  - "--slice"
+  - "0"
+  - "--debug"
+  - "4"
+  - "--logfile"
+  - "{outputdir}/run.log"
+  - "{model}"
+checks:
+  - no_crash: {}
+  - file_contains: {path: "{outputdir}/run.log", text: "has_wipe_tower 1"}
+notes: >
+  Regression class (CLI-vs-GUI parity): the CLI's per-plate extruder/
+  filament collection skips the rest of an object's per-feature filament-id
+  overrides (outer_wall_filament_id and friends) as soon as it sees support
+  is off for that object -- the "off" check and the override collection
+  share one early-exit, so a feature that has nothing to do with support
+  silently loses its filament assignment whenever support happens to be
+  disabled. Downstream, that filament is never counted as "used", so the
+  wipe tower gets disabled even though the model asks for a second filament.
+
+  Confirmed reproducing on the public v2.4.2 release build, isolated
+  cleanly: identical fixture and override, only --enable-support toggled.
+  With support off, the log shows "filaments_cnt=1, set to no wipe tower"
+  and "has_wipe_tower 0". With support left at its embedded default (on),
+  the exact same override produces "has_wipe_tower 1" instead. The checks
+  above assert the desired (support-off-but-still-honored) behavior.
+
+  Fixture: test_projects/synthetic/two_filament_single_object.3mf --
+  Stanford_Bunny.3mf with its embedded project config hand-extended from 1
+  to 2 filaments (duplicate filament entries; the object's own geometry
+  stays on extruder 1 throughout, so filament 2 becomes "used" only via the
+  outer_wall_filament_id override, which is what makes this an isolated
+  signal). Built with scripts/patch_3mf.py. Only filament-scoped keys were
+  touched -- broader edits (e.g. flush_volumes_matrix, machine_max_* arrays)
+  need to stay correctly sized for the new filament count or the slice
+  fails with an unrelated "Flush volumes matrix do not match to the correct
+  size!" error; this fixture accounts for that (flush_volumes_matrix
+  expanded from a 1x1 to a proper 2x2).

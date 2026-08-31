@@ -1,0 +1,25 @@
+id: transform-orient
+title: --orient completes and reports the model
+category: cli-flags
+status: fixed
+model: Stanford_Bunny.3mf
+args:
+- --datadir
+- '{datadir}'
+- --outputdir
+- '{outputdir}'
+- --orient
+- '1'
+- --info
+- '{model}'
+checks:
+- no_crash: {}
+- exit_code:
+    equals: 0
+- stdout_contains:
+    text: size_x =
+notes: |
+  Auto-orientation must complete cleanly. On this model --info reports the same
+  extents before and after (no observable effect on the mesh bbox), so only
+  success is pinned; strengthen with a model whose best orientation differs from
+  its stored one.

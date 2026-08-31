@@ -1,0 +1,33 @@
+id: mismatched-extruder-geometry-arrays
+title: Per-extruder printable areas whose intersection is empty must not crash the CLI
+category: geometry-bounds
+status: open
+model: synthetic/mismatched_extruder_arrays.3mf
+args:
+- --datadir
+- '{datadir}'
+- --outputdir
+- '{outputdir}'
+- --slice
+- '0'
+- '{model}'
+checks:
+- no_crash: {}
+notes: |
+  Regression class (bed geometry): a toolchanger/multi-extruder profile can
+  declare one printable area per extruder (extruder_printable_area); the CLI
+  derives the shared bed as the intersection of all of them (get_shared_poly in
+  PrintConfig.cpp, called from get_bed_shape(..., use_share=true) in CLI::run).
+  When two areas do not overlap, the intersection is empty and the code indexes
+  result_polygon[0] on an empty vector -- SIGSEGV (backtrace: get_shared_poly ->
+  Polygon::operator= on a null polygon). Fixture: toolchanger_4_color.3mf with
+  extruder_printable_area set to two non-overlapping halves of the bed (0-175
+  and 175-350 in X; they share only an edge) and extruder_printable_height
+  shortened to one entry. Earlier isolation attempts read this as an area/height
+  length mismatch; the backtrace shows the length mismatch is incidental -- five
+  identical full-bed areas with five heights slice fine, and the crash follows
+  the areas' empty intersection. Note the height/area size-mismatch safeguard
+  added to BuildVolume.cpp in the cli-mode-bug-sweep worktree does not cover
+  this path: the fixture still segfaults on that build. Desired: a clean
+  validation error ("extruder printable areas do not overlap") or the plain
+  printable_area as fallback.

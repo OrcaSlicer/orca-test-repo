@@ -1,0 +1,34 @@
+id: layer-range-overrides-roundtrip-export-3mf
+title: Per-layer-range settings survive --export-3mf
+category: per-object
+status: fixed
+model: synthetic/cube_x1c_layer_range.3mf
+args:
+- --datadir
+- '{datadir}'
+- --outputdir
+- '{outputdir}'
+- --slice
+- '0'
+- --export-3mf
+- out.3mf
+- '{model}'
+checks:
+- no_crash: {}
+- exit_code:
+    equals: 0
+- threemf_member_contains:
+    path: '{outputdir}/out.3mf'
+    member: Metadata/layer_config_ranges.xml
+    text: <option opt_key="layer_height">0.3</option>
+- threemf_member_contains:
+    path: '{outputdir}/out.3mf'
+    member: Metadata/layer_config_ranges.xml
+    text: max_z="10"
+notes: |
+  The exported project must carry the range and its options unchanged. Fixture
+  test_projects/synthetic/cube_x1c_layer_range.3mf: the X1C cube project plus a
+  Metadata/layer_config_ranges.xml (<objects><object id="1"><range min_z="0"
+  max_z="10"><option opt_key="layer_height">0.3</option><option
+  opt_key="sparse_infill_density">60%</option></range></object></objects>;
+  object ids are 1-based object indices).

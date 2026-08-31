@@ -1,0 +1,35 @@
+id: nil-value-for-scalar-vector-option
+title: "Assigning nil to a second, independently-found vector option must also error cleanly"
+category: crash
+status: open
+model: Stanford_Bunny.3mf
+args:
+  - "--datadir"
+  - "{datadir}"
+  - "--outputdir"
+  - "{outputdir}"
+  - "--filament-multitool-ramming-flow=nil"
+  - "--info"
+  - "{model}"
+checks:
+  - no_crash: {}
+notes: >
+  Same bug class as nil-value-for-vector-option.yaml (assigning "nil" to a
+  non-nullable vector-typed CLI option aborts instead of erroring cleanly),
+  found automatically by test_config_fuzz.py's default-sample sweep rather
+  than by hand -- exactly the mechanism that sweep exists for: a class
+  confirmed on one option (nozzle_diameter) turned out to also affect
+  filament_multitool_ramming_flow, an option nobody had tested by hand.
+
+  Confirmed reproducing on the public v2.4.2 release build: aborts with an
+  uncaught Slic3r::ConfigurationError ("Deserializing nil into a
+  non-nullable object"), identical failure text to the original case. Kept
+  as a separate case rather than folded into the original -- they pin two
+  independently-confirmed instances of the same class, and either one
+  regressing/getting fixed should be visible on its own, not entangled with
+  the other's status.
+
+  status: open here (not fixed) since this specific option was not part of
+  the earlier BUG-5-style investigation and its fix status hasn't been
+  separately tracked -- treat as reproducing until shown otherwise, matching
+  the direct fuzz-run evidence.

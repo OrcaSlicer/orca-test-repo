@@ -1,6 +1,113 @@
 {
-  "klipper_multicolor_3mf.gcode": 6489109,
-  "p1s_multicolor_3mf.gcode": 4182234,
-  "toolchanger_4_color_3mf.gcode": 6393045,
-  "Stanford_Bunny_3mf.gcode":16084972
+  "_comment": "slicing metrics per model, see gcode_metrics.py; regenerate with scripts/update_baseline.py",
+  "models": {
+    "Stanford_Bunny_3mf.gcode": {
+      "metrics": {
+        "layers": 1009,
+        "max_z_mm": 118.4,
+        "filament_mm": [
+          32804.74
+        ],
+        "filament_cm3": [
+          78.9
+        ],
+        "filament_g": [
+          82.06
+        ],
+        "e_sum_mm": 37790.736,
+        "size_bytes": 16075216
+      },
+      "captured_with": "OrcaSlicer-2.4.2",
+      "captured_on": "2026-08-29"
+    },
+    "klipper_multicolor_3mf.gcode": {
+      "metrics": {
+        "layers": 150,
+        "max_z_mm": 30.0,
+        "filament_mm": [
+          17937.04,
+          9113.04,
+          10773.62,
+          7101.03
+        ],
+        "filament_cm3": [
+          43.14,
+          21.92,
+          25.91,
+          17.08
+        ],
+        "filament_g": [
+          53.5,
+          27.18,
+          32.13,
+          21.18
+        ],
+        "e_sum_mm": 54437.928,
+        "size_bytes": 6406560
+      },
+      "captured_with": "OrcaSlicer-2.4.2",
+      "captured_on": "2026-08-29"
+    },
+    "p1s_multicolor_3mf.gcode": {
+      "metrics": {
+        "layers": 150,
+        "max_z_mm": 30.0,
+        "print_time_s": 30919,
+        "total_time_s": 31294,
+        "filament_mm": [
+          9379.65,
+          6549.42,
+          5799.47,
+          3651.14
+        ],
+        "filament_cm3": [
+          22.56,
+          15.75,
+          13.95,
+          8.78
+        ],
+        "filament_g": [
+          28.43,
+          19.85,
+          17.58,
+          11.07
+        ],
+        "e_sum_mm": 33884.376,
+        "size_bytes": 4185077
+      },
+      "captured_with": "OrcaSlicer-2.4.2",
+      "captured_on": "2026-08-29"
+    },
+    "toolchanger_4_color_3mf.gcode": {
+      "metrics": {
+        "layers": 150,
+        "max_z_mm": 30.0,
+        "filament_mm": [
+          8038.27,
+          2732.74,
+          2111.11,
+          1590.83,
+          1197.56
+        ],
+        "filament_cm3": [
+          19.33,
+          6.57,
+          5.08,
+          3.83,
+          2.88
+        ],
+        "filament_g": [
+          23.97,
+          8.15,
+          6.3,
+          4.74,
+          3.57
+        ],
+        "e_sum_mm": 19288.718,
+        "size_bytes": 6299014
+      },
+      "captured_with": "OrcaSlicer-2.4.2",
+      "captured_on": "2026-08-29"
+    }
+  }
 }

@@ -1,0 +1,36 @@
+id: bed-exclusion-zone-multiple-rectangles
+title: "Downward-compatibility checks must read every rectangle of a multi-rectangle bed exclusion zone"
+category: geometry-bounds
+status: needs_fixture
+fixture_todo: >
+  Confirmed real, concrete coordinates (2026-08-27, from the shipped
+  fdm_bbl_3dp_001_common.json profile -- no new machine profile needed):
+  printable_area is a 256x256 bed; bed_exclude_area is genuinely 2
+  rectangles, a 28x28 corner square at (0,0)-(28,28), and an 8-wide strip
+  along the left edge from (0,28) to (8,256). An object footprint placed at
+  roughly x in [0,8], y in [28,256] overlaps ONLY the second rectangle --
+  that's the position to use so a reader that only sees rectangle 1 wrongly
+  reports "compatible".
+
+  Not yet attempted: how --downward-check/--downward-settings actually
+  invoke this (need a second, "downward" machine profile passed via
+  --downward-settings, with --downward-check enabling the comparison --
+  --help's one-line descriptions were read but the flags haven't been
+  exercised against a real fixture yet). Time-boxed out of this session's
+  fixture-building pass after the other cases in this batch turned out to
+  need more iteration than expected (see filament-override-with-
+  support-disabled and mismatched-extruder-geometry-arrays for the pattern
+  of what "confirm the actual behavior first" cost in practice) -- pick this
+  up fresh rather than assume the mechanism from --help's description alone.
+args: []
+checks: []
+notes: >
+  Regression class: same vertex-subtraction shortcut as
+  circular-bed-multi-plate-slicing, applied to the bed exclusion zone -- the
+  size computation reads only the first rectangle's coordinates even though
+  real profiles ship exclusion zones with more than one rectangle, so any
+  later rectangle is silently never checked. This produces false negatives
+  on keep-out-zone compatibility checks. Believed still present (unlike the
+  core circular-bed fix); only reachable via the downward-check flags, so
+  low-traffic but real. Not independently confirmed on the current build
+  under test -- confirm the behavior live before pinning checks.

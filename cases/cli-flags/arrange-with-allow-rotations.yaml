@@ -1,0 +1,23 @@
+id: arrange-with-allow-rotations
+title: --arrange with --allow-rotations produces a project
+category: cli-flags
+status: fixed
+model: Stanford_Bunny.3mf
+args:
+- --datadir
+- '{datadir}'
+- --outputdir
+- '{outputdir}'
+- --allow-rotations
+- --arrange
+- '1'
+- --export-3mf
+- out.3mf
+- '{model}'
+checks:
+- no_crash: {}
+- exit_code:
+    equals: 0
+- file_exists:
+    path: '{outputdir}/out.3mf'
+notes: Arrange must succeed with rotation allowed and write the arranged project.

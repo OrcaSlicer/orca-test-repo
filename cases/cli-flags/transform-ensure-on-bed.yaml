@@ -1,0 +1,26 @@
+id: transform-ensure-on-bed
+title: --ensure-on-bed places a model that sits below Z=0 back on the bed
+category: cli-flags
+status: fixed
+model: Stanford_Bunny.3mf
+args:
+- --datadir
+- '{datadir}'
+- --outputdir
+- '{outputdir}'
+- --ensure-on-bed
+- --slice
+- '0'
+- '{model}'
+checks:
+- no_crash: {}
+- exit_code:
+    equals: 0
+- gcode_z_above_bed:
+    min: 0.0
+notes: |
+  Stanford_Bunny.3mf's mesh has min_z = -59.21 in --info (the placement lives in
+  the instance transform). --info reports the raw mesh so it shows no change
+  there; slicing is what actually exercises placement, so this now checks the
+  real output -- every G0/G1 move in the sliced G-code stays at or above the
+  bed (Z >= 0), not just that the process completes.

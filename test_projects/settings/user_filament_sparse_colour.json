@@ -1,0 +1,10 @@
+{
+  "type": "filament",
+  "from": "User",
+  "name": "Test Filament (sparse, colour)",
+  "inherits": "Bambu PLA Basic @BBL X1C",
+  "filament_id": "GFA00",
+  "filament_colour": [
+    "#123456"
+  ]
+}

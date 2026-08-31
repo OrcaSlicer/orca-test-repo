@@ -1,0 +1,25 @@
+id: limit-mstpp-exceeded
+title: --mstpp aborts a plate whose slicing time exceeds the limit
+category: cli-flags
+status: fixed
+model: Stanford_Bunny.3mf
+args:
+- --datadir
+- '{datadir}'
+- --outputdir
+- '{outputdir}'
+- --mstpp
+- '1'
+- --slice
+- '0'
+- '{model}'
+checks:
+- no_crash: {}
+- exit_code:
+    equals: 198
+- result_json_field:
+    field: return_code
+    equals: -58
+notes: |
+  A 1-second per-plate budget is exceeded by Stanford_Bunny on any machine; the
+  CLI must report the time-limit error (-58, exit 198).

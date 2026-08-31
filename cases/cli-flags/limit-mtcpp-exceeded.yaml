@@ -1,0 +1,25 @@
+id: limit-mtcpp-exceeded
+title: --mtcpp rejects a plate whose triangle count exceeds the limit
+category: cli-flags
+status: fixed
+model: Stanford_Bunny.3mf
+args:
+- --datadir
+- '{datadir}'
+- --outputdir
+- '{outputdir}'
+- --mtcpp
+- '100'
+- --slice
+- '0'
+- '{model}'
+checks:
+- no_crash: {}
+- exit_code:
+    equals: 197
+- result_json_field:
+    field: return_code
+    equals: -59
+notes: |
+  Stanford_Bunny has 52716 facets; --mtcpp 100 must stop with the triangle-count
+  error (-59, exit 197) instead of slicing.

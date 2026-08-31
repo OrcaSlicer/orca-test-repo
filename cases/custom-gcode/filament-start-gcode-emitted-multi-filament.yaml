@@ -1,0 +1,34 @@
+id: filament-start-gcode-emitted-multi-filament
+title: filament_start_gcode set on the CLI is emitted on a multi-filament project
+category: custom-gcode
+status: fixed
+model: p1s_multicolor.3mf
+args:
+- --datadir
+- '{datadir}'
+- --outputdir
+- '{outputdir}'
+- --allow-newer-file
+- --filament-start-gcode="; PROBE_FILAMENT_START_GCODE"
+- --slice
+- '0'
+- '{model}'
+checks:
+- no_crash: {}
+- exit_code:
+    equals: 0
+- no_crash: {}
+- gcode_body_count:
+    text: PROBE_FILAMENT_START_GCODE
+    at_least: 1
+notes: |
+  Emitted at the first filament and at every tool change of the 4-filament
+  project (>=1 pinned; the exact count depends on the colour layout).
+  filament_start_gcode is a per-filament string *vector*; on the command line
+  its elements are separated by ';' and an element containing ';' or spaces must
+  be double-quoted (libslic3r escape_strings_cstyle format), so a G-code comment
+  has to be passed as --filament-start-gcode='"; TEXT"'. Passing '; TEXT'
+  unquoted splits into an empty first element plus 'TEXT' -- the empty snippet
+  is what gets emitted for filament 1, which looks like the override being
+  ignored. The case uses the quoted form; the recorded value in the config block
+  is the same quoted form.

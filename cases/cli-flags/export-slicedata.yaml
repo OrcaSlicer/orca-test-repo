@@ -1,0 +1,25 @@
+id: export-slicedata
+title: --export-slicedata alongside --slice succeeds
+category: cli-flags
+status: fixed
+model: Stanford_Bunny.3mf
+args:
+- --datadir
+- '{datadir}'
+- --outputdir
+- '{outputdir}'
+- --slice
+- '0'
+- --export-slicedata
+- sd
+- '{model}'
+checks:
+- no_crash: {}
+- exit_code:
+    equals: 0
+- file_exists:
+    path: '{outputdir}/plate_1.gcode'
+notes: |
+  Only clean completion plus the G-code is pinned; where the slicing-data
+  directory is written (and --load-slicedata reading it back) needs a two-step
+  test, not yet covered.

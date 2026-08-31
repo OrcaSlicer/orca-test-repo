@@ -1,0 +1,108 @@
+name: CLI regression suite
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    # catch upstream drift even when nothing in this repo changed
+    - cron: "17 4 * * *"
+  workflow_dispatch:
+    inputs:
+      orca_tag:
+        description: "OrcaSlicer release tag to test against (blank = latest)"
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+jobs:
+  # Fast, no binary required: every cases/**/*.yaml must parse and the whole
+  # suite must collect cleanly. This is the gate for changes to the suite
+  # itself and runs on every push/PR regardless of binary availability.
+  validate-suite:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - run: python -m pytest . -c pytest.ini --collect-only -q
+
+  # A self-check against a fixed public release, NOT the primary regression
+  # gate -- that role belongs to OrcaSlicer's own CI (build_orca.yml's
+  # "Run external slicer regression tests" step), which clones this repo and
+  # runs run_test.py against a real build of the actual commit under test.
+  # This job exists so changes to the suite itself get fast feedback without
+  # waiting on an OrcaSlicer build. Case `status` in cases/**/*.yaml is
+  # pinned against this reference release (see TESTING_STRATEGY.md) -- if
+  # this job goes red after a fresh upstream release, it means that
+  # release's actual behavior no longer matches a case's recorded status,
+  # not that the suite itself is broken; update the case's `status`/checks
+  # to match, don't silence it blindly.
+  regression:
+    runs-on: ubuntu-24.04
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+
+      - name: Fetch orca-slicer binary
+        run: |
+          set -euo pipefail
+          TAG="${{ inputs.orca_tag }}"
+          if [ -z "$TAG" ]; then
+            TAG=$(gh api repos/OrcaSlicer/OrcaSlicer/releases/latest --jq .tag_name)
+          fi
+          echo "Using OrcaSlicer release: $TAG"
+          mkdir -p dl
+          gh release download "$TAG" --repo OrcaSlicer/OrcaSlicer \
+            --pattern "OrcaSlicer_Linux_AppImage_Ubuntu2404_V*.AppImage" \
+            --dir dl --clobber
+          appimage="$(find dl -name '*.AppImage' | head -n1)"
+          chmod +x "$appimage"
+          "$appimage" --appimage-extract >/dev/null
+          echo "ORCA_BIN=$PWD/squashfs-root/bin/orca-slicer" >> "$GITHUB_ENV"
+
+      - name: Run suite
+        run: python -m pytest . -c pytest.ini --orca-bin "$ORCA_BIN" -v
+
+  # Keeps cases/_snapshots/cli_surface_full.json in step with upstream: enumerate
+  # the CLI option surface from OrcaSlicer main and open a PR when it changed.
+  # (When the suite runs inside OrcaSlicer's own CI it enumerates live from that
+  # checkout anyway -- see run_test.py -- so the snapshot only matters for runs
+  # without a source tree, like the `regression` job above.)
+  refresh-surface:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Fetch OrcaSlicer source (main, shallow)
+        run: git clone --depth 1 https://github.com/OrcaSlicer/OrcaSlicer.git "$RUNNER_TEMP/OrcaSlicer"
+      - name: Regenerate snapshot
+        run: |
+          python scripts/enumerate_cli_options.py --orca-source "$RUNNER_TEMP/OrcaSlicer" \
+            > cases/_snapshots/cli_surface_full.json
+          git diff --stat -- cases/_snapshots/cli_surface_full.json || true
+      - uses: peter-evans/create-pull-request@v6
+        with:
+          branch: bot/refresh-cli-surface
+          title: "Refresh CLI option surface snapshot from upstream main"
+          commit-message: "Refresh cli_surface_full.json from OrcaSlicer main"
+          body: |
+            Automated regeneration of `cases/_snapshots/cli_surface_full.json` via
+            `scripts/enumerate_cli_options.py` against the current OrcaSlicer `main`.
+            Review the diff for new options that deserve a case, then merge.
+          delete-branch: true

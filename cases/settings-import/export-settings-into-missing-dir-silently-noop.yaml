@@ -1,0 +1,25 @@
+id: export-settings-into-missing-dir-silently-noop
+title: --export-settings to a path whose directory does not exist must fail, not exit 0 without writing
+category: settings-import
+status: open
+model: Stanford_Bunny.3mf
+args:
+- --datadir
+- '{datadir}'
+- --outputdir
+- '{outputdir}'
+- --export-settings
+- '{outputdir}/missing/settings.json'
+- '{model}'
+checks:
+- no_crash: {}
+- exit_code:
+    not_equals: 0
+notes: |
+  Regression class (settings export / diagnostics): when the directory of the
+  --export-settings target does not exist, the CLI exits 0 and result.json says
+  "Success." but no file is written (the --export-3mf and STL-export paths
+  report a missing directory as an error). Found while building the override
+  sweep, whose per-batch output directories were not pre-created; every batch
+  then looked "rejected". Desired: create the directory or report a clean error,
+  never a silent success. Observed on the public v2.4.2 build.

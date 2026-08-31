@@ -1,0 +1,27 @@
+id: logfile-and-debug-level
+title: --logfile with --debug writes the log where asked
+category: cli-flags
+status: fixed
+model: Stanford_Bunny.3mf
+args:
+- --datadir
+- '{datadir}'
+- --outputdir
+- '{outputdir}'
+- --debug
+- '4'
+- --logfile
+- probe.log
+- --info
+- '{model}'
+checks:
+- no_crash: {}
+- exit_code:
+    equals: 0
+- file_exists:
+    path: '{cwd}/probe.log'
+- file_not_exists:
+    path: '{cwd}/00000.log'
+notes: |
+  A relative --logfile is created in the working directory and no default-named
+  log is left behind.

@@ -1,0 +1,28 @@
+id: export-3mf-min-save
+title: --min-save exports a 3mf without the mesh payload
+category: cli-flags
+status: fixed
+model: Stanford_Bunny.3mf
+args:
+- --datadir
+- '{datadir}'
+- --outputdir
+- '{outputdir}'
+- --min-save
+- --export-3mf
+- out.3mf
+- '{model}'
+checks:
+- no_crash: {}
+- exit_code:
+    equals: 0
+- threemf_member_absent:
+    path: '{outputdir}/out.3mf'
+    member_prefix: 3D/Objects/
+- threemf_member_contains:
+    path: '{outputdir}/out.3mf'
+    member: Metadata/project_settings.config
+    text: '"layer_height"'
+notes: |
+  With --min-save the exported 3mf drops 3D/Objects/*.model (Stanford_Bunny: 922
+  KB -> 168 KB) but keeps the project settings.

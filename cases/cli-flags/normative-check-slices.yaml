@@ -1,0 +1,21 @@
+id: normative-check-slices
+title: --normative-check still produces G-code
+category: cli-flags
+status: fixed
+model: Stanford_Bunny.3mf
+args:
+- --datadir
+- '{datadir}'
+- --outputdir
+- '{outputdir}'
+- --normative-check
+- --slice
+- '0'
+- '{model}'
+checks:
+- no_crash: {}
+- exit_code:
+    equals: 0
+- file_exists:
+    path: '{outputdir}/plate_1.gcode'
+notes: The normative checks pass on a valid project and G-code is produced.

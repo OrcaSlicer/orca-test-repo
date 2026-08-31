@@ -1,0 +1,21 @@
+{
+  "type": "machine",
+  "from": "User",
+  "name": "Test Machine (explicit keys)",
+  "inherits": "Bambu Lab X1 Carbon 0.4 nozzle",
+  "printer_model": "Bambu Lab X1 Carbon",
+  "nozzle_diameter": [
+    "0.4"
+  ],
+  "retraction_length": [
+    "1.23"
+  ],
+  "z_hop": [
+    "0.61"
+  ],
+  "printable_height": "233",
+  "machine_max_acceleration_x": [
+    "12345",
+    "12345"
+  ]
+}

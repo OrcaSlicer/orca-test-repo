@@ -1,0 +1,34 @@
+id: sparse-user-filament-with-colour-segfault
+category: settings-import
+status: open
+title: A sparse user filament preset that sets filament_colour must not crash the CLI on STL input
+model: synthetic/cube20.stl
+args:
+- --datadir
+- '{datadir}'
+- --outputdir
+- '{outputdir}'
+- --load-settings
+- '{datadir}/system/BBL/machine/Bambu Lab X1 Carbon 0.4 nozzle.json;{datadir}/system/BBL/process/0.20mm Standard @BBL X1C.json'
+- --load-filaments
+- '{fixtures}/user_filament_sparse_colour.json'
+- --info
+- '{model}'
+checks:
+- no_crash: {}
+notes: |
+  Regression class (settings import): a user filament preset holding only its
+  identity keys plus `filament_colour` (type/from/name/inherits/filament_id +
+  filament_colour), loaded with --load-filaments alongside a system machine and
+  process onto an STL, segfaults during config merge (reproduces with --info, no
+  slicing needed). Isolation on the public v2.4.2 build: the same file loaded
+  onto a 3mf project works; the same sparse preset *without* filament_colour
+  works (with nozzle_temperature only it works); a fully flattened copy of a
+  system filament preset *with* filament_colour added also segfaults on STL
+  input and works once filament_colour is removed (which is why
+  test_projects/settings/user_filament_flattened.json carries no colour). One
+  sparse variant that added filament_type/vendor/density/diameter/cost next to
+  filament_colour did not crash, so the trigger is not fully characterised --
+  but "user filament sets filament_colour + STL input + --load-settings"
+  reproduces reliably with this fixture. Desired behaviour: apply it, or reject
+  it with a clean CLI_CONFIG_FILE_ERROR.

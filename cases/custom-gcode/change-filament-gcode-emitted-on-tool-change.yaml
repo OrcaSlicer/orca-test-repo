@@ -1,0 +1,28 @@
+id: change-filament-gcode-emitted-on-tool-change
+title: change_filament_gcode is emitted at every tool change of a multi-filament project
+category: custom-gcode
+status: fixed
+model: p1s_multicolor.3mf
+args:
+- --datadir
+- '{datadir}'
+- --outputdir
+- '{outputdir}'
+- --allow-newer-file
+- --change-filament-gcode=; PROBE_CHANGE_FILAMENT_GCODE
+- --slice
+- '0'
+- '{model}'
+checks:
+- no_crash: {}
+- exit_code:
+    equals: 0
+- no_crash: {}
+- gcode_body_count:
+    text: PROBE_CHANGE_FILAMENT_GCODE
+    at_least: 1
+notes: |
+  A 4-filament project performs tool changes; the CLI-supplied
+  change_filament_gcode must be what is emitted at them (observed: 307 times on
+  v2.4.2). Only >=1 is pinned since the exact count depends on the project's
+  colour layout.

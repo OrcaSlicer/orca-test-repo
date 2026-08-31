@@ -1,0 +1,33 @@
+id: time-lapse-gcode-emitted-per-layer
+title: time_lapse_gcode is emitted once per layer on a Bambu printer profile
+category: custom-gcode
+status: fixed
+model: synthetic/cube20.stl
+args:
+- --datadir
+- '{datadir}'
+- --outputdir
+- '{outputdir}'
+- --load-settings
+- '{datadir}/system/BBL/machine/Bambu Lab X1 Carbon 0.4 nozzle.json;{datadir}/system/BBL/process/0.20mm Standard @BBL X1C.json'
+- --load-filaments
+- '{datadir}/system/BBL/filament/Bambu PLA Basic @BBL X1C.json'
+- --time-lapse-gcode=; PROBE_TIME_LAPSE_GCODE
+- --slice
+- '0'
+- '{model}'
+checks:
+- no_crash: {}
+- exit_code:
+    equals: 0
+- gcode_config_value:
+    key: time_lapse_gcode
+    equals: ; PROBE_TIME_LAPSE_GCODE
+- gcode_body_count:
+    text: PROBE_TIME_LAPSE_GCODE
+    equals: 100
+notes: |
+  On the X1C profile the timelapse snippet is emitted at every layer even
+  without --enable-timelapse (the profile's own timelapse handling); pinned as
+  observed on the v2.4.2 build. If a build starts gating it behind the flag this
+  case will say so.

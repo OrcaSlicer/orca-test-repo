@@ -1,0 +1,26 @@
+id: circular-bed-multi-plate-slicing
+title: "Multi-plate CLI slicing must work on a non-rectangular (circular) bed"
+category: geometry-bounds
+status: needs_fixture
+fixture_todo: >
+  Needs a 2-plate .3mf targeting a circular-bed printer profile.
+  Circular-bed profiles ship with OrcaSlicer (e.g. delta-printer vendor
+  profiles under resources/profiles), so --load-settings should work without
+  vendoring a new profile; the .3mf itself needs 2 plates with at least one
+  object on plate 2 (author via CLI export plus hand-editing the plate
+  assignment inside the zip). Repro shape: `--slice 1` and `--slice 2` must
+  both succeed; the broken behavior sliced plate 1 fine (grid origin masks
+  the bug) but failed plate 2 with a "nothing to be sliced"-style error,
+  while a rectangular-bed control worked on both.
+args: []
+checks: []
+notes: >
+  Regression class: bed width/depth computed by subtracting two specific
+  printable-area polygon vertices is only correct for a 4-point rectangular
+  bed; for a many-vertex circular bed the result is garbage that corrupts
+  downstream plate-layout math (plate grid stride), breaking every plate
+  after the first. Confirmed fixed on the current build under test for this
+  core multi-plate-slicing path; this case exists to pin that fix once a
+  fixture lands. The same wrong-shortcut pattern reportedly still exists in
+  sibling code paths (see bed-exclusion-zone-multiple-rectangles), so this
+  case is the template to copy for those.

@@ -1,0 +1,28 @@
+id: invalid-boolean-option-value
+title: "An invalid boolean CLI value must be rejected, not silently ignored"
+category: cli-parsing
+status: open
+model: Stanford_Bunny.3mf
+args:
+  - "--datadir"
+  - "{datadir}"
+  - "--outputdir"
+  - "{outputdir}"
+  - "--allow-rotations=false"
+  - "--info"
+  - "{model}"
+checks:
+  - no_crash: {}
+  - exit_code: {equals: 254}
+notes: >
+  Regression class: boolean CLI options accept only "0"/"1"; any other
+  literal (like "false") must produce a usage error, consistent with every
+  other option type. The failure mode being pinned here is a parser that
+  discards the deserialization result for booleans specifically, so an
+  invalid literal silently keeps the option's default instead of erroring.
+  Confirmed reproducing on the public v2.4.2 release: exits 0 and proceeds
+  as if --allow-rotations had never been passed, no error at all. The checks
+  above assert the desired behavior (a clean non-zero exit), so this flips
+  to fixed automatically once a release corrects it; tighten with a
+  stderr/stdout text check once the exact error message a fix produces is
+  known.
