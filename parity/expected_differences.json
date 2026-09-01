@@ -1,0 +1,182 @@
+{
+  "_doc": [
+    "Ledger of KNOWN GUI-vs-CLI differences. Entries classify comparison diffs",
+    "as 'known' so the scorecard can surface only NEW divergences. This file",
+    "never gates anything - it is curation, not suppression: every known diff",
+    "is still counted and listed in the scorecard.",
+    "match.section is the comparator JSON section (glob), match.key is a glob",
+    "against the diff key (an archive member name, a settings key, or a",
+    "comparator stat name). 'catalog' cites the parity-catalog section or bug",
+    "id documenting the difference."
+  ],
+  "entries": [
+    {
+      "id": "mesh-embedding",
+      "match": { "section": "members", "key": "3D/*" },
+      "catalog": "GUI sliced export omits geometry; CLI --export-3mf embeds it",
+      "reason": "packaging difference, not a functional one"
+    },
+    {
+      "id": "thumbnails-members",
+      "match": { "section": "members", "key": "Metadata/*.png" },
+      "catalog": "1.7.3 - CLI headless export carries no rendered images",
+      "reason": "GL-render availability, cosmetic"
+    },
+    {
+      "id": "dirty-list-wipe",
+      "match": { "section": "*", "key": "different_settings_to_system*" },
+      "catalog": "1.1.3 / BUG-34 - CLI wipes the dirty list",
+      "reason": "known real bug, tracked; classified known so new findings stand out"
+    },
+    {
+      "id": "filament-identity",
+      "match": { "section": "*", "key": "filament_colour*" },
+      "catalog": "pilot - CLI uses default colour, no tray identity",
+      "reason": "no device context in CLI"
+    },
+    {
+      "id": "filament-identity-2",
+      "match": { "section": "*", "key": "filament_ids*" },
+      "catalog": "pilot - CLI leaves filament_ids empty",
+      "reason": "no device context in CLI"
+    },
+    {
+      "id": "filament-identity-3",
+      "match": { "section": "*", "key": "extruder_colour*" },
+      "catalog": "pilot",
+      "reason": "follows filament_colour"
+    },
+    {
+      "id": "filament-multicolour",
+      "match": { "section": "*", "key": "filament_multi_colour*" },
+      "catalog": "pilot",
+      "reason": "GUI-only colour bookkeeping"
+    },
+    {
+      "id": "filament-colour-type",
+      "match": { "section": "*", "key": "filament_colour_type*" },
+      "catalog": "pilot",
+      "reason": "GUI-only colour bookkeeping"
+    },
+    {
+      "id": "ams-bookkeeping",
+      "match": { "section": "*", "key": "extruder_ams_count*" },
+      "catalog": "1.4.2 - CLI synthesizes AMS state",
+      "reason": "device-state key"
+    },
+    {
+      "id": "ams-drying",
+      "match": { "section": "*", "key": "filament_dev_ams_*" },
+      "catalog": "pilot - device-derived arrays sized differently",
+      "reason": "device-state keys"
+    },
+    {
+      "id": "nozzle-stats",
+      "match": { "section": "*", "key": "extruder_nozzle_stats*" },
+      "catalog": "pilot",
+      "reason": "GUI-only device bookkeeping"
+    },
+    {
+      "id": "flush-matrix",
+      "match": { "section": "*", "key": "flush_volumes_*" },
+      "catalog": "1.4.3 - CLI recomputes a synthetic-AMS-sized matrix",
+      "reason": "trigger conditions differ; same math"
+    },
+    {
+      "id": "filament-map",
+      "match": { "section": "*", "key": "filament_nozzle_map*" },
+      "catalog": "1.4.2",
+      "reason": "synthetic AMS mapping"
+    },
+    {
+      "id": "wipe-tower-pos",
+      "match": { "section": "*", "key": "wipe_tower_*" },
+      "catalog": "1.3.4 - defaults vs project-carried positions",
+      "reason": "unused on single-filament plates"
+    },
+    {
+      "id": "printhost-keys",
+      "match": { "section": "*", "key": "print*host*" },
+      "catalog": "pilot - GUI strips host keys on save, CLI emits empty ones",
+      "reason": "credential-adjacent keys, empty either way"
+    },
+    {
+      "id": "printhost-keys-2",
+      "match": { "section": "*", "key": "printhost_*" },
+      "catalog": "pilot",
+      "reason": "see printhost-keys"
+    },
+    {
+      "id": "compat-expression-groups",
+      "match": { "section": "*", "key": "compatible_*" },
+      "catalog": "pilot - presence differs between writers",
+      "reason": "preset-bookkeeping keys"
+    },
+    {
+      "id": "inherits-group",
+      "match": { "section": "*", "key": "inherits_group*" },
+      "catalog": "run-2 shakedown - presence differs between writers",
+      "reason": "preset-bookkeeping key"
+    },
+    {
+      "id": "plugin-config-overrides",
+      "match": { "section": "*", "key": "*_plugin_config_overrides*" },
+      "catalog": "run-2 shakedown - GUI-only plugin bookkeeping keys",
+      "reason": "presence differs between writers"
+    },
+    {
+      "id": "thumbnails-serialization",
+      "match": { "section": "*", "key": "thumbnails" },
+      "catalog": "pilot - CLI serializes '48x48/PNG, 300x300/PNG' with a space",
+      "reason": "cosmetic serialization difference"
+    },
+    {
+      "id": "label-id",
+      "match": { "section": "gcode_header", "key": "model label id" },
+      "catalog": "1.6.3 - runtime ids vs loaded ids",
+      "reason": "permanent for independently-imported models"
+    },
+    {
+      "id": "printer-model-id",
+      "match": { "section": "slice_info", "key": "printer_model_id" },
+      "catalog": "pilot minor - CLI leaves it empty",
+      "reason": "tracked minor divergence"
+    },
+    {
+      "id": "plate-json-first-layer-time",
+      "match": { "section": "plate_json", "key": "first_layer_time" },
+      "catalog": "BUG-33 - CLI writes 0.0",
+      "reason": "known real bug, tracked"
+    },
+    {
+      "id": "plate-json-runtime-ids",
+      "match": { "section": "plate_json", "key": "bbox_objects*" },
+      "catalog": "pilot - runtime object ids",
+      "reason": "nondeterministic ids"
+    },
+    {
+      "id": "plate-json-colors",
+      "match": { "section": "plate_json", "key": "filament_colors*" },
+      "catalog": "pilot",
+      "reason": "follows filament_colour"
+    },
+    {
+      "id": "model-settings-object-meta",
+      "match": { "section": "model_settings", "key": "*" },
+      "catalog": "pilot - GUI sliced export omits object tree; plate metadata carries GUI-only image refs",
+      "reason": "follows mesh-embedding / thumbnails-members"
+    },
+    {
+      "id": "slice-info-filaments",
+      "match": { "section": "slice_info", "key": "*filaments*" },
+      "catalog": "pilot - colour/tray fields inside filament records",
+      "reason": "follows filament identity"
+    },
+    {
+      "id": "geometry-presence",
+      "match": { "section": "model", "key": "*" },
+      "catalog": "pilot - GUI sliced export has empty resources/build",
+      "reason": "follows mesh-embedding"
+    }
+  ]
+}
