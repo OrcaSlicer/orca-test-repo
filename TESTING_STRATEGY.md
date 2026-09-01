@@ -7,6 +7,14 @@ imports OrcaSlicer source.
 
 ## Layers
 
+0. **GUI-vs-CLI parity harness** (`parity/`, run by `parity/run_parity.py`)
+   -- four-lane comparison (GUI headless under Xvfb, CLI, and both
+   round-trips) of full slicing runs on committed fixtures, scored as
+   metrics with a known-differences ledger; never gates. Needs an X-capable
+   environment and an OrcaSlicer checkout/AppImage for `resources/`
+   (`ORCA_SLICER_ROOT`); see `parity/README.md`.
+
+
 1. **Declarative regression cases** (`cases/**/*.yaml`, run by
    `test_cases.py`) -- fast, targeted checks that a known *class* of input
    keeps behaving correctly: crash resistance under crafted arguments

@@ -1,0 +1,196 @@
+{
+  "defaults": {
+    "vendor": "BBL",
+    "machine": "Bambu Lab P1S 0.4 nozzle",
+    "process": "0.20mm Standard @BBL X1C",
+    "filament": "Bambu PLA Basic @BBL X1C",
+    "lanes": [
+      "G",
+      "C",
+      "R",
+      "RB"
+    ],
+    "slice_plate": 1
+  },
+  "fixtures": [
+    {
+      "id": "cube-baseline",
+      "description": "20mm cube STL, stock system presets. Baseline pipeline/engine parity.",
+      "input": "fixtures/20mmbox-LF.stl",
+      "flags": {}
+    },
+    {
+      "id": "cube-project",
+      "description": "Same cube as a project 3mf (CLI-authored, arranged). Exercises the 3mf load path on both sides with embedded settings.",
+      "input": "fixtures/cube_project.3mf",
+      "flags": {}
+    },
+    {
+      "id": "cube-flag-injection",
+      "description": "CLI slices with --sparse-infill-density 25%; RB measures whether the injected value survives the GUI reopen (BUG-34 sentinel: it currently does not).",
+      "input": "fixtures/20mmbox-LF.stl",
+      "flags": {
+        "sparse-infill-density": "25%"
+      },
+      "lanes": [
+        "C",
+        "RB"
+      ],
+      "expect": [
+        {
+          "section": "*",
+          "key": "sparse_infill_density*"
+        },
+        {
+          "section": "gcode",
+          "key": "*"
+        },
+        {
+          "section": "gcode_header",
+          "key": "model printing time"
+        },
+        {
+          "section": "slice_info",
+          "key": "prediction"
+        },
+        {
+          "section": "slice_info",
+          "key": "weight"
+        }
+      ]
+    },
+    {
+      "id": "off-origin-stl",
+      "description": "Cube translated to (150,80) off the plate center. GUI centers imports (Plater.cpp center_around_origin); CLI keeps file coordinates unless --arrange. Placement-driven gcode divergence is the documented, expected outcome (catalog 1.2.3).",
+      "input": "fixtures/20mmbox_offorigin.stl",
+      "flags": {},
+      "lanes": [
+        "G",
+        "C",
+        "R"
+      ],
+      "expect": [
+        {
+          "section": "gcode",
+          "key": "*"
+        },
+        {
+          "section": "gcode_header",
+          "key": "*"
+        },
+        {
+          "section": "plate_json",
+          "key": "bbox*"
+        },
+        {
+          "section": "slice_info",
+          "key": "*"
+        },
+        {
+          "section": "model_settings",
+          "key": "*"
+        },
+        {
+          "section": "model",
+          "key": "*"
+        },
+        {
+          "section": "project_settings",
+          "key": "wipe_tower*"
+        }
+      ]
+    },
+    {
+      "id": "inch-unit-stl",
+      "description": "Cube authored in inch units. GUI detects and asks to convert (dialog answered by the sweeper); CLI needs --convert-unit (catalog 1.2.4). Placement will differ (GUI centers).",
+      "input": "fixtures/20mmbox_inch.stl",
+      "flags": {
+        "convert-unit": null
+      },
+      "lanes": [
+        "G",
+        "C"
+      ],
+      "expect": [
+        {
+          "section": "gcode",
+          "key": "*"
+        },
+        {
+          "section": "gcode_header",
+          "key": "*"
+        },
+        {
+          "section": "plate_json",
+          "key": "bbox*"
+        },
+        {
+          "section": "slice_info",
+          "key": "*"
+        },
+        {
+          "section": "model_settings",
+          "key": "*"
+        },
+        {
+          "section": "model",
+          "key": "*"
+        }
+      ]
+    },
+    {
+      "id": "sunken-project",
+      "description": "Project with the cube half below the bed (z=-10). Both pipelines should slice only the visible 10mm; any divergence here is a finding (cf. the --rotate/ensure_on_bed truncation class).",
+      "input": "fixtures/cube_sunken.3mf",
+      "flags": {}
+    },
+    {
+      "id": "partly-outside-project",
+      "description": "Two objects, one crossing the bed edge (x 238..258 on a 256 bed). Outcome-pair fixture, empirically corrected from catalog 1.5.1: the GUI DISABLES slicing entirely ('laid over the boundary' error, lane G times out by design), the CLI aborts CLI_OBJECTS_PARTLY_INSIDE (-52 = exit 204). Both refuse; the pair documents HOW each refuses.",
+      "input": "fixtures/cube_partly_outside.3mf",
+      "flags": {},
+      "lanes": [
+        "G",
+        "C"
+      ],
+      "gui_slice_timeout": 45
+    },
+    {
+      "id": "budget-abort",
+      "description": "Outcome-pair fixture: --mtcpp 5 makes the CLI abort on triangle count (12 > 5) while the GUI has no such budget (catalog 1.5.8). Bridge: --mtcpp 0.",
+      "input": "fixtures/20mmbox-LF.stl",
+      "flags": {
+        "mtcpp": "5"
+      },
+      "lanes": [
+        "G",
+        "C"
+      ]
+    },
+    {
+      "id": "step-input",
+      "description": "Outcome-pair fixture: STEP file. GUI imports it (deflection dialog answered by the sweeper); CLI has no STEP loader and errors (catalog 1.2.2). Not bridgeable.",
+      "input": "fixtures/utf8_part_names.step",
+      "flags": {},
+      "lanes": [
+        "G",
+        "C"
+      ]
+    },
+    {
+      "id": "user-preset-inherits",
+      "description": "BUG-32 sentinel: user process preset with inherits and no leaf compatible_printers. GUI accepts the pair; CLI compat gate exits CLI_PROCESS_NOT_COMPATIBLE (-17). When this fixture's lane C turns green, BUG-32 got fixed.",
+      "input": "fixtures/20mmbox-LF.stl",
+      "process": "0.20mm Deviant @parity",
+      "install_user_presets": [
+        "fixtures/presets/0.20mm Deviant @parity.json"
+      ],
+      "flags": {},
+      "lanes": [
+        "G",
+        "C",
+        "R"
+      ]
+    }
+  ]
+}
