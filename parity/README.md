@@ -39,7 +39,15 @@ python3 parity/run_parity.py                  # all fixtures, all lanes
 python3 parity/run_parity.py --fixture cube-baseline
 python3 parity/run_parity.py --lanes C,G      # skip round-trips
 python3 parity/run_parity.py --cli-presets flat   # same effective config both lanes
+python3 parity/run_parity.py --gui-workers 2  # run 2 fixtures at once, each on its own display
 ```
+
+`--gui-workers N` runs N fixtures concurrently, each on its own X display
+(`--display` base, base+1, ...) with its own seed, datadirs and GUI session
+— fully isolated, so results are identical to sequential. Each GUI costs
+~0.3 core idle (llvmpipe repaint) plus ~1 core in launch/slice bursts and
+~0.95 GB RAM; on a 4-vCPU / 16 GB CI runner 2 is comfortable, 3+ contends
+(and slice slowdowns risk tripping per-lane timeouts). CI uses 2.
 
 Outputs land in `--out` (a temp dir by default): `scorecard.json`
 (machine-readable), `report.md` (human summary), and per-fixture

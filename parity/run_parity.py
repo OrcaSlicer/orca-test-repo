@@ -34,10 +34,12 @@ Stdlib only.
 """
 
 import argparse
+import concurrent.futures
 import datetime
 import fnmatch
 import json
 import os
+import queue
 import shutil
 import subprocess
 import sys
@@ -275,7 +277,7 @@ def gui_job(binpath, input_path, datadir, session_dir, outdir, name, display,
     return res
 
 
-# ---------------------------------------------------------------- main
+# ---------------------------------------------------------------- fixture
 
 def display_busy(display):
     try:
@@ -289,6 +291,125 @@ def display_busy(display):
         return False
 
 
+def run_fixture(fx, lanes, display, out, args, repo, ledger):
+    """Run one fixture through its lanes on its own display, fully isolated
+    (own seed, datadirs, and GUI session), and return its scorecard entry.
+    Isolation is what makes running several of these concurrently on separate
+    displays correctness-neutral -- no shared state between them."""
+    def flog(m):
+        log("[%s :%d] %s" % (fx["id"], display, m))
+
+    fdir = os.path.join(out, fx["id"])
+    os.makedirs(fdir, exist_ok=True)
+    input_path = os.path.join(HERE, fx["input"])
+    entry = {"id": fx["id"], "lanes": {}, "comparisons": {}}
+    flog("lanes %s" % ",".join(lanes))
+
+    # per-fixture seed: presets differ between fixtures, and user presets
+    # declared by the fixture must live inside the datadir
+    seed = os.path.join(fdir, "seed")
+    subprocess.run(
+        [sys.executable, os.path.join(HERE, "make_seed.py"), "--out", seed,
+         "--mode", args.seed_mode, "--repo", repo, "--force",
+         "--vendor", fx["vendor"], "--machine", fx["machine"],
+         "--process", fx["process"], "--filament", fx["filament"]],
+        check=True,
+    )
+    install_user_presets(fx, repo, seed)
+
+    # CLI lanes get a private datadir each (the CLI mutates it); GUI lanes
+    # G and RB share one datadir + one reused GUI session per fixture
+    datadirs = {}
+    for lane in lanes:
+        if lane in ("G", "RB"):
+            continue
+        d = os.path.join(fdir, "datadir-" + lane.lower())
+        shutil.copytree(seed, d, dirs_exist_ok=True)
+        datadirs[lane] = d
+    gui_lanes = [lane for lane in ("G", "RB") if lane in lanes]
+    gui_session = os.path.join(fdir, "gui-session")
+    gui_datadir = os.path.join(fdir, "datadir-gui")
+    gui_started = [False]
+    if gui_lanes:
+        shutil.copytree(seed, gui_datadir, dirs_exist_ok=True)
+
+    def start_gui_once(preload=None):
+        if not gui_started[0]:
+            flog("gui session start")
+            gui_session_start(args.bin, gui_datadir, gui_session, display,
+                              preload=preload)
+            gui_started[0] = True
+
+    results = {}
+    try:
+        if "G" in lanes:
+            flog("lane G (GUI)")
+            start_gui_once(preload=input_path)
+            results["G"] = gui_job(args.bin, input_path, gui_datadir, gui_session,
+                                   fdir, "gui", display,
+                                   slice_timeout=fx.get("gui_slice_timeout"))
+            entry["lanes"]["G"] = {k: results["G"][k] for k in ("exit", "seconds")}
+        if "C" in lanes:
+            flog("lane C (CLI)")
+            results["C"] = lane_C(args.bin, fx, input_path, datadirs["C"], fdir,
+                                  flatten=args.cli_presets == "flat")
+            entry["lanes"]["C"] = {k: results["C"][k] for k in ("exit", "seconds")}
+        if "R" in lanes and results.get("G", {}).get("project"):
+            flog("lane R (CLI round-trip)")
+            results["R"] = lane_cli_reslice(args.bin, results["G"]["project"],
+                                            datadirs["R"], fdir, "roundtrip_cli")
+            entry["lanes"]["R"] = {k: results["R"][k] for k in ("exit", "seconds")}
+        if "RB" in lanes and results.get("C", {}).get("output"):
+            flog("lane RB (GUI round-trip)")
+            # preload so a cold session (RB-only fixture) launches straight onto
+            # the loaded project rather than the empty Home page, which breaks
+            # the Ctrl+O load path; a warm session (G already ran) ignores it
+            start_gui_once(preload=results["C"]["output"])
+            results["RB"] = gui_job(args.bin, results["C"]["output"], gui_datadir,
+                                    gui_session, fdir, "roundtrip_gui", display,
+                                    slice_timeout=fx.get("gui_slice_timeout"))
+            entry["lanes"]["RB"] = {k: results["RB"][k] for k in ("exit", "seconds")}
+    finally:
+        if gui_started[0]:
+            flog("gui session stop")
+            gui_session_stop(gui_session, display)
+
+    pairs = {"pipeline": ("C", "G"), "engine": ("R", "G"), "gui_load": ("RB", "C")}
+    for tag, (la, lb) in pairs.items():
+        a = results.get(la, {}).get("output")
+        b = results.get(lb, {}).get("output")
+        if not (a and b):
+            continue
+        flog("compare %s (%s vs %s)" % (tag, la, lb))
+        cjson = compare_pair(a, b, la, lb, fdir, tag)
+        # fixture-level expected diffs (documented behavior this fixture
+        # deliberately provokes) are treated as known for this fixture only
+        fx_ledger = {"entries": ledger["entries"] + [
+            {"id": "fixture-expected", "match": m} for m in fx.get("expect", [])]}
+        known, new = classify(atoms_from_comparison(cjson), fx_ledger)
+        gplates = cjson.get("gcode", {})
+        entry["comparisons"][tag] = {
+            "gcode_identical": all(d.get("identical") for d in gplates.values())
+            if gplates else None,
+            "similarity": min((d.get("similarity", 1.0) for d in gplates.values()),
+                              default=None),
+            "known_diffs": len(known), "new_diffs": len(new), "new": new,
+        }
+
+    # settings survival across the CLI -> GUI reopen
+    rb = results.get("RB", {})
+    if rb.get("project") and results.get("C", {}).get("output"):
+        before = project_settings(results["C"]["output"])
+        after = project_settings(rb["project"])
+        changed = sorted(k for k in before if k in after and before[k] != after[k])
+        entry["settings_survival"] = {"changed_on_reopen": len(changed),
+                                      "keys": changed[:50]}
+    return entry
+
+
+# ---------------------------------------------------------------- main
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--fixture", action="append", help="fixture id(s) to run (default: all)")
@@ -298,7 +419,13 @@ def main():
                          "(env ORCA_SLICER_ROOT)")
     ap.add_argument("--bin", default=os.environ.get("ORCA_BIN"))
     ap.add_argument("--out", default=None, help="results dir (default: temp dir)")
-    ap.add_argument("--display", type=int, default=int(os.environ.get("DISPLAY_NUM", "99")))
+    ap.add_argument("--display", type=int, default=int(os.environ.get("DISPLAY_NUM", "99")),
+                    help="base X display number; workers use display, display+1, ...")
+    ap.add_argument("--gui-workers", type=int,
+                    default=int(os.environ.get("GUI_WORKERS", "1")),
+                    help="how many fixtures to run concurrently, each on its own "
+                         "display (fully isolated). 1 = sequential. On a 4-vCPU CI "
+                         "runner 2 is comfortable (~1.5 cores peak); 3+ contends.")
     ap.add_argument("--seed-mode", choices=("resources", "home"), default="resources")
     ap.add_argument("--cli-presets", choices=("raw", "flat"), default="raw",
                     help="raw: hand lane C the leaf vendor profile as-is (what a "
@@ -335,11 +462,13 @@ def main():
     need_gui = any(
         set(lanes_override or fx["lanes"]) & {"G", "RB"} for fx in fixtures
     )
-    if need_gui and display_busy(args.display):
-        sys.exit(
-            "an OrcaSlicer window already exists on :%d - close it or pick "
-            "another --display" % args.display
-        )
+    workers = max(1, min(args.gui_workers, len(fixtures)))
+    displays = [args.display + i for i in range(workers)]
+    if need_gui:
+        busy = [d for d in displays if display_busy(d)]
+        if busy:
+            sys.exit("an OrcaSlicer window already exists on display(s) %s - close "
+                     "it or pick another --display" % ", ".join(":%d" % d for d in busy))
 
     scorecard = {
         "run": {
@@ -359,133 +488,34 @@ def main():
         "fixtures": [],
     }
 
-    for fx in fixtures:
+    # run fixtures across a bounded pool of displays. Each fixture is fully
+    # isolated (own seed/datadirs/GUI session on its own display), so the only
+    # thing shared is the results list, assembled after each returns.
+    order = {fx["id"]: i for i, fx in enumerate(fixtures)}
+    display_q = queue.Queue()
+    for d in displays:
+        display_q.put(d)
+    entries = []
+
+    def worker(fx):
         lanes = lanes_override or fx["lanes"]
-        fdir = os.path.join(out, fx["id"])
-        os.makedirs(fdir, exist_ok=True)
-        input_path = os.path.join(HERE, fx["input"])
-        entry = {"id": fx["id"], "lanes": {}, "comparisons": {}}
-        log("fixture %s: lanes %s" % (fx["id"], ",".join(lanes)))
-
-        # per-fixture seed: presets differ between fixtures, and user presets
-        # declared by the fixture must live inside the datadir
-        seed = os.path.join(fdir, "seed")
-        subprocess.run(
-            [sys.executable, os.path.join(HERE, "make_seed.py"), "--out", seed,
-             "--mode", args.seed_mode, "--repo", repo, "--force",
-             "--vendor", fx["vendor"], "--machine", fx["machine"],
-             "--process", fx["process"], "--filament", fx["filament"]],
-            check=True,
-        )
-        install_user_presets(fx, repo, seed)
-
-        # CLI lanes get a private datadir each (the CLI mutates it); GUI lanes
-        # G and RB share one datadir + one reused GUI session per fixture
-        datadirs = {}
-        for lane in lanes:
-            if lane in ("G", "RB"):
-                continue
-            d = os.path.join(fdir, "datadir-" + lane.lower())
-            shutil.copytree(seed, d, dirs_exist_ok=True)
-            datadirs[lane] = d
-        gui_lanes = [lane for lane in ("G", "RB") if lane in lanes]
-        gui_session = os.path.join(fdir, "gui-session")
-        gui_datadir = os.path.join(fdir, "datadir-gui")
-        gui_started = False
-        if gui_lanes:
-            shutil.copytree(seed, gui_datadir, dirs_exist_ok=True)
-
-        def start_gui_once(preload=None):
-            nonlocal gui_started
-            if not gui_started:
-                log("  gui session start")
-                gui_session_start(args.bin, gui_datadir, gui_session, args.display,
-                                  preload=preload)
-                gui_started = True
-
-        results = {}
+        disp = display_q.get()
         try:
-            if "G" in lanes:
-                log("  lane G (GUI)")
-                start_gui_once(preload=input_path)
-                results["G"] = gui_job(args.bin, input_path, gui_datadir, gui_session,
-                                       fdir, "gui", args.display,
-                                       slice_timeout=fx.get("gui_slice_timeout"))
-                entry["lanes"]["G"] = {k: results["G"][k] for k in ("exit", "seconds")}
-            if "C" in lanes:
-                log("  lane C (CLI)")
-                results["C"] = lane_C(args.bin, fx, input_path, datadirs["C"], fdir,
-                                      flatten=args.cli_presets == "flat")
-                entry["lanes"]["C"] = {k: results["C"][k] for k in ("exit", "seconds")}
-            if "R" in lanes and results.get("G", {}).get("project"):
-                log("  lane R (CLI round-trip)")
-                results["R"] = lane_cli_reslice(args.bin, results["G"]["project"],
-                                                datadirs["R"], fdir, "roundtrip_cli")
-                entry["lanes"]["R"] = {k: results["R"][k] for k in ("exit", "seconds")}
-            if "RB" in lanes and results.get("C", {}).get("output"):
-                log("  lane RB (GUI round-trip)")
-                # preload so a cold session (RB-only fixture) launches straight
-                # onto the loaded project rather than the empty Home page, which
-                # breaks the Ctrl+O load path; a warm session (G already ran)
-                # ignores preload and loads via Ctrl+O
-                start_gui_once(preload=results["C"]["output"])
-                results["RB"] = gui_job(args.bin, results["C"]["output"], gui_datadir,
-                                        gui_session, fdir, "roundtrip_gui", args.display,
-                                        slice_timeout=fx.get("gui_slice_timeout"))
-                entry["lanes"]["RB"] = {k: results["RB"][k] for k in ("exit", "seconds")}
+            return run_fixture(fx, lanes, disp, out, args, repo, ledger)
         finally:
-            if gui_started:
-                log("  gui session stop")
-                gui_session_stop(gui_session, args.display)
+            display_q.put(disp)
 
-        pairs = {
-            "pipeline": ("C", "G"),
-            "engine": ("R", "G"),
-            "gui_load": ("RB", "C"),
-        }
-        for tag, (la, lb) in pairs.items():
-            a = results.get(la, {}).get("output")
-            b = results.get(lb, {}).get("output")
-            if not (a and b):
-                continue
-            log("  compare %s (%s vs %s)" % (tag, la, lb))
-            cjson = compare_pair(a, b, la, lb, fdir, tag)
-            # fixture-level expected diffs (documented behavior this fixture
-            # deliberately provokes) are treated as known for this fixture only
-            fx_ledger = {
-                "entries": ledger["entries"] + [
-                    {"id": "fixture-expected", "match": m}
-                    for m in fx.get("expect", [])
-                ]
-            }
-            known, new = classify(atoms_from_comparison(cjson), fx_ledger)
-            gplates = cjson.get("gcode", {})
-            entry["comparisons"][tag] = {
-                "gcode_identical": all(d.get("identical") for d in gplates.values())
-                if gplates else None,
-                "similarity": min(
-                    (d.get("similarity", 1.0) for d in gplates.values()),
-                    default=None,
-                ),
-                "known_diffs": len(known),
-                "new_diffs": len(new),
-                "new": new,
-            }
-
-        # settings survival across the CLI -> GUI reopen
-        rb = results.get("RB", {})
-        if rb.get("project") and results.get("C", {}).get("output"):
-            before = project_settings(results["C"]["output"])
-            after = project_settings(rb["project"])
-            changed = sorted(
-                k for k in before if k in after and before[k] != after[k]
-            )
-            entry["settings_survival"] = {
-                "changed_on_reopen": len(changed),
-                "keys": changed[:50],
-            }
-
-        scorecard["fixtures"].append(entry)
+    log("running %d fixtures on %d display(s): %s"
+        % (len(fixtures), workers, ", ".join(":%d" % d for d in displays)))
+    if workers == 1:
+        for fx in fixtures:
+            entries.append(worker(fx))
+    else:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as ex:
+            futs = {ex.submit(worker, fx): fx for fx in fixtures}
+            for fut in concurrent.futures.as_completed(futs):
+                entries.append(fut.result())
+    scorecard["fixtures"] = sorted(entries, key=lambda e: order[e["id"]])
 
     new_total = sum(
         c.get("new_diffs", 0)
