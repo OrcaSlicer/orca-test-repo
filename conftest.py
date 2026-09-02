@@ -50,6 +50,22 @@ def pytest_addoption(parser):
         help="Path to an OrcaSlicer source checkout (or set $ORCA_SOURCE): the CLI option surface is "
              "enumerated live from it instead of the committed cases/_snapshots/cli_surface_full.json.",
     )
+    parser.addoption(
+        "--effect-sample",
+        action="store",
+        type=int,
+        default=15,
+        help="How many landed options test_cli_overrides.py's effect stage re-slices one at a "
+             "time to check the value actually changes the G-code (a daily-rotating but "
+             "reproducible-within-a-day sample; 0 disables the stage). Each costs one slice.",
+    )
+    parser.addoption(
+        "--effect-full",
+        action="store_true",
+        default=False,
+        help="Effect-stage every landed option instead of a sample (slow -- one slice per "
+             "option; intended for a scheduled/nightly run).",
+    )
 
 
 @pytest.fixture(scope="session")
