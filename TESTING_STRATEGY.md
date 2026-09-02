@@ -566,8 +566,11 @@ coupling is the binary under test, supplied at run time:
 # or: ORCA_BIN=/path/to/orca-slicer python -m pytest . -c pytest.ini
 ```
 
-`data_dir/` holds checked-in printer/filament profiles used to seed each
-test's private `--datadir` copy (tests never point at the repo's own
-`data_dir/`, since the CLI writes machine-id/cache files into it).
+The datadir seed (system printer/filament profiles + app config) is
+generated once per session from the OrcaSlicer source checkout by
+`parity/make_seed.py`, so profiles always match the binary under test;
+each test still gets a private `--datadir` copy, since the CLI writes
+machine-id/cache files into it. This requires `--orca-source`/`$ORCA_SOURCE`
+(auto-detected by `run_test.py`; CI provides `$GITHUB_WORKSPACE`).
 `test_projects/` holds the fixture models. Everything else the tests create
 lives in pytest temp directories.

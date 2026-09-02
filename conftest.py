@@ -15,7 +15,6 @@ from case_registry import CASES_BY_ID
 
 REPO_ROOT = Path(__file__).resolve().parent
 TEST_PROJECTS = REPO_ROOT / "test_projects"
-DATA_DIR_SEED = REPO_ROOT / "data_dir"
 
 
 def pytest_collection_modifyitems(config, items):
@@ -66,8 +65,6 @@ def pytest_addoption(parser):
         help="Run test_config_fuzz.py's full sweep instead of a sample (slow -- intended for a "
              "scheduled/nightly run, not routine local use).",
     )
-
-
 @pytest.fixture(scope="session")
 def orca_bin(request):
     import os
@@ -102,14 +99,38 @@ def orca_bin(request):
 
 @pytest.fixture(scope="session")
 def seeded_data_dir(tmp_path_factory):
-    """One copy-on-session of the checked-in data_dir/ (printer & filament profiles).
+    """One generated-per-session datadir seed (system profiles + app config).
+
+    Generated from the OrcaSlicer source checkout by parity/make_seed.py, so
+    the profiles always match the binary under test (this replaced an 11 MB
+    checked-in data_dir/ that could silently drift from upstream). Requires
+    the source checkout: --orca-source / $ORCA_SOURCE -- run_test.py
+    auto-detects it from the binary path, and OrcaSlicer's CI provides it via
+    $GITHUB_WORKSPACE.
 
     orca-slicer writes a machine-id file and a hint cache into --datadir at
-    runtime, so tests must never point --datadir at the repo's own data_dir/
-    directly -- that would mutate a tracked fixture on every run.
+    runtime, so tests copy this seed per test rather than pointing --datadir
+    at it directly.
     """
+    import sys
+
+    import surface
+
+    src = surface.source_dir()
+    if src is None:
+        pytest.exit(
+            "the datadir seed is generated from an OrcaSlicer source checkout: "
+            "pass --orca-source /path/to/OrcaSlicer (or set $ORCA_SOURCE). "
+            "run_test.py auto-detects it from the binary's path or $GITHUB_WORKSPACE.",
+            returncode=2,
+        )
     dest = tmp_path_factory.mktemp("data_dir_seed")
-    shutil.copytree(DATA_DIR_SEED, dest, dirs_exist_ok=True)
+    subprocess.run(
+        [sys.executable, str(REPO_ROOT / "parity" / "make_seed.py"),
+         "--out", str(dest), "--repo", str(src), "--force",
+         "--vendor", "BBL", "--vendor", "Custom"],
+        check=True, capture_output=True,
+    )
     return dest
 
 

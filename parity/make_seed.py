@@ -82,6 +82,12 @@ def build_from_resources(args):
     for v in vendors:
         copy_vendor(profiles, v, system_dir)
 
+    # printer model metadata (model jsons, bed accessories); harmless if absent
+    printers_src = os.path.join(args.repo, "resources", "printers")
+    if os.path.isdir(printers_src):
+        shutil.copytree(printers_src, os.path.join(args.out, "printers"),
+                        dirs_exist_ok=True)
+
     for sub in ("machine", "process", "filament"):
         os.makedirs(os.path.join(args.out, "user", "default", sub), exist_ok=True)
 

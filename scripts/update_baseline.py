@@ -11,7 +11,7 @@ not actually looked at.
 import argparse
 import datetime
 import json
-import shutil
+import os
 import subprocess
 import sys
 import tempfile
@@ -22,7 +22,6 @@ sys.path.insert(0, str(REPO_ROOT))
 import gcode_metrics as gm  # noqa: E402
 
 TEST_PROJECTS = REPO_ROOT / "test_projects"
-DATA_DIR_SEED = REPO_ROOT / "data_dir"
 BASELINE_FILE = REPO_ROOT / "baseline.json"
 
 
@@ -30,7 +29,15 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("orca_bin", type=Path)
     parser.add_argument("--only", help="only regenerate this one .3mf filename")
+    parser.add_argument("--orca-source", type=Path,
+                        default=os.environ.get("ORCA_SOURCE"),
+                        help="OrcaSlicer source checkout providing resources/profiles for the "
+                             "datadir seed (or $ORCA_SOURCE)")
     args = parser.parse_args()
+    if not args.orca_source or not (Path(args.orca_source) / "resources" / "profiles").is_dir():
+        print("ERROR: pass --orca-source /path/to/OrcaSlicer (or set $ORCA_SOURCE) -- the "
+              "datadir seed is generated from its resources/profiles", file=sys.stderr)
+        return 1
 
     orca_bin = args.orca_bin.expanduser()
     if not orca_bin.is_file():
@@ -48,7 +55,12 @@ def main() -> int:
         tmp_path = Path(tmp)
         datadir = tmp_path / "datadir"
         outputdir = tmp_path / "result"
-        shutil.copytree(DATA_DIR_SEED, datadir)
+        subprocess.run(
+            [sys.executable, str(REPO_ROOT / "parity" / "make_seed.py"),
+             "--out", str(datadir), "--repo", str(args.orca_source), "--force",
+             "--vendor", "BBL", "--vendor", "Custom"],
+            check=True, capture_output=True,
+        )
         outputdir.mkdir()
 
         inputs = sorted(TEST_PROJECTS.glob("*.3mf"))
