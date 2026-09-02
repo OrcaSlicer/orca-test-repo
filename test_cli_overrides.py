@@ -13,6 +13,18 @@ line and verify it shows up:
                     for that key; fast (no slicing).
   stage "gcode"  -- in the G-code CONFIG_BLOCK of an actual slice (STL +
                     the same presets), i.e. the config the slicer applied.
+  stage "effect" -- a landed value should normally also CHANGE the sliced
+                    G-code. One slice per option, compared against a
+                    baseline slice: `effective` (instruction stream changed,
+                    with the list of slicing metrics that moved as its
+                    signature) or `inert` (stream identical -- the mining
+                    output: an option that lands in the config but is
+                    ignored by the slicing pipeline, unless it is
+                    legitimately inert for this model, e.g. support options
+                    with supports off). Reported, not asserted. Because it
+                    cannot batch, routine runs take a daily-rotating sample
+                    (--effect-sample, default 15); --effect-full sweeps
+                    every landed option.
 
 Options are sent in batches; a batch that fails is bisected down to the
 single option(s) responsible. Every option ends up in exactly one bucket:
@@ -30,14 +42,21 @@ not fail the run. Options that are structural/identity (bed shape, preset
 names, ...) or whose value cannot be derived (dynamic enums, keys absent from
 the baseline) are skipped and listed as such.
 """
+import datetime
 import json
+import random
 import re
 import subprocess
+import sys
 from pathlib import Path
 
 import pytest
 
 import settings_compare as sc
+
+sys.path.insert(0, str(Path(__file__).resolve().parent / "parity"))
+import gcode_metrics  # noqa: E402
+from compare_gcode3mf import normalized_stream  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parent
 SURFACE = REPO_ROOT / "cases" / "_snapshots" / "cli_surface_full.json"
@@ -203,7 +222,7 @@ def _bisect(sweep, keys, probes, runner):
 
 
 @pytest.fixture(scope="session")
-def override_results(orca_bin, seeded_data_dir, tmp_path_factory):
+def override_results(orca_bin, seeded_data_dir, tmp_path_factory, request):
     work = tmp_path_factory.mktemp("overrides")
     sweep = Sweep(orca_bin, seeded_data_dir, work)
     import surface as surface_mod
@@ -281,7 +300,42 @@ def override_results(orca_bin, seeded_data_dir, tmp_path_factory):
     for i in range(0, len(landed), BATCH):
         gcode.update(_bisect(sweep, landed[i:i + BATCH], probes, gcode_runner))
 
-    report = {"probes": probes, "skipped": skipped, "merge": merge, "gcode": gcode, "invocations": sweep.n,
+    # stage "effect": one slice per option against a baseline slice. Sampled
+    # by default (mirrors the fuzz suite's daily-rotating reproducible sample)
+    # because it cannot batch.
+    effect_keys = sorted(k for k, b in gcode.items() if b == "landed")
+    if not request.config.getoption("--effect-full"):
+        sample = request.config.getoption("--effect-sample")
+        rng = random.Random(datetime.date.today().isoformat())
+        effect_keys = sorted(rng.sample(effect_keys, min(sample, len(effect_keys)))) if sample > 0 else []
+    effect = {}
+    if effect_keys:
+        (bdir := work / "effect_base").mkdir(exist_ok=True)
+        rc, cwd = sweep.run(sweep.base_args(bdir) + ["--slice", "0", model_stl], timeout=180)
+        gbase = bdir / "plate_1.gcode"
+        if rc != 0 or not gbase.exists():
+            raise AssertionError(f"effect-stage baseline slice failed rc={rc}; cwd={cwd}")
+        base_text = gbase.read_text(errors="replace")
+        base_stream = normalized_stream(base_text)
+        base_metrics = gcode_metrics.parse(base_text)
+        for k in effect_keys:
+            (edir := work / f"effect_{k}").mkdir(exist_ok=True)
+            rc, _ = sweep.run(sweep.base_args(edir) + [flag(k), "--slice", "0", model_stl], timeout=180)
+            g = edir / "plate_1.gcode"
+            if rc != 0 or not g.exists():
+                effect[k] = {"bucket": failure_kind(rc)}
+                continue
+            text = g.read_text(errors="replace")
+            if normalized_stream(text) == base_stream:
+                effect[k] = {"bucket": "inert"}
+            else:
+                m = gcode_metrics.parse(text)
+                moved = sorted(f for f in base_metrics
+                               if not str(f).startswith("_") and m.get(f) != base_metrics[f])
+                effect[k] = {"bucket": "effective", "moved": moved}
+
+    report = {"probes": probes, "skipped": skipped, "merge": merge, "gcode": gcode, "effect": effect,
+              "invocations": sweep.n,
               "binary": str(orca_bin), "surface_origin": surface_mod.load()["origin"]}
     text = json.dumps(report, indent=2, sort_keys=True)
     (work / "override_report.json").write_text(text)
@@ -318,6 +372,26 @@ def test_override_sweep_merge_stage(override_results):
     print("  skipped :", {k: v for k, v in r["skipped"].items()})
     assert not dropped, ("options given on the CLI that did NOT reach the merged config "
                          "(exit 0, value unchanged): " + ", ".join(f"{k}={r['probes'][k]}" for k in dropped))
+
+
+@pytest.mark.cli_overrides
+def test_override_sweep_effect_stage(override_results):
+    r = override_results
+    eff = r.get("effect", {})
+    if not eff:
+        pytest.skip("effect stage disabled (--effect-sample 0 and no --effect-full)")
+    effective = sorted(k for k, v in eff.items() if v["bucket"] == "effective")
+    inert = sorted(k for k, v in eff.items() if v["bucket"] == "inert")
+    broken = sorted(k for k, v in eff.items() if v["bucket"] in ("crash", "hang"))
+    print(f"\n[override sweep / effect] {len(eff)} options sliced individually: "
+          f"{len(effective)} effective, {len(inert)} inert, {len(broken)} crashed/hung")
+    # inert is the mining output, not a failure: an option can be legitimately
+    # inert for this model/config (support options with supports off, ...) --
+    # but a key that SHOULD matter appearing here is a silently-ignored-flag bug
+    print("  inert:", inert)
+    assert not broken, (
+        "options whose individual override slice crashed or hung: "
+        + ", ".join(f"{k}={r['probes'][k]}" for k in broken))
 
 
 @pytest.mark.cli_overrides

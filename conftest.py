@@ -65,6 +65,24 @@ def pytest_addoption(parser):
         help="Run test_config_fuzz.py's full sweep instead of a sample (slow -- intended for a "
              "scheduled/nightly run, not routine local use).",
     )
+    parser.addoption(
+        "--effect-sample",
+        action="store",
+        type=int,
+        default=15,
+        help="How many landed options test_cli_overrides.py's effect stage re-slices one at a "
+             "time to check the value actually changes the G-code (a daily-rotating but "
+             "reproducible-within-a-day sample; 0 disables the stage). Each costs one slice.",
+    )
+    parser.addoption(
+        "--effect-full",
+        action="store_true",
+        default=False,
+        help="Effect-stage every landed option instead of a sample (slow -- one slice per "
+             "option; intended for a scheduled/nightly run).",
+    )
+
+
 @pytest.fixture(scope="session")
 def orca_bin(request):
     import os
