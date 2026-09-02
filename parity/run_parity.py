@@ -235,16 +235,37 @@ def lane_cli_reslice(binpath, project_3mf, datadir, outdir, name):
     return res
 
 
-def lane_gui(binpath, input_path, datadir, outdir, name, display,
-             save_project=True, slice_timeout=None):
+def gui_session_start(binpath, datadir, session_dir, display, preload=None):
+    """Launch one GUI once; lanes G and RB then reuse it (gui_job), paying the
+    ~15-20s wx/GL/WebKit init only once per fixture. `preload` opens a file at
+    launch so the first job that wants it skips a redundant Ctrl+O."""
+    os.makedirs(session_dir, exist_ok=True)
+    env = {"ORCA_BIN": binpath, "ORCA_DATADIR": datadir, "RIG": session_dir,
+           "SESSION_DIR": session_dir, "DISPLAY_NUM": str(display)}
+    cmd = [os.path.join(HERE, "gui_lane.sh"), "start"]
+    if preload:
+        cmd.append(preload)
+    return run(cmd, session_dir, GUI_TIMEOUT,
+               os.path.join(session_dir, "start.log"), env)
+
+
+def gui_session_stop(session_dir, display):
+    env = {"RIG": session_dir, "SESSION_DIR": session_dir, "DISPLAY_NUM": str(display)}
+    return run([os.path.join(HERE, "gui_lane.sh"), "stop"], session_dir, 60,
+               os.path.join(session_dir, "stop.log"), env)
+
+
+def gui_job(binpath, input_path, datadir, session_dir, outdir, name, display,
+            save_project=True, slice_timeout=None):
     out3mf = os.path.join(outdir, name + ".gcode.3mf")
     project = os.path.join(outdir, name + "_project.3mf") if save_project else None
     rig = os.path.join(outdir, name + "-rig")
-    cmd = [os.path.join(HERE, "gui_lane.sh"), input_path, out3mf]
+    os.makedirs(rig, exist_ok=True)
+    cmd = [os.path.join(HERE, "gui_lane.sh"), "job", input_path, out3mf]
     if project:
         cmd.append(project)
     env = {"ORCA_BIN": binpath, "ORCA_DATADIR": datadir, "RIG": rig,
-           "DISPLAY_NUM": str(display)}
+           "SESSION_DIR": session_dir, "DISPLAY_NUM": str(display), "JOB_TAG": name}
     if slice_timeout:
         env["SLICE_TIMEOUT"] = str(slice_timeout)
     res = run(cmd, outdir, max(GUI_TIMEOUT, (slice_timeout or 0) + 300),
@@ -358,36 +379,64 @@ def main():
         )
         install_user_presets(fx, repo, seed)
 
+        # CLI lanes get a private datadir each (the CLI mutates it); GUI lanes
+        # G and RB share one datadir + one reused GUI session per fixture
         datadirs = {}
         for lane in lanes:
+            if lane in ("G", "RB"):
+                continue
             d = os.path.join(fdir, "datadir-" + lane.lower())
             shutil.copytree(seed, d, dirs_exist_ok=True)
             datadirs[lane] = d
+        gui_lanes = [lane for lane in ("G", "RB") if lane in lanes]
+        gui_session = os.path.join(fdir, "gui-session")
+        gui_datadir = os.path.join(fdir, "datadir-gui")
+        gui_started = False
+        if gui_lanes:
+            shutil.copytree(seed, gui_datadir, dirs_exist_ok=True)
+
+        def start_gui_once(preload=None):
+            nonlocal gui_started
+            if not gui_started:
+                log("  gui session start")
+                gui_session_start(args.bin, gui_datadir, gui_session, args.display,
+                                  preload=preload)
+                gui_started = True
 
         results = {}
-        if "G" in lanes:
-            log("  lane G (GUI)")
-            results["G"] = lane_gui(args.bin, input_path, datadirs["G"], fdir,
-                                    "gui", args.display,
-                                    slice_timeout=fx.get("gui_slice_timeout"))
-            entry["lanes"]["G"] = {k: results["G"][k] for k in ("exit", "seconds")}
-        if "C" in lanes:
-            log("  lane C (CLI)")
-            results["C"] = lane_C(args.bin, fx, input_path, datadirs["C"], fdir,
-                                  flatten=args.cli_presets == "flat")
-            entry["lanes"]["C"] = {k: results["C"][k] for k in ("exit", "seconds")}
-        if "R" in lanes and results.get("G", {}).get("project"):
-            log("  lane R (CLI round-trip)")
-            results["R"] = lane_cli_reslice(args.bin, results["G"]["project"],
-                                            datadirs["R"], fdir, "roundtrip_cli")
-            entry["lanes"]["R"] = {k: results["R"][k] for k in ("exit", "seconds")}
-        if "RB" in lanes and results.get("C", {}).get("output"):
-            log("  lane RB (GUI round-trip)")
-            results["RB"] = lane_gui(args.bin, results["C"]["output"],
-                                     datadirs["RB"], fdir, "roundtrip_gui",
-                                     args.display,
-                                     slice_timeout=fx.get("gui_slice_timeout"))
-            entry["lanes"]["RB"] = {k: results["RB"][k] for k in ("exit", "seconds")}
+        try:
+            if "G" in lanes:
+                log("  lane G (GUI)")
+                start_gui_once(preload=input_path)
+                results["G"] = gui_job(args.bin, input_path, gui_datadir, gui_session,
+                                       fdir, "gui", args.display,
+                                       slice_timeout=fx.get("gui_slice_timeout"))
+                entry["lanes"]["G"] = {k: results["G"][k] for k in ("exit", "seconds")}
+            if "C" in lanes:
+                log("  lane C (CLI)")
+                results["C"] = lane_C(args.bin, fx, input_path, datadirs["C"], fdir,
+                                      flatten=args.cli_presets == "flat")
+                entry["lanes"]["C"] = {k: results["C"][k] for k in ("exit", "seconds")}
+            if "R" in lanes and results.get("G", {}).get("project"):
+                log("  lane R (CLI round-trip)")
+                results["R"] = lane_cli_reslice(args.bin, results["G"]["project"],
+                                                datadirs["R"], fdir, "roundtrip_cli")
+                entry["lanes"]["R"] = {k: results["R"][k] for k in ("exit", "seconds")}
+            if "RB" in lanes and results.get("C", {}).get("output"):
+                log("  lane RB (GUI round-trip)")
+                # preload so a cold session (RB-only fixture) launches straight
+                # onto the loaded project rather than the empty Home page, which
+                # breaks the Ctrl+O load path; a warm session (G already ran)
+                # ignores preload and loads via Ctrl+O
+                start_gui_once(preload=results["C"]["output"])
+                results["RB"] = gui_job(args.bin, results["C"]["output"], gui_datadir,
+                                        gui_session, fdir, "roundtrip_gui", args.display,
+                                        slice_timeout=fx.get("gui_slice_timeout"))
+                entry["lanes"]["RB"] = {k: results["RB"][k] for k in ("exit", "seconds")}
+        finally:
+            if gui_started:
+                log("  gui session stop")
+                gui_session_stop(gui_session, args.display)
 
         pairs = {
             "pipeline": ("C", "G"),

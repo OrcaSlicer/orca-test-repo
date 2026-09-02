@@ -66,6 +66,13 @@ lanes — step-by-step screenshots for post-mortem.
 - `gui_lane.sh` — standalone headless GUI driver (Xvfb + xdotool):
   import → slice (Ctrl+R) → export (Ctrl+G) → optional save-as. Slicing
   completion is detected by retrying Ctrl+G until the export dialog opens.
+  Runs one-shot (`gui_lane.sh IN OUT [PROJECT]`) or as a reusable session
+  (`start` / `job` / `stop`): the runner launches one GUI per fixture and
+  drives both GUI lanes (G and RB) through it, paying the ~15-20s
+  wx/GL/WebKit init once instead of per lane. Synchronisation polls for
+  window/dialog presence and output-file settling rather than sleeping, so a
+  full four-lane fixture runs in ~50s (was ~120-150s). The reused-session
+  loads rely on the seed suppressing the unsaved-changes prompts.
 - `make_seed.py` — generates the datadir seed. Default `--mode resources`
   builds everything from `resources/profiles` (portable, CI-safe);
   `--mode home` clones an existing `~/.config/OrcaSlicer` instead.

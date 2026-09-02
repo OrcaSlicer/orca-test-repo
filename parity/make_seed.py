@@ -115,6 +115,14 @@ def build_from_resources(args):
             # a first-run confirmation dialog (GUI_App.cpp: tls_cert_store_accepted)
             "tls_cert_store_accepted": "yes",
             "tls_accepted_cert_store_location": system_cert_store(),
+            # suppress the two "unsaved changes / modified presets" prompts that
+            # opening a second project into a live session would otherwise raise,
+            # so a reused GUI session can load the next fixture unattended:
+            #   save_project_choise "no" -> discard the project without saving
+            #     (Plater.cpp:17554); save_preset_choise "2" -> Action::Discard
+            #     the modified presets (UnsavedChangesDialog.cpp:839)
+            "save_project_choise": "no",
+            "save_preset_choise": "2",
         },
     }
     with open(os.path.join(args.out, "OrcaSlicer.conf"), "w") as f:
