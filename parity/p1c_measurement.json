@@ -1,0 +1,126 @@
+{
+ "K:accel_to_decel_enable": {
+  "bucket": "inert",
+  "probe": "1"
+ },
+ "K:accel_to_decel_factor": {
+  "bucket": "effective",
+  "probe": "90%"
+ },
+ "K:activate_chamber_temp_control": {
+  "bucket": "inert",
+  "probe": "0"
+ },
+ "K:adaptive_pressure_advance": {
+  "bucket": "inert",
+  "probe": "1"
+ },
+ "K:adaptive_pressure_advance_overhangs": {
+  "bucket": "inert",
+  "probe": "1"
+ },
+ "K:bed_temperature_formula": {
+  "bucket": "inert",
+  "probe": "by_first_filament"
+ },
+ "K:chamber_minimal_temperature": {
+  "bucket": "inert",
+  "probe": "50"
+ },
+ "K:chamber_temperature": {
+  "bucket": "inert",
+  "probe": "50"
+ },
+ "K:enable_pressure_advance": {
+  "bucket": "inert",
+  "probe": "0"
+ },
+ "K:exclude_object": {
+  "bucket": "inert",
+  "probe": "1"
+ },
+ "K:extrusion_rate_smoothing_external_perimeter_only": {
+  "bucket": "inert",
+  "probe": "1"
+ },
+ "K:fan_speedup_overhangs": {
+  "bucket": "inert",
+  "probe": "0"
+ },
+ "K:filament_adaptive_volumetric_speed": {
+  "bucket": "inert",
+  "probe": "1"
+ },
+ "K:gcode_label_objects": {
+  "bucket": "inert",
+  "probe": "1"
+ },
+ "K:max_resonance_avoidance_speed": {
+  "bucket": "inert",
+  "probe": "200"
+ },
+ "K:max_volumetric_extrusion_rate_slope_segment_length": {
+  "bucket": "rejected",
+  "probe": "10"
+ },
+ "K:pressure_advance": {
+  "bucket": "inert",
+  "probe": "0.08"
+ },
+ "K:resonance_avoidance": {
+  "bucket": "inert",
+  "probe": "1"
+ },
+ "K:slow_down_for_layer_cooling": {
+  "bucket": "inert",
+  "probe": "0"
+ },
+ "M:accel_to_decel_enable": {
+  "bucket": "inert",
+  "probe": "1"
+ },
+ "M:gcode_add_line_number": {
+  "bucket": "inert",
+  "probe": "1"
+ },
+ "M:infill_jerk": {
+  "bucket": "inert",
+  "probe": "3"
+ },
+ "M:initial_layer_jerk": {
+  "bucket": "inert",
+  "probe": "3"
+ },
+ "M:initial_layer_travel_jerk": {
+  "bucket": "inert",
+  "probe": "300%"
+ },
+ "M:inner_wall_jerk": {
+  "bucket": "inert",
+  "probe": "3"
+ },
+ "M:machine_max_acceleration_travel": {
+  "bucket": "effective",
+  "probe": "500"
+ },
+ "M:outer_wall_jerk": {
+  "bucket": "inert",
+  "probe": "3"
+ },
+ "M:pressure_advance": {
+  "bucket": "inert",
+  "probe": "0.08"
+ },
+ "M:silent_mode": {
+  "bucket": "inert",
+  "probe": "1"
+ },
+ "M:top_surface_jerk": {
+  "bucket": "inert",
+  "probe": "3"
+ },
+ "M:travel_jerk": {
+  "bucket": "inert",
+  "probe": "3"
+ }
+}

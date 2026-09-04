@@ -1,0 +1,359 @@
+{
+ "results": {
+  "adaptive_pressure_advance_overhangs": {
+   "bucket": "inert",
+   "probe": "1",
+   "variant": "W0"
+  },
+  "additional_fan_full_speed_layer": {
+   "bucket": "inert",
+   "probe": "40",
+   "variant": "W0"
+  },
+  "bottom_surface_fill_order": {
+   "bucket": "effective",
+   "probe": "outward",
+   "variant": "W_topexp"
+  },
+  "brim_ears_max_angle": {
+   "bucket": "effective",
+   "probe": "30",
+   "variant": "W0"
+  },
+  "brim_ears_outer_only": {
+   "bucket": "inert",
+   "probe": "1",
+   "variant": "W0"
+  },
+  "center_of_surface_pattern": {
+   "bucket": "inert",
+   "probe": "each_model",
+   "variant": "W_topexp"
+  },
+  "chamber_minimal_temperature": {
+   "bucket": "inert",
+   "probe": "50",
+   "variant": "W0"
+  },
+  "close_additional_fan_first_x_layers": {
+   "bucket": "inert",
+   "probe": "30",
+   "variant": "W0"
+  },
+  "combine_brims": {
+   "bucket": "inert",
+   "probe": "1",
+   "variant": "W0"
+  },
+  "cooling_filter_enabled": {
+   "bucket": "inert",
+   "probe": "1",
+   "variant": "W0"
+  },
+  "detect_thin_wall": {
+   "bucket": "inert",
+   "probe": "1",
+   "variant": "W0"
+  },
+  "enforce_support_layers": {
+   "bucket": "effective",
+   "probe": "10",
+   "variant": "W_iface"
+  },
+  "filter_out_gap_fill": {
+   "bucket": "inert",
+   "probe": "5",
+   "variant": "W0"
+  },
+  "first_x_layer_fan_speed": {
+   "bucket": "inert",
+   "probe": "100",
+   "variant": "W0"
+  },
+  "full_fan_speed_layer": {
+   "bucket": "effective",
+   "probe": "30",
+   "variant": "W0"
+  },
+  "gap_fill_flow_ratio": {
+   "bucket": "inert",
+   "probe": "2",
+   "variant": "W0"
+  },
+  "gap_infill_speed": {
+   "bucket": "inert",
+   "probe": "10",
+   "variant": "W0"
+  },
+  "has_scarf_joint_seam": {
+   "bucket": "inert",
+   "probe": "0",
+   "variant": "W0"
+  },
+  "hole_to_polyhole_max_edges": {
+   "bucket": "effective",
+   "probe": "4",
+   "variant": "W_holes"
+  },
+  "hole_to_polyhole_threshold": {
+   "bucket": "effective",
+   "probe": "0.05",
+   "variant": "W_holes"
+  },
+  "hole_to_polyhole_twisted": {
+   "bucket": "effective",
+   "probe": "0",
+   "variant": "W_holes"
+  },
+  "infill_combination_max_layer_height": {
+   "bucket": "inert",
+   "probe": "400%",
+   "variant": "W0"
+  },
+  "infill_overhang_angle": {
+   "bucket": "rejected",
+   "probe": "5",
+   "variant": "W0"
+  },
+  "infill_shift_step": {
+   "bucket": "inert",
+   "probe": "1",
+   "variant": "W_zigzag"
+  },
+  "initial_layer_fan_speed": {
+   "bucket": "inert",
+   "probe": "100",
+   "variant": "W0"
+  },
+  "make_overhang_printable_angle": {
+   "bucket": "effective",
+   "probe": "20",
+   "variant": "W_ohp"
+  },
+  "make_overhang_printable_hole_size": {
+   "bucket": "inert",
+   "probe": "5",
+   "variant": "W_ohp"
+  },
+  "max_bridge_length": {
+   "bucket": "inert",
+   "probe": "1",
+   "variant": "W0"
+  },
+  "min_width_top_surface": {
+   "bucket": "inert",
+   "probe": "500%",
+   "variant": "W0"
+  },
+  "overhang_reverse_threshold": {
+   "bucket": "inert",
+   "probe": "0",
+   "variant": "W0"
+  },
+  "precise_z_height": {
+   "bucket": "inert",
+   "probe": "1",
+   "variant": "W0"
+  },
+  "relative_bridge_angle": {
+   "bucket": "inert",
+   "probe": "1",
+   "variant": "W0"
+  },
+  "retract_lift_below": {
+   "bucket": "effective",
+   "probe": "5",
+   "variant": "W0"
+  },
+  "scarf_angle_threshold": {
+   "bucket": "inert",
+   "probe": "10",
+   "variant": "W0"
+  },
+  "scarf_joint_speed": {
+   "bucket": "effective",
+   "probe": "20%",
+   "variant": "W0"
+  },
+  "scarf_overhang_threshold": {
+   "bucket": "inert",
+   "probe": "90",
+   "variant": "W0"
+  },
+  "slow_down_layers": {
+   "bucket": "effective",
+   "probe": "40",
+   "variant": "W0"
+  },
+  "slow_down_min_speed": {
+   "bucket": "effective",
+   "probe": "40",
+   "variant": "W0"
+  },
+  "small_perimeter_speed": {
+   "bucket": "inert",
+   "probe": "10",
+   "variant": "W0"
+  },
+  "sparse_infill_speed": {
+   "bucket": "effective",
+   "probe": "20",
+   "variant": "W0"
+  },
+  "support_base_pattern": {
+   "bucket": "inert",
+   "probe": "rectilinear",
+   "variant": "W_iface"
+  },
+  "support_bottom_interface_spacing": {
+   "bucket": "effective",
+   "probe": "1.5",
+   "variant": "W_iface"
+  },
+  "support_chamber_temp_control": {
+   "bucket": "inert",
+   "probe": "0",
+   "variant": "W_iface"
+  },
+  "support_cooling_filter": {
+   "bucket": "inert",
+   "probe": "1",
+   "variant": "W_iface"
+  },
+  "support_critical_regions_only": {
+   "bucket": "inert",
+   "probe": "1",
+   "variant": "W_iface"
+  },
+  "support_interface_not_for_body": {
+   "bucket": "inert",
+   "probe": "0",
+   "variant": "W_iface"
+  },
+  "support_interface_pattern": {
+   "bucket": "inert",
+   "probe": "rectilinear",
+   "variant": "W_iface"
+  },
+  "support_interface_spacing": {
+   "bucket": "inert",
+   "probe": "1.5",
+   "variant": "W_iface"
+  },
+  "support_interface_top_layers": {
+   "bucket": "effective",
+   "probe": "0",
+   "variant": "W_iface"
+  },
+  "support_object_first_layer_gap": {
+   "bucket": "effective",
+   "probe": "1",
+   "variant": "W_iface"
+  },
+  "support_remove_small_overhang": {
+   "bucket": "inert",
+   "probe": "0",
+   "variant": "W_iface"
+  },
+  "support_style": {
+   "bucket": "effective",
+   "probe": "snug",
+   "variant": "W_iface"
+  },
+  "support_threshold_overlap": {
+   "bucket": "inert",
+   "probe": "90%",
+   "variant": "W_iface"
+  },
+  "symmetric_infill_y_axis": {
+   "bucket": "effective",
+   "probe": "1",
+   "variant": "W_zigzag"
+  },
+  "top_surface_expansion_direction": {
+   "bucket": "effective",
+   "probe": "inward",
+   "variant": "W_topexp"
+  },
+  "top_surface_expansion_margin": {
+   "bucket": "effective",
+   "probe": "3",
+   "variant": "W_topexp"
+  },
+  "top_surface_fill_order": {
+   "bucket": "effective",
+   "probe": "outward",
+   "variant": "W_topexp"
+  },
+  "tree_support_auto_brim": {
+   "bucket": "effective",
+   "probe": "0",
+   "variant": "W_treeslim"
+  },
+  "tree_support_branch_angle": {
+   "bucket": "effective",
+   "probe": "10",
+   "variant": "W_treeslim"
+  },
+  "tree_support_branch_diameter": {
+   "bucket": "effective",
+   "probe": "8",
+   "variant": "W_treeslim"
+  },
+  "tree_support_branch_distance": {
+   "bucket": "effective",
+   "probe": "10",
+   "variant": "W_treeslim"
+  },
+  "tree_support_branch_distance_organic": {
+   "bucket": "inert",
+   "probe": "10",
+   "variant": "W_organic"
+  },
+  "tree_support_brim_width": {
+   "bucket": "effective",
+   "probe": "10",
+   "variant": "W_treeslim"
+  },
+  "wall_distribution_count": {
+   "bucket": "inert",
+   "probe": "5",
+   "variant": "W0"
+  },
+  "wall_transition_filter_deviation": {
+   "bucket": "effective",
+   "probe": "0.9",
+   "variant": "W0"
+  },
+  "wipe_speed": {
+   "bucket": "inert",
+   "probe": "20%",
+   "variant": "W0"
+  }
+ },
+ "skipped": {
+  "accel_to_decel_enable": "no baseline for W_klipper",
+  "accel_to_decel_factor": "no baseline for W_klipper",
+  "activate_chamber_temp_control": "no baseline for W_klipper",
+  "adaptive_pressure_advance": "no baseline for W_klipper",
+  "bed_temperature_formula": "no baseline for W_klipper",
+  "chamber_temperature": "no baseline for W_klipper",
+  "enable_pressure_advance": "no baseline for W_klipper",
+  "extrusion_rate_smoothing_external_perimeter_only": "no baseline for W_klipper",
+  "fan_speedup_overhangs": "no baseline for W_klipper",
+  "filament_adaptive_volumetric_speed": "no baseline for W_klipper",
+  "gcode_label_objects": "no baseline for W_klipper",
+  "infill_jerk": "no baseline for W_marlin",
+  "initial_layer_jerk": "no baseline for W_marlin",
+  "initial_layer_travel_jerk": "no baseline for W_marlin",
+  "inner_wall_jerk": "no baseline for W_marlin",
+  "max_resonance_avoidance_speed": "no baseline for W_klipper",
+  "max_volumetric_extrusion_rate_slope_segment_length": "no baseline for W_klipper",
+  "outer_wall_jerk": "no baseline for W_marlin",
+  "pressure_advance": "no baseline for W_klipper",
+  "resonance_avoidance": "no baseline for W_klipper",
+  "slow_down_for_layer_cooling": "no baseline for W_klipper",
+  "top_surface_jerk": "no baseline for W_marlin",
+  "travel_jerk": "no baseline for W_marlin"
+ }
+}

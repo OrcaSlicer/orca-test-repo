@@ -1,0 +1,1903 @@
+{
+ "bottom_surface_filament_id": {
+  "bucket": "inert",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "inert"
+   ],
+   [
+    "p2_toolchanger",
+    "inert"
+   ]
+  ]
+ },
+ "change_filament_gcode": {
+  "bucket": "effective",
+  "probe": "probe_change_filament_gcode",
+  "tried": [
+   [
+    "p2_bbl",
+    "effective"
+   ]
+  ],
+  "variant": "p2_bbl"
+ },
+ "cooling_tube_length": {
+  "bucket": "effective",
+  "probe": "7.5",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "effective"
+   ]
+  ],
+  "variant": "p2_klipper"
+ },
+ "cooling_tube_retraction": {
+  "bucket": "effective",
+  "probe": "137.2",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "effective"
+   ]
+  ],
+  "variant": "p2_klipper"
+ },
+ "enable_filament_ramming": {
+  "bucket": "effective",
+  "probe": "0",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "effective"
+   ]
+  ],
+  "variant": "p2_klipper"
+ },
+ "enable_long_retraction_when_cut": {
+  "bucket": "effective",
+  "probe": "3",
+  "tried": [
+   [
+    "p2_bbl",
+    "effective"
+   ]
+  ],
+  "variant": "p2_bbl"
+ },
+ "enable_mixed_color_sublayer": {
+  "bucket": "inert",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "inert"
+   ],
+   [
+    "p2_toolchanger",
+    "inert"
+   ]
+  ]
+ },
+ "enable_pre_heating": {
+  "bucket": "effective",
+  "probe": "1",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "inert"
+   ],
+   [
+    "p2_toolchanger",
+    "effective"
+   ]
+  ],
+  "variant": "p2_toolchanger"
+ },
+ "enable_tower_interface_cooldown_during_tower": {
+  "bucket": "inert",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "inert"
+   ],
+   [
+    "p2_toolchanger",
+    "inert"
+   ]
+  ]
+ },
+ "enable_tower_interface_features": {
+  "bucket": "effective",
+  "probe": "1",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "effective"
+   ]
+  ],
+  "variant": "p2_klipper"
+ },
+ "extra_loading_move": {
+  "bucket": "effective",
+  "probe": "-3",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "effective"
+   ]
+  ],
+  "variant": "p2_klipper"
+ },
+ "filament_change_length": {
+  "bucket": "inert",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "inert"
+   ],
+   [
+    "p2_toolchanger",
+    "inert"
+   ]
+  ]
+ },
+ "filament_change_length_nc": {
+  "bucket": "inert",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "inert"
+   ],
+   [
+    "p2_toolchanger",
+    "inert"
+   ]
+  ]
+ },
+ "filament_cooling_before_tower": {
+  "bucket": "inert",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "inert"
+   ],
+   [
+    "p2_toolchanger",
+    "inert"
+   ]
+  ]
+ },
+ "filament_cooling_final_speed": {
+  "bucket": "effective",
+  "probe": "5.1,5.1,5.1,5.1",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "effective"
+   ]
+  ],
+  "variant": "p2_klipper"
+ },
+ "filament_cooling_initial_speed": {
+  "bucket": "effective",
+  "probe": "3.3,3.3,3.3,3.3",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "effective"
+   ]
+  ],
+  "variant": "p2_klipper"
+ },
+ "filament_cooling_moves": {
+  "bucket": "effective",
+  "probe": "6,6,6,6",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "effective"
+   ]
+  ],
+  "variant": "p2_klipper"
+ },
+ "filament_flush_temp_fast": {
+  "bucket": "inert",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "inert"
+   ],
+   [
+    "p2_toolchanger",
+    "inert"
+   ]
+  ]
+ },
+ "filament_is_support": {
+  "bucket": "effective",
+  "probe": "1,1,1,1",
+  "tried": [
+   [
+    "p2_bbl",
+    "effective"
+   ]
+  ],
+  "variant": "p2_bbl"
+ },
+ "filament_loading_speed": {
+  "bucket": "effective",
+  "probe": "42,42,42,42",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "effective"
+   ]
+  ],
+  "variant": "p2_klipper"
+ },
+ "filament_loading_speed_start": {
+  "bucket": "effective",
+  "probe": "4.5,4.5,4.5,4.5",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "effective"
+   ]
+  ],
+  "variant": "p2_klipper"
+ },
+ "filament_long_retractions_when_cut": {
+  "bucket": "effective",
+  "probe": "0,0,0,0,0,0,0,0",
+  "tried": [
+   [
+    "p2_bbl",
+    "effective"
+   ]
+  ],
+  "variant": "p2_bbl"
+ },
+ "filament_minimal_purge_on_wipe_tower": {
+  "bucket": "effective",
+  "probe": "22.5,22.5,22.5,22.5",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "effective"
+   ]
+  ],
+  "variant": "p2_klipper"
+ },
+ "filament_mixed_gradient_curve": {
+  "bucket": "inert",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "inert"
+   ],
+   [
+    "p2_toolchanger",
+    "inert"
+   ]
+  ]
+ },
+ "filament_mixed_gradient_per_part": {
+  "bucket": "inert",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "inert"
+   ],
+   [
+    "p2_toolchanger",
+    "inert"
+   ]
+  ]
+ },
+ "filament_mixed_gradient_range": {
+  "bucket": "inert",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "inert"
+   ],
+   [
+    "p2_toolchanger",
+    "inert"
+   ]
+  ]
+ },
+ "filament_multitool_ramming": {
+  "bucket": "effective",
+  "probe": "0,0,0,0,0",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "inert"
+   ],
+   [
+    "p2_toolchanger",
+    "effective"
+   ]
+  ],
+  "variant": "p2_toolchanger"
+ },
+ "filament_multitool_ramming_flow": {
+  "bucket": "effective",
+  "probe": "15,15,15,15",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "effective"
+   ]
+  ],
+  "variant": "p2_klipper"
+ },
+ "filament_multitool_ramming_volume": {
+  "bucket": "effective",
+  "probe": "15,15,15,15,15",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "inert"
+   ],
+   [
+    "p2_toolchanger",
+    "effective"
+   ]
+  ],
+  "variant": "p2_toolchanger"
+ },
+ "filament_pre_cooling_temperature": {
+  "bucket": "inert",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "inert"
+   ],
+   [
+    "p2_toolchanger",
+    "inert"
+   ]
+  ]
+ },
+ "filament_pre_cooling_temperature_nc": {
+  "bucket": "effective",
+  "probe": "1",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "inert"
+   ],
+   [
+    "p2_toolchanger",
+    "effective"
+   ]
+  ],
+  "variant": "p2_toolchanger"
+ },
+ "filament_preheat_temperature_delta": {
+  "bucket": "inert",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "inert"
+   ],
+   [
+    "p2_toolchanger",
+    "inert"
+   ]
+  ]
+ },
+ "filament_prime_volume": {
+  "bucket": "effective",
+  "probe": "67.5",
+  "tried": [
+   [
+    "p2_bbl",
+    "effective"
+   ]
+  ],
+  "variant": "p2_bbl"
+ },
+ "filament_prime_volume_nc": {
+  "bucket": "inert",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "inert"
+   ],
+   [
+    "p2_toolchanger",
+    "inert"
+   ]
+  ]
+ },
+ "filament_ramming_parameters": {
+  "bucket": "effective",
+  "probe": "probe_filament_ramming_parameters,probe_filament_ramming_parameters,probe_filament_ramming_parameters,probe_filament_ramming_parameters",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "effective"
+   ]
+  ],
+  "variant": "p2_klipper"
+ },
+ "filament_ramming_travel_time": {
+  "bucket": "effective",
+  "probe": "1,1,1,1,1",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "inert"
+   ],
+   [
+    "p2_toolchanger",
+    "effective"
+   ]
+  ],
+  "variant": "p2_toolchanger"
+ },
+ "filament_ramming_travel_time_nc": {
+  "bucket": "inert",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "inert"
+   ],
+   [
+    "p2_toolchanger",
+    "inert"
+   ]
+  ]
+ },
+ "filament_ramming_volumetric_speed": {
+  "bucket": "inert",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "inert"
+   ],
+   [
+    "p2_toolchanger",
+    "inert"
+   ]
+  ]
+ },
+ "filament_ramming_volumetric_speed_nc": {
+  "bucket": "inert",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "inert"
+   ],
+   [
+    "p2_toolchanger",
+    "inert"
+   ]
+  ]
+ },
+ "filament_retract_length_nc": {
+  "bucket": "inert",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "inert"
+   ],
+   [
+    "p2_toolchanger",
+    "inert"
+   ]
+  ]
+ },
+ "filament_retraction_distances_when_cut": {
+  "bucket": "effective",
+  "probe": "17,17,17,17,17,17,17,17",
+  "tried": [
+   [
+    "p2_bbl",
+    "effective"
+   ]
+  ],
+  "variant": "p2_bbl"
+ },
+ "filament_soluble": {
+  "bucket": "effective",
+  "probe": "1,1,1,1",
+  "tried": [
+   [
+    "p2_bbl",
+    "effective"
+   ]
+  ],
+  "variant": "p2_bbl"
+ },
+ "filament_stamping_distance": {
+  "bucket": "effective",
+  "probe": "1,1,1,1",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "effective"
+   ]
+  ],
+  "variant": "p2_klipper"
+ },
+ "filament_stamping_loading_speed": {
+  "bucket": "effective",
+  "probe": "43.5,43.5,43.5,43.5,43.5",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "inert"
+   ],
+   [
+    "p2_toolchanger",
+    "effective"
+   ]
+  ],
+  "variant": "p2_toolchanger"
+ },
+ "filament_toolchange_delay": {
+  "bucket": "effective",
+  "probe": "1,1,1,1",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "effective"
+   ]
+  ],
+  "variant": "p2_klipper"
+ },
+ "filament_tower_interface_pre_extrusion_dist": {
+  "bucket": "inert",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "inert"
+   ],
+   [
+    "p2_toolchanger",
+    "inert"
+   ]
+  ]
+ },
+ "filament_tower_interface_pre_extrusion_length": {
+  "bucket": "inert",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "inert"
+   ],
+   [
+    "p2_toolchanger",
+    "inert"
+   ]
+  ]
+ },
+ "filament_tower_interface_print_temp": {
+  "bucket": "inert",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "inert"
+   ],
+   [
+    "p2_toolchanger",
+    "inert"
+   ]
+  ]
+ },
+ "filament_tower_interface_purge_volume": {
+  "bucket": "inert",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "inert"
+   ],
+   [
+    "p2_toolchanger",
+    "inert"
+   ]
+  ]
+ },
+ "filament_tower_ironing_area": {
+  "bucket": "effective",
+  "probe": "6,6,6,6",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "effective"
+   ]
+  ],
+  "variant": "p2_klipper"
+ },
+ "filament_unloading_speed": {
+  "bucket": "effective",
+  "probe": "135,135,135,135",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "effective"
+   ]
+  ],
+  "variant": "p2_klipper"
+ },
+ "filament_unloading_speed_start": {
+  "bucket": "effective",
+  "probe": "150,150,150,150",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "effective"
+   ]
+  ],
+  "variant": "p2_klipper"
+ },
+ "first_layer_print_sequence": {
+  "bucket": "inert",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "inert"
+   ],
+   [
+    "p2_toolchanger",
+    "inert"
+   ]
+  ]
+ },
+ "flush_into_infill": {
+  "bucket": "effective",
+  "probe": "1",
+  "tried": [
+   [
+    "p2_bbl",
+    "effective"
+   ]
+  ],
+  "variant": "p2_bbl"
+ },
+ "flush_into_objects": {
+  "bucket": "effective",
+  "probe": "1",
+  "tried": [
+   [
+    "p2_bbl",
+    "effective"
+   ]
+  ],
+  "variant": "p2_bbl"
+ },
+ "flush_into_support": {
+  "bucket": "effective",
+  "probe": "0",
+  "tried": [
+   [
+    "p2_bbl",
+    "effective"
+   ]
+  ],
+  "variant": "p2_bbl"
+ },
+ "grab_length": {
+  "bucket": "effective",
+  "probe": "1",
+  "tried": [
+   [
+    "p2_bbl",
+    "effective"
+   ]
+  ],
+  "variant": "p2_bbl"
+ },
+ "has_filament_switcher": {
+  "bucket": "inert",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "inert"
+   ],
+   [
+    "p2_toolchanger",
+    "inert"
+   ]
+  ]
+ },
+ "high_current_on_filament_swap": {
+  "bucket": "inert",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "inert"
+   ],
+   [
+    "p2_toolchanger",
+    "inert"
+   ]
+  ]
+ },
+ "hotend_cooling_rate": {
+  "bucket": "inert",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "inert"
+   ],
+   [
+    "p2_toolchanger",
+    "inert"
+   ]
+  ]
+ },
+ "hotend_heating_rate": {
+  "bucket": "inert",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "inert"
+   ],
+   [
+    "p2_toolchanger",
+    "inert"
+   ]
+  ]
+ },
+ "idle_temperature": {
+  "bucket": "effective",
+  "probe": "1,1,1,1,1",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "inert"
+   ],
+   [
+    "p2_toolchanger",
+    "effective"
+   ]
+  ],
+  "variant": "p2_toolchanger"
+ },
+ "inner_wall_filament_id": {
+  "bucket": "inert",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "inert"
+   ],
+   [
+    "p2_toolchanger",
+    "inert"
+   ]
+  ]
+ },
+ "interface_shells": {
+  "bucket": "effective",
+  "probe": "1",
+  "tried": [
+   [
+    "p2_bbl",
+    "effective"
+   ]
+  ],
+  "variant": "p2_bbl"
+ },
+ "interlocking_beam": {
+  "bucket": "effective",
+  "probe": "1",
+  "tried": [
+   [
+    "p2_bbl",
+    "effective"
+   ]
+  ],
+  "variant": "p2_bbl"
+ },
+ "interlocking_beam_layer_count": {
+  "bucket": "inert",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "inert"
+   ],
+   [
+    "p2_toolchanger",
+    "inert"
+   ]
+  ]
+ },
+ "interlocking_beam_width": {
+  "bucket": "inert",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "inert"
+   ],
+   [
+    "p2_toolchanger",
+    "inert"
+   ]
+  ]
+ },
+ "interlocking_boundary_avoidance": {
+  "bucket": "inert",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "inert"
+   ],
+   [
+    "p2_toolchanger",
+    "inert"
+   ]
+  ]
+ },
+ "interlocking_depth": {
+  "bucket": "inert",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "inert"
+   ],
+   [
+    "p2_toolchanger",
+    "inert"
+   ]
+  ]
+ },
+ "interlocking_orientation": {
+  "bucket": "effective",
+  "probe": "33.75",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "effective"
+   ]
+  ],
+  "variant": "p2_klipper"
+ },
+ "internal_solid_filament_id": {
+  "bucket": "inert",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "inert"
+   ],
+   [
+    "p2_toolchanger",
+    "inert"
+   ]
+  ]
+ },
+ "long_retractions_when_cut": {
+  "bucket": "inert",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "inert"
+   ],
+   [
+    "p2_toolchanger",
+    "inert"
+   ]
+  ]
+ },
+ "long_retractions_when_ec": {
+  "bucket": "inert",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "inert"
+   ],
+   [
+    "p2_toolchanger",
+    "inert"
+   ]
+  ]
+ },
+ "manual_filament_change": {
+  "bucket": "effective",
+  "probe": "1",
+  "tried": [
+   [
+    "p2_bbl",
+    "effective"
+   ]
+  ],
+  "variant": "p2_bbl"
+ },
+ "max_travel_detour_distance": {
+  "bucket": "inert",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "inert"
+   ],
+   [
+    "p2_toolchanger",
+    "inert"
+   ]
+  ]
+ },
+ "min_skirt_length": {
+  "bucket": "effective",
+  "probe": "6",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "inert"
+   ],
+   [
+    "p2_toolchanger",
+    "effective"
+   ]
+  ],
+  "variant": "p2_toolchanger"
+ },
+ "mmu_segmented_region_interlocking_depth": {
+  "bucket": "effective",
+  "probe": "1",
+  "tried": [
+   [
+    "p2_bbl",
+    "effective"
+   ]
+  ],
+  "variant": "p2_bbl"
+ },
+ "mmu_segmented_region_max_width": {
+  "bucket": "effective",
+  "probe": "1",
+  "tried": [
+   [
+    "p2_bbl",
+    "effective"
+   ]
+  ],
+  "variant": "p2_bbl"
+ },
+ "ooze_prevention": {
+  "bucket": "effective",
+  "probe": "0",
+  "tried": [
+   [
+    "p2_bbl",
+    "rejected"
+   ],
+   [
+    "p2_klipper",
+    "rejected"
+   ],
+   [
+    "p2_toolchanger",
+    "effective"
+   ]
+  ],
+  "variant": "p2_toolchanger"
+ },
+ "other_layers_print_sequence": {
+  "bucket": "inert",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "inert"
+   ],
+   [
+    "p2_toolchanger",
+    "inert"
+   ]
+  ]
+ },
+ "outer_wall_filament_id": {
+  "bucket": "inert",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "inert"
+   ],
+   [
+    "p2_toolchanger",
+    "inert"
+   ]
+  ]
+ },
+ "parking_pos_retraction": {
+  "bucket": "effective",
+  "probe": "138",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "effective"
+   ]
+  ],
+  "variant": "p2_klipper"
+ },
+ "preheat_steps": {
+  "bucket": "effective",
+  "probe": "2",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "inert"
+   ],
+   [
+    "p2_toolchanger",
+    "effective"
+   ]
+  ],
+  "variant": "p2_toolchanger"
+ },
+ "preheat_time": {
+  "bucket": "effective",
+  "probe": "45",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "inert"
+   ],
+   [
+    "p2_toolchanger",
+    "effective"
+   ]
+  ],
+  "variant": "p2_toolchanger"
+ },
+ "prime_tower_brim_width": {
+  "bucket": "effective",
+  "probe": "4.5",
+  "tried": [
+   [
+    "p2_bbl",
+    "effective"
+   ]
+  ],
+  "variant": "p2_bbl"
+ },
+ "prime_tower_enable_framework": {
+  "bucket": "effective",
+  "probe": "1",
+  "tried": [
+   [
+    "p2_bbl",
+    "effective"
+   ]
+  ],
+  "variant": "p2_bbl"
+ },
+ "prime_tower_flat_ironing": {
+  "bucket": "effective",
+  "probe": "1",
+  "tried": [
+   [
+    "p2_bbl",
+    "effective"
+   ]
+  ],
+  "variant": "p2_bbl"
+ },
+ "prime_tower_infill_gap": {
+  "bucket": "effective",
+  "probe": "225%",
+  "tried": [
+   [
+    "p2_bbl",
+    "effective"
+   ]
+  ],
+  "variant": "p2_bbl"
+ },
+ "prime_tower_skip_points": {
+  "bucket": "effective",
+  "probe": "0",
+  "tried": [
+   [
+    "p2_bbl",
+    "effective"
+   ]
+  ],
+  "variant": "p2_bbl"
+ },
+ "prime_tower_width": {
+  "bucket": "effective",
+  "probe": "52.5",
+  "tried": [
+   [
+    "p2_bbl",
+    "effective"
+   ]
+  ],
+  "variant": "p2_bbl"
+ },
+ "prime_volume": {
+  "bucket": "effective",
+  "probe": "67.5",
+  "tried": [
+   [
+    "p2_bbl",
+    "effective"
+   ]
+  ],
+  "variant": "p2_bbl"
+ },
+ "prime_volume_mode": {
+  "bucket": "effective",
+  "probe": "Saving",
+  "tried": [
+   [
+    "p2_bbl",
+    "effective"
+   ]
+  ],
+  "variant": "p2_bbl"
+ },
+ "printing_by_object_gcode": {
+  "bucket": "inert",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "inert"
+   ],
+   [
+    "p2_toolchanger",
+    "inert"
+   ]
+  ]
+ },
+ "purge_in_prime_tower": {
+  "bucket": "effective",
+  "probe": "0",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "effective"
+   ]
+  ],
+  "variant": "p2_klipper"
+ },
+ "retract_length_toolchange": {
+  "bucket": "effective",
+  "probe": "3,3",
+  "tried": [
+   [
+    "p2_bbl",
+    "effective"
+   ]
+  ],
+  "variant": "p2_bbl"
+ },
+ "retract_restart_extra_toolchange": {
+  "bucket": "inert",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "inert"
+   ],
+   [
+    "p2_toolchanger",
+    "inert"
+   ]
+  ]
+ },
+ "retraction_distances_when_cut": {
+  "bucket": "inert",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "inert"
+   ],
+   [
+    "p2_toolchanger",
+    "inert"
+   ]
+  ]
+ },
+ "retraction_distances_when_ec": {
+  "bucket": "inert",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "inert"
+   ],
+   [
+    "p2_toolchanger",
+    "inert"
+   ]
+  ]
+ },
+ "separated_infills": {
+  "bucket": "inert",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "inert"
+   ],
+   [
+    "p2_toolchanger",
+    "inert"
+   ]
+  ]
+ },
+ "single_extruder_multi_material": {
+  "bucket": "effective",
+  "probe": "0",
+  "tried": [
+   [
+    "p2_bbl",
+    "effective"
+   ]
+  ],
+  "variant": "p2_bbl"
+ },
+ "single_extruder_multi_material_priming": {
+  "bucket": "effective",
+  "probe": "1",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "effective"
+   ]
+  ],
+  "variant": "p2_klipper"
+ },
+ "single_loop_draft_shield": {
+  "bucket": "inert",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "inert"
+   ],
+   [
+    "p2_toolchanger",
+    "inert"
+   ]
+  ]
+ },
+ "skirt_type": {
+  "bucket": "effective",
+  "probe": "perobject",
+  "tried": [
+   [
+    "p2_bbl",
+    "effective"
+   ]
+  ],
+  "variant": "p2_bbl"
+ },
+ "sparse_infill_filament_id": {
+  "bucket": "inert",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "inert"
+   ],
+   [
+    "p2_toolchanger",
+    "inert"
+   ]
+  ]
+ },
+ "standby_temperature_delta": {
+  "bucket": "effective",
+  "probe": "-60",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "inert"
+   ],
+   [
+    "p2_toolchanger",
+    "effective"
+   ]
+  ],
+  "variant": "p2_toolchanger"
+ },
+ "support_fast_purge_mode": {
+  "bucket": "inert",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "inert"
+   ],
+   [
+    "p2_toolchanger",
+    "inert"
+   ]
+  ]
+ },
+ "support_object_skip_flush": {
+  "bucket": "effective",
+  "probe": "1",
+  "tried": [
+   [
+    "p2_bbl",
+    "effective"
+   ]
+  ],
+  "variant": "p2_bbl"
+ },
+ "tool_change_on_wipe_tower": {
+  "bucket": "inert",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "inert"
+   ],
+   [
+    "p2_toolchanger",
+    "inert"
+   ]
+  ]
+ },
+ "toolchange_ordering": {
+  "bucket": "effective",
+  "probe": "cyclic",
+  "tried": [
+   [
+    "p2_bbl",
+    "effective"
+   ]
+  ],
+  "variant": "p2_bbl"
+ },
+ "top_surface_filament_id": {
+  "bucket": "inert",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "inert"
+   ],
+   [
+    "p2_toolchanger",
+    "inert"
+   ]
+  ]
+ },
+ "wait_for_temp_on_wipe_tower": {
+  "bucket": "effective",
+  "probe": "0",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "inert"
+   ],
+   [
+    "p2_toolchanger",
+    "effective"
+   ]
+  ],
+  "variant": "p2_toolchanger"
+ },
+ "wipe_tower_bridging": {
+  "bucket": "effective",
+  "probe": "15",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "effective"
+   ]
+  ],
+  "variant": "p2_klipper"
+ },
+ "wipe_tower_cone_angle": {
+  "bucket": "inert",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "inert"
+   ],
+   [
+    "p2_toolchanger",
+    "inert"
+   ]
+  ]
+ },
+ "wipe_tower_extra_flow": {
+  "bucket": "effective",
+  "probe": "150%",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "effective"
+   ]
+  ],
+  "variant": "p2_klipper"
+ },
+ "wipe_tower_extra_rib_length": {
+  "bucket": "effective",
+  "probe": "1",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "inert"
+   ],
+   [
+    "p2_toolchanger",
+    "effective"
+   ]
+  ],
+  "variant": "p2_toolchanger"
+ },
+ "wipe_tower_extra_spacing": {
+  "bucket": "effective",
+  "probe": "150%",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "effective"
+   ]
+  ],
+  "variant": "p2_klipper"
+ },
+ "wipe_tower_filament": {
+  "bucket": "effective",
+  "probe": "1",
+  "tried": [
+   [
+    "p2_bbl",
+    "effective"
+   ]
+  ],
+  "variant": "p2_bbl"
+ },
+ "wipe_tower_fillet_wall": {
+  "bucket": "inert",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "inert"
+   ],
+   [
+    "p2_toolchanger",
+    "inert"
+   ]
+  ]
+ },
+ "wipe_tower_max_purge_speed": {
+  "bucket": "effective",
+  "probe": "135",
+  "tried": [
+   [
+    "p2_bbl",
+    "effective"
+   ]
+  ],
+  "variant": "p2_bbl"
+ },
+ "wipe_tower_no_sparse_layers": {
+  "bucket": "effective",
+  "probe": "1",
+  "tried": [
+   [
+    "p2_bbl",
+    "effective"
+   ]
+  ],
+  "variant": "p2_bbl"
+ },
+ "wipe_tower_rib_width": {
+  "bucket": "inert",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "inert"
+   ],
+   [
+    "p2_toolchanger",
+    "inert"
+   ]
+  ]
+ },
+ "wipe_tower_rotation_angle": {
+  "bucket": "effective",
+  "probe": "1",
+  "tried": [
+   [
+    "p2_bbl",
+    "effective"
+   ]
+  ],
+  "variant": "p2_bbl"
+ },
+ "wipe_tower_type": {
+  "bucket": "effective",
+  "probe": "type1",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "effective"
+   ]
+  ],
+  "variant": "p2_klipper"
+ },
+ "wipe_tower_wall_type": {
+  "bucket": "effective",
+  "probe": "cone",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "effective"
+   ]
+  ],
+  "variant": "p2_klipper"
+ },
+ "wiping_volumes_extruders": {
+  "bucket": "inert",
+  "tried": [
+   [
+    "p2_bbl",
+    "inert"
+   ],
+   [
+    "p2_klipper",
+    "inert"
+   ],
+   [
+    "p2_toolchanger",
+    "inert"
+   ]
+  ]
+ }
+}

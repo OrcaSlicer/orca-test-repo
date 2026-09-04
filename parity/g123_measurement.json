@@ -1,0 +1,182 @@
+{
+ "bottom_surface_filament_id": {
+  "bucket": "effective",
+  "probe": "2",
+  "variant": "mf_base"
+ },
+ "enable_tower_interface_cooldown_during_tower": {
+  "bucket": "inert",
+  "probe": "1",
+  "variant": "mf_tower_iface"
+ },
+ "filament_cooling_before_tower": {
+  "bucket": "inert",
+  "probe": "15",
+  "variant": "mf_ramming"
+ },
+ "filament_flush_temp_fast": {
+  "bucket": "inert",
+  "probe": "1",
+  "variant": "mf_ramming"
+ },
+ "filament_pre_cooling_temperature": {
+  "bucket": "inert",
+  "probe": "1,1,1,1,1,1,1,1",
+  "variant": "mf_preheat"
+ },
+ "filament_preheat_temperature_delta": {
+  "bucket": "inert",
+  "probe": "1",
+  "variant": "mf_preheat"
+ },
+ "filament_ramming_volumetric_speed": {
+  "bucket": "inert",
+  "probe": "0,0,0,0,0,0,0,0",
+  "variant": "mf_ramming"
+ },
+ "filament_tower_interface_pre_extrusion_dist": {
+  "bucket": "inert",
+  "probe": "15,15,15,15",
+  "variant": "mf_tower_iface"
+ },
+ "filament_tower_interface_pre_extrusion_length": {
+  "bucket": "inert",
+  "probe": "1,1,1,1",
+  "variant": "mf_tower_iface"
+ },
+ "filament_tower_interface_print_temp": {
+  "bucket": "inert",
+  "probe": "0,0,0,0",
+  "variant": "mf_tower_iface"
+ },
+ "filament_tower_interface_purge_volume": {
+  "bucket": "inert",
+  "probe": "30,30,30,30",
+  "variant": "mf_tower_iface"
+ },
+ "first_layer_print_sequence": {
+  "bucket": "inert",
+  "probe": "1",
+  "variant": "byobject"
+ },
+ "hotend_cooling_rate": {
+  "bucket": "inert",
+  "probe": "3",
+  "variant": "mf_preheat"
+ },
+ "hotend_heating_rate": {
+  "bucket": "inert",
+  "probe": "3",
+  "variant": "mf_preheat"
+ },
+ "inner_wall_filament_id": {
+  "bucket": "effective",
+  "probe": "2",
+  "variant": "mf_base"
+ },
+ "input_shaping_freq_x": {
+  "bucket": "inert",
+  "probe": "1",
+  "variant": "marlin_is"
+ },
+ "interlocking_beam_layer_count": {
+  "bucket": "effective",
+  "probe": "3",
+  "variant": "mf_interlock"
+ },
+ "interlocking_beam_width": {
+  "bucket": "effective",
+  "probe": "1.2",
+  "variant": "mf_interlock"
+ },
+ "interlocking_boundary_avoidance": {
+  "bucket": "effective",
+  "probe": "3",
+  "variant": "mf_interlock"
+ },
+ "interlocking_depth": {
+  "bucket": "effective",
+  "probe": "3",
+  "variant": "mf_interlock"
+ },
+ "internal_solid_filament_id": {
+  "bucket": "effective",
+  "probe": "2",
+  "variant": "mf_base"
+ },
+ "max_travel_detour_distance": {
+  "bucket": "inert",
+  "probe": "1",
+  "variant": "byobject"
+ },
+ "other_layers_print_sequence": {
+  "bucket": "inert",
+  "probe": "1",
+  "variant": "byobject"
+ },
+ "outer_wall_filament_id": {
+  "bucket": "effective",
+  "probe": "2",
+  "variant": "mf_base"
+ },
+ "printing_by_object_gcode": {
+  "bucket": "effective",
+  "probe": "probe_printing_by_object_gcode",
+  "variant": "byobject"
+ },
+ "retract_restart_extra_toolchange": {
+  "bucket": "inert",
+  "probe": "1,1",
+  "variant": "mf_base"
+ },
+ "separated_infills": {
+  "bucket": "inert",
+  "probe": "1",
+  "variant": "mf_base"
+ },
+ "single_loop_draft_shield": {
+  "bucket": "effective",
+  "probe": "1",
+  "variant": "draftshield"
+ },
+ "sparse_infill_filament_id": {
+  "bucket": "effective",
+  "probe": "2",
+  "variant": "mf_base"
+ },
+ "support_fast_purge_mode": {
+  "bucket": "inert",
+  "probe": "1",
+  "variant": "mf_base"
+ },
+ "tool_change_on_wipe_tower": {
+  "bucket": "inert",
+  "probe": "1",
+  "variant": "mf_base"
+ },
+ "top_surface_filament_id": {
+  "bucket": "effective",
+  "probe": "2",
+  "variant": "mf_base"
+ },
+ "wipe_tower_cone_angle": {
+  "bucket": "inert",
+  "probe": "45",
+  "variant": "mf_cone"
+ },
+ "wipe_tower_fillet_wall": {
+  "bucket": "effective",
+  "probe": "0",
+  "variant": "mf_rib"
+ },
+ "wipe_tower_rib_width": {
+  "bucket": "effective",
+  "probe": "12",
+  "variant": "mf_rib"
+ },
+ "wiping_volumes_extruders": {
+  "bucket": "inert",
+  "probe": "105,105,105,105,105,105,105,105,105,105",
+  "variant": "mf_base"
+ }
+}
