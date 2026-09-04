@@ -1,0 +1,17 @@
+{
+ "adaptive_bed_mesh_margin": {
+  "bucket": "effective",
+  "probe": "5",
+  "variant": "klip_is"
+ },
+ "center_of_surface_pattern": {
+  "bucket": "inert",
+  "probe": "each_model",
+  "variant": "classic"
+ },
+ "input_shaping_freq_x": {
+  "bucket": "inert",
+  "probe": "40",
+  "variant": "klip_is"
+ }
+}

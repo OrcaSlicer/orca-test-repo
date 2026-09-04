@@ -1,0 +1,794 @@
+{
+ "accel_to_decel_enable": {
+  "bucket": "effective",
+  "probe": "0",
+  "tried": [
+   [
+    "p4_klipper",
+    "effective"
+   ]
+  ],
+  "variant": "p4_klipper"
+ },
+ "activate_chamber_temp_control": {
+  "bucket": "effective",
+  "probe": "0",
+  "tried": [
+   [
+    "p4_klipper",
+    "effective"
+   ]
+  ],
+  "variant": "p4_klipper"
+ },
+ "adaptive_bed_mesh_margin": {
+  "bucket": "inert",
+  "tried": [
+   [
+    "p4_klipper",
+    "inert"
+   ],
+   [
+    "p4_marlin",
+    "inert"
+   ],
+   [
+    "p3_tc",
+    "inert"
+   ]
+  ],
+  "variant": null
+ },
+ "adaptive_pressure_advance": {
+  "bucket": "effective",
+  "probe": "1",
+  "tried": [
+   [
+    "p4_klipper",
+    "effective"
+   ]
+  ],
+  "variant": "p4_klipper"
+ },
+ "adaptive_pressure_advance_overhangs": {
+  "bucket": "effective",
+  "probe": "1",
+  "tried": [
+   [
+    "p4_klipper",
+    "effective"
+   ]
+  ],
+  "variant": "p4_klipper"
+ },
+ "bed_mesh_max": {
+  "bucket": "effective",
+  "probe": "100000,100000",
+  "tried": [
+   [
+    "p4_klipper",
+    "effective"
+   ]
+  ],
+  "variant": "p4_klipper"
+ },
+ "bed_mesh_min": {
+  "bucket": "effective",
+  "probe": "-99998,-99998",
+  "tried": [
+   [
+    "p4_klipper",
+    "effective"
+   ]
+  ],
+  "variant": "p4_klipper"
+ },
+ "bed_mesh_probe_distance": {
+  "bucket": "effective",
+  "probe": "51,51",
+  "tried": [
+   [
+    "p4_klipper",
+    "effective"
+   ]
+  ],
+  "variant": "p4_klipper"
+ },
+ "bed_temperature_formula": {
+  "bucket": "effective",
+  "probe": "by_first_filament",
+  "tried": [
+   [
+    "p4_klipper",
+    "effective"
+   ]
+  ],
+  "variant": "p4_klipper"
+ },
+ "chamber_minimal_temperature": {
+  "bucket": "effective",
+  "probe": "1",
+  "tried": [
+   [
+    "p4_klipper",
+    "inert"
+   ],
+   [
+    "p4_marlin",
+    "effective"
+   ]
+  ],
+  "variant": "p4_marlin"
+ },
+ "chamber_temperature": {
+  "bucket": "effective",
+  "probe": "60",
+  "tried": [
+   [
+    "p4_klipper",
+    "effective"
+   ]
+  ],
+  "variant": "p4_klipper"
+ },
+ "combine_brims": {
+  "bucket": "inert",
+  "tried": [
+   [
+    "p5_twoobj",
+    "inert"
+   ]
+  ],
+  "variant": null
+ },
+ "enable_pressure_advance": {
+  "bucket": "inert",
+  "tried": [
+   [
+    "p4_klipper",
+    "inert"
+   ],
+   [
+    "p4_marlin",
+    "inert"
+   ]
+  ],
+  "variant": null
+ },
+ "eng_plate_temp": {
+  "bucket": "effective",
+  "probe": "68",
+  "tried": [
+   [
+    "p7_eng",
+    "effective"
+   ]
+  ],
+  "variant": "p7_eng"
+ },
+ "eng_plate_temp_initial_layer": {
+  "bucket": "effective",
+  "probe": "68",
+  "tried": [
+   [
+    "p7_eng",
+    "effective"
+   ]
+  ],
+  "variant": "p7_eng"
+ },
+ "exclude_object": {
+  "bucket": "effective",
+  "probe": "0",
+  "tried": [
+   [
+    "p4_klipper",
+    "effective"
+   ]
+  ],
+  "variant": "p4_klipper"
+ },
+ "extrusion_rate_smoothing_external_perimeter_only": {
+  "bucket": "effective",
+  "probe": "1",
+  "tried": [
+   [
+    "p4_klipper",
+    "effective"
+   ]
+  ],
+  "variant": "p4_klipper"
+ },
+ "fan_direction": {
+  "bucket": "effective",
+  "probe": "left",
+  "tried": [
+   [
+    "p4_klipper",
+    "effective"
+   ]
+  ],
+  "variant": "p4_klipper"
+ },
+ "fan_speedup_overhangs": {
+  "bucket": "inert",
+  "tried": [
+   [
+    "p4_klipper",
+    "inert"
+   ],
+   [
+    "p4_marlin",
+    "inert"
+   ]
+  ],
+  "variant": null
+ },
+ "filament_adaptive_volumetric_speed": {
+  "bucket": "effective",
+  "probe": "1",
+  "tried": [
+   [
+    "p4_klipper",
+    "effective"
+   ]
+  ],
+  "variant": "p4_klipper"
+ },
+ "first_layer_print_sequence": {
+  "bucket": "inert",
+  "tried": [
+   [
+    "p5_twoobj",
+    "inert"
+   ]
+  ],
+  "variant": null
+ },
+ "gcode_add_line_number": {
+  "bucket": "effective",
+  "probe": "1",
+  "tried": [
+   [
+    "p4_klipper",
+    "effective"
+   ]
+  ],
+  "variant": "p4_klipper"
+ },
+ "gcode_label_objects": {
+  "bucket": "effective",
+  "probe": "0",
+  "tried": [
+   [
+    "p4_klipper",
+    "effective"
+   ]
+  ],
+  "variant": "p4_klipper"
+ },
+ "hot_plate_temp": {
+  "bucket": "effective",
+  "probe": "68",
+  "tried": [
+   [
+    "p7_hot",
+    "effective"
+   ]
+  ],
+  "variant": "p7_hot"
+ },
+ "hot_plate_temp_initial_layer": {
+  "bucket": "effective",
+  "probe": "68",
+  "tried": [
+   [
+    "p7_hot",
+    "effective"
+   ]
+  ],
+  "variant": "p7_hot"
+ },
+ "infill_jerk": {
+  "bucket": "effective",
+  "probe": "3",
+  "tried": [
+   [
+    "p4_marlin",
+    "effective"
+   ]
+  ],
+  "variant": "p4_marlin"
+ },
+ "initial_layer_jerk": {
+  "bucket": "effective",
+  "probe": "3",
+  "tried": [
+   [
+    "p4_marlin",
+    "effective"
+   ]
+  ],
+  "variant": "p4_marlin"
+ },
+ "initial_layer_travel_jerk": {
+  "bucket": "effective",
+  "probe": "300%",
+  "tried": [
+   [
+    "p4_marlin",
+    "inert"
+   ],
+   [
+    "p4_klipper",
+    "effective"
+   ]
+  ],
+  "variant": "p4_klipper"
+ },
+ "input_shaping_damp_x": {
+  "bucket": "effective",
+  "probe": "0.15",
+  "tried": [
+   [
+    "p4_klipper",
+    "effective"
+   ]
+  ],
+  "variant": "p4_klipper"
+ },
+ "input_shaping_damp_y": {
+  "bucket": "effective",
+  "probe": "0.15",
+  "tried": [
+   [
+    "p4_klipper",
+    "effective"
+   ]
+  ],
+  "variant": "p4_klipper"
+ },
+ "input_shaping_emit": {
+  "bucket": "effective",
+  "probe": "1",
+  "tried": [
+   [
+    "p4_klipper",
+    "effective"
+   ]
+  ],
+  "variant": "p4_klipper"
+ },
+ "input_shaping_freq_x": {
+  "bucket": "inert",
+  "tried": [
+   [
+    "p4_klipper",
+    "inert"
+   ],
+   [
+    "p4_marlin",
+    "inert"
+   ],
+   [
+    "p3_tc",
+    "inert"
+   ]
+  ],
+  "variant": null
+ },
+ "input_shaping_freq_y": {
+  "bucket": "effective",
+  "probe": "1",
+  "tried": [
+   [
+    "p4_klipper",
+    "effective"
+   ]
+  ],
+  "variant": "p4_klipper"
+ },
+ "input_shaping_type": {
+  "bucket": "effective",
+  "probe": "MZV",
+  "tried": [
+   [
+    "p4_klipper",
+    "effective"
+   ]
+  ],
+  "variant": "p4_klipper"
+ },
+ "machine_max_acceleration_travel": {
+  "bucket": "effective",
+  "probe": "30000,30000",
+  "tried": [
+   [
+    "p4_klipper",
+    "effective"
+   ]
+  ],
+  "variant": "p4_klipper"
+ },
+ "machine_pause_gcode": {
+  "bucket": "effective",
+  "probe": "probe_machine_pause_gcode",
+  "tried": [
+   [
+    "p4_klipper",
+    "effective"
+   ]
+  ],
+  "variant": "p4_klipper"
+ },
+ "max_resonance_avoidance_speed": {
+  "bucket": "inert",
+  "tried": [
+   [
+    "p4_klipper",
+    "inert"
+   ],
+   [
+    "p4_marlin",
+    "inert"
+   ]
+  ],
+  "variant": null
+ },
+ "max_travel_detour_distance": {
+  "bucket": "inert",
+  "tried": [
+   [
+    "p5_twoobj",
+    "inert"
+   ]
+  ],
+  "variant": null
+ },
+ "max_volumetric_extrusion_rate_slope_segment_length": {
+  "bucket": "effective",
+  "probe": "4.5",
+  "tried": [
+   [
+    "p4_klipper",
+    "effective"
+   ]
+  ],
+  "variant": "p4_klipper"
+ },
+ "min_resonance_avoidance_speed": {
+  "bucket": "effective",
+  "probe": "105",
+  "tried": [
+   [
+    "p4_klipper",
+    "effective"
+   ]
+  ],
+  "variant": "p4_klipper"
+ },
+ "min_skirt_length": {
+  "bucket": "inert",
+  "tried": [
+   [
+    "p5_twoobj",
+    "inert"
+   ]
+  ],
+  "variant": null
+ },
+ "other_layers_print_sequence": {
+  "bucket": "inert",
+  "tried": [
+   [
+    "p5_twoobj",
+    "inert"
+   ]
+  ],
+  "variant": null
+ },
+ "outer_wall_jerk": {
+  "bucket": "effective",
+  "probe": "3",
+  "tried": [
+   [
+    "p4_marlin",
+    "effective"
+   ]
+  ],
+  "variant": "p4_marlin"
+ },
+ "parallel_printheads_count": {
+  "bucket": "inert",
+  "tried": [
+   [
+    "p4_klipper",
+    "inert"
+   ],
+   [
+    "p4_marlin",
+    "inert"
+   ],
+   [
+    "p3_tc",
+    "inert"
+   ]
+  ],
+  "variant": null
+ },
+ "part_cooling_fan_min_pwm": {
+  "bucket": "effective",
+  "probe": "1",
+  "tried": [
+   [
+    "p4_klipper",
+    "effective"
+   ]
+  ],
+  "variant": "p4_klipper"
+ },
+ "printing_by_object_gcode": {
+  "bucket": "inert",
+  "tried": [
+   [
+    "p5_twoobj",
+    "inert"
+   ]
+  ],
+  "variant": null
+ },
+ "resonance_avoidance": {
+  "bucket": "effective",
+  "probe": "1",
+  "tried": [
+   [
+    "p4_klipper",
+    "effective"
+   ]
+  ],
+  "variant": "p4_klipper"
+ },
+ "silent_mode": {
+  "bucket": "effective",
+  "probe": "1",
+  "tried": [
+   [
+    "p4_klipper",
+    "inert"
+   ],
+   [
+    "p4_marlin",
+    "effective"
+   ]
+  ],
+  "variant": "p4_marlin"
+ },
+ "single_loop_draft_shield": {
+  "bucket": "inert",
+  "tried": [
+   [
+    "p5_twoobj",
+    "inert"
+   ]
+  ],
+  "variant": null
+ },
+ "skirt_type": {
+  "bucket": "inert",
+  "tried": [
+   [
+    "p5_twoobj",
+    "inert"
+   ]
+  ],
+  "variant": null
+ },
+ "slow_down_for_layer_cooling": {
+  "bucket": "effective",
+  "probe": "0",
+  "tried": [
+   [
+    "p4_klipper",
+    "effective"
+   ]
+  ],
+  "variant": "p4_klipper"
+ },
+ "small_support_perimeter_speed": {
+  "bucket": "effective",
+  "probe": "75%",
+  "tried": [
+   [
+    "p4_klipper",
+    "effective"
+   ]
+  ],
+  "variant": "p4_klipper"
+ },
+ "small_support_perimeter_threshold": {
+  "bucket": "effective",
+  "probe": "1",
+  "tried": [
+   [
+    "p4_klipper",
+    "effective"
+   ]
+  ],
+  "variant": "p4_klipper"
+ },
+ "spiral_finishing_flow_ratio": {
+  "bucket": "effective",
+  "probe": "1",
+  "tried": [
+   [
+    "p6_spiral",
+    "effective"
+   ]
+  ],
+  "variant": "p6_spiral"
+ },
+ "spiral_mode_max_xy_smoothing": {
+  "bucket": "inert",
+  "tried": [
+   [
+    "p6_spiral",
+    "inert"
+   ]
+  ],
+  "variant": null
+ },
+ "spiral_mode_smooth": {
+  "bucket": "effective",
+  "probe": "1",
+  "tried": [
+   [
+    "p6_spiral",
+    "effective"
+   ]
+  ],
+  "variant": "p6_spiral"
+ },
+ "spiral_starting_flow_ratio": {
+  "bucket": "effective",
+  "probe": "1",
+  "tried": [
+   [
+    "p6_spiral",
+    "effective"
+   ]
+  ],
+  "variant": "p6_spiral"
+ },
+ "supertack_plate_temp": {
+  "bucket": "effective",
+  "probe": "52",
+  "tried": [
+   [
+    "p7_supertack",
+    "effective"
+   ]
+  ],
+  "variant": "p7_supertack"
+ },
+ "supertack_plate_temp_initial_layer": {
+  "bucket": "effective",
+  "probe": "52",
+  "tried": [
+   [
+    "p7_supertack",
+    "effective"
+   ]
+  ],
+  "variant": "p7_supertack"
+ },
+ "support_parallel_printheads": {
+  "bucket": "effective",
+  "probe": "1",
+  "tried": [
+   [
+    "p4_klipper",
+    "effective"
+   ]
+  ],
+  "variant": "p4_klipper"
+ },
+ "template_custom_gcode": {
+  "bucket": "effective",
+  "probe": "probe_template_custom_gcode",
+  "tried": [
+   [
+    "p4_klipper",
+    "effective"
+   ]
+  ],
+  "variant": "p4_klipper"
+ },
+ "textured_cool_plate_temp": {
+  "bucket": "effective",
+  "probe": "60",
+  "tried": [
+   [
+    "p7_textured_cool",
+    "effective"
+   ]
+  ],
+  "variant": "p7_textured_cool"
+ },
+ "textured_cool_plate_temp_initial_layer": {
+  "bucket": "effective",
+  "probe": "60",
+  "tried": [
+   [
+    "p7_textured_cool",
+    "effective"
+   ]
+  ],
+  "variant": "p7_textured_cool"
+ },
+ "textured_plate_temp": {
+  "bucket": "effective",
+  "probe": "68",
+  "tried": [
+   [
+    "p7_textured",
+    "effective"
+   ]
+  ],
+  "variant": "p7_textured"
+ },
+ "textured_plate_temp_initial_layer": {
+  "bucket": "effective",
+  "probe": "68",
+  "tried": [
+   [
+    "p7_textured",
+    "effective"
+   ]
+  ],
+  "variant": "p7_textured"
+ },
+ "top_surface_jerk": {
+  "bucket": "effective",
+  "probe": "3",
+  "tried": [
+   [
+    "p4_marlin",
+    "effective"
+   ]
+  ],
+  "variant": "p4_marlin"
+ },
+ "travel_jerk": {
+  "bucket": "effective",
+  "probe": "3",
+  "tried": [
+   [
+    "p4_marlin",
+    "effective"
+   ]
+  ],
+  "variant": "p4_marlin"
+ },
+ "wrapping_detection_gcode": {
+  "bucket": "effective",
+  "probe": "probe_wrapping_detection_gcode",
+  "tried": [
+   [
+    "p4_klipper",
+    "effective"
+   ]
+  ],
+  "variant": "p4_klipper"
+ },
+ "wrapping_detection_layers": {
+  "bucket": "effective",
+  "probe": "30",
+  "tried": [
+   [
+    "p4_klipper",
+    "effective"
+   ]
+  ],
+  "variant": "p4_klipper"
+ }
+}

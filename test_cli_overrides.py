@@ -60,6 +60,7 @@ from compare_gcode3mf import normalized_stream  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parent
 SURFACE = REPO_ROOT / "cases" / "_snapshots" / "cli_surface_full.json"
+ROUTING = REPO_ROOT / "parity" / "effect_routing.json"
 BATCH = 40
 
 SYS_MACHINE = "system/BBL/machine/Bambu Lab X1 Carbon 0.4 nozzle.json"
@@ -96,6 +97,49 @@ SKIP_KEYS = {
     "small_area_infill_flow_compensation_model", "volumetric_speed_coefficients",
 }
 
+# Options that cannot move the normalized G-code stream no matter what is
+# sliced: the comparison drops comments and M73, and these only ever reach a
+# comment, a time/cost estimate, the GUI, or printer metadata. Reporting them
+# as "inert" every run buries the real findings, so the effect stage scores
+# them `unobservable` instead. This is about the *comparison*, not the option:
+# each one is still checked by the merge and G-code stages.
+UNOBSERVABLE = {
+    "bbl_calib_mark_logo", "bed_custom_model", "bed_custom_texture",
+    "best_object_pos", "default_filament_colour", "disable_m73",
+    "enable_filament_dynamic_map", "extruder_max_nozzle_count", "filament_adhesiveness_category",
+    "filament_cost", "filament_density", "filament_dev_ams_drying_ams_limitations",
+    "filament_dev_ams_drying_heat_distortion_temperature", "filament_dev_ams_drying_temperature", "filament_dev_ams_drying_time",
+    "filament_dev_chamber_drying_bed_temperature", "filament_dev_chamber_drying_time", "filament_dev_drying_cooling_temperature",
+    "filament_dev_drying_softening_temperature", "filament_extruder_compatibility", "filament_notes",
+    "filename_format", "gcode_comments", "machine_bed_mass_Y",
+    "machine_hotend_change_time", "machine_load_filament_time", "machine_max_force_Y",
+    "machine_max_printed_mass", "machine_min_extruding_rate", "machine_min_travel_rate",
+    "machine_prepare_compensation_time", "machine_tool_change_time", "machine_unload_filament_time",
+    "notes", "nozzle_flush_dataset", "nozzle_height",
+    "nozzle_hrc", "nozzle_temperature_range_low", "nozzle_type",
+    "nozzle_volume", "preferred_orientation", "print_order",
+    "printer_notes", "required_nozzle_HRC", "temperature_vitrification",
+    "time_cost",
+}
+
+# Reads its value (Print.cpp:4628 applies filament_shrink to the model) yet
+# produces byte-identical G-code -- kept out of UNOBSERVABLE so it stays in
+# the inert list as a finding rather than being quietly exempted.
+SUSPECTED_IGNORED = {"filament_shrink"}
+
+# 0 means "use the object's own filament", so the default 0 -> 1 probe asks
+# for the filament the region already prints in and can never change anything.
+INHERIT_ZERO_KEYS = {
+    "top_surface_filament_id", "bottom_surface_filament_id", "inner_wall_filament_id",
+    "outer_wall_filament_id", "internal_solid_filament_id", "sparse_infill_filament_id",
+}
+
+# coString options whose value has a grammar; a `probe_<key>` token is not a
+# valid value and is discarded, so the option reads as inert.
+STRUCTURED_STRINGS = {
+    "extra_solid_infills": "5",   # layer spec: N, N#K, or an explicit list
+}
+
 NUMERIC_VECTOR_TYPES = {"coFloats", "coInts", "coPercents", "coFloatsOrPercents"}
 
 
@@ -103,7 +147,7 @@ def _fmt(x: float) -> str:
     return str(int(x)) if float(x).is_integer() else f"{x:.4g}"
 
 
-def _numeric_probe(cur: str, lo, hi, integer: bool) -> str | None:
+def _numeric_probe(cur: str, lo, hi, integer: bool, down_first: bool = False) -> str | None:
     try:
         c = float(cur)
     except ValueError:
@@ -111,6 +155,11 @@ def _numeric_probe(cur: str, lo, hi, integer: bool) -> str | None:
     lo = -1e9 if lo is None else lo
     hi = 1e9 if hi is None else hi
     cands = [c * 1.5 + (1 if c == 0 else 0), c + 1, c / 2, c - 1, lo + (hi - lo) / 3]
+    if down_first:
+        # A speed raised past the volumetric-flow limit clamps to the same
+        # number as the baseline (inner_wall_speed 300 -> 450 is byte-identical
+        # on a 0.4 nozzle with PLA), so halving is the only probe that moves.
+        cands = [c / 2, c / 4, c - 1] + cands
     for v in cands:
         if integer:
             v = round(v)
@@ -123,17 +172,25 @@ def choose_value(meta: dict, current) -> tuple[str | None, str]:
     """Return (cli_value, expected) or (None, reason) if no valid probe exists."""
     t, lo, hi = meta["type"], meta["min"], meta["max"]
     enums = meta["enum_values"]
+    key = meta["key"]
     cur_list = current if isinstance(current, list) else None
     cur = current[0] if cur_list else current
+    down_first = "speed" in key
+    if key in STRUCTURED_STRINGS:
+        return STRUCTURED_STRINGS[key], STRUCTURED_STRINGS[key]
+    if key in INHERIT_ZERO_KEYS:
+        # anything but 0 and the region's own filament
+        v = "2" if str(cur) in ("0", "1") else "1"
+        return v, v
 
     def scalar(cur_s):
         if t in ("coFloat", "coInt"):
-            return _numeric_probe(cur_s, lo, hi, t == "coInt")
+            return _numeric_probe(cur_s, lo, hi, t == "coInt", down_first)
         if t in ("coFloats", "coInts"):
-            return _numeric_probe(cur_s, lo, hi, t == "coInts")
+            return _numeric_probe(cur_s, lo, hi, t == "coInts", down_first)
         if t in ("coPercent", "coPercents"):
             # percent options can legitimately exceed 100% (e.g. wipe_tower_extra_spacing 100-300%)
-            v = _numeric_probe(cur_s.rstrip("%"), lo, hi, False)
+            v = _numeric_probe(cur_s.rstrip("%"), lo, hi, False, down_first)
             return None if v is None else v + "%"
         if t in ("coPoint", "coPoints"):
             # a point is "x,y" (scalar) or "XxY" (vector element) in the merged JSON; shift both by 1
@@ -144,9 +201,9 @@ def choose_value(meta: dict, current) -> tuple[str | None, str]:
             return f"{_fmt(x + 1)},{_fmt(y + 1)}" if t == "coPoint" else f"{_fmt(x + 1)}x{_fmt(y + 1)}"
         if t in ("coFloatOrPercent", "coFloatsOrPercents"):
             if cur_s.endswith("%"):
-                v = _numeric_probe(cur_s.rstrip("%"), lo, hi, False)
+                v = _numeric_probe(cur_s.rstrip("%"), lo, hi, False, down_first)
                 return None if v is None else v + "%"
-            return _numeric_probe(cur_s, lo, hi, False)
+            return _numeric_probe(cur_s, lo, hi, False, down_first)
         if t in ("coBool", "coBools"):
             return "0" if cur_s in ("1", "true") else "1"
         if t in ("coEnum", "coEnums"):
@@ -229,6 +286,7 @@ def override_results(orca_bin, seeded_data_dir, tmp_path_factory, request):
 
     surface = [o for o in surface_mod.options()
                if not o["nocli"] and o["class"] == "PrintConfigDef" and o["key"] not in SKIP_KEYS]
+    meta_by_key = {o["key"]: o for o in surface}
     model_3mf = REPO_ROOT / "test_projects" / "Stanford_Bunny.3mf"
     model_stl = REPO_ROOT / "test_projects" / "synthetic" / "cube20.stl"
 
@@ -308,8 +366,42 @@ def override_results(orca_bin, seeded_data_dir, tmp_path_factory, request):
         sample = request.config.getoption("--effect-sample")
         rng = random.Random(datetime.date.today().isoformat())
         effect_keys = sorted(rng.sample(effect_keys, min(sample, len(effect_keys)))) if sample > 0 else []
-    effect = {}
+    shard = request.config.getoption("--effect-shard")
+    if shard:
+        # parity/effect_routing.json groups options by the cheapest fixture that
+        # can show their effect and balances those groups by measured slice cost,
+        # so each shard is a similar wall-clock slice of one --effect-full run.
+        i, n = (int(x) for x in shard.split("/"))
+        routing = json.loads((ROUTING).read_text())
+        mine = {k for keys in routing["shards"].get(str(i), {}).values() for k in keys}
+        unrouted = [k for k in effect_keys if k not in routing["routing"]]
+        # options with no recorded fixture are spread round-robin so a new option
+        # is never silently dropped from every shard
+        mine |= {k for j, k in enumerate(sorted(unrouted)) if j % n == i}
+        effect_keys = [k for k in effect_keys if k in mine]
+        print(f"\n[override sweep] shard {i}/{n}: {len(effect_keys)} of the landed options")
+    effect, effect_probes = {}, dict(probes)
     if effect_keys:
+        # The probes above were chosen against the 3mf's merged config, but this
+        # stage slices model_stl with the presets only. Wherever the two disagree
+        # the probe can land exactly on the value being sliced, and the option is
+        # scored inert without ever having been tested -- 28 options on a stock
+        # X1C profile, among them enable_support, brim_type and support_style.
+        # Re-probe against the baseline this stage actually slices.
+        (pdir := work / "effect_probe").mkdir(exist_ok=True)
+        rc, _ = sweep.run(sweep.base_args(pdir) +
+                          ["--export-settings", pdir / "base.json", model_stl], timeout=120)
+        if rc == 0 and (pdir / "base.json").exists():
+            ebase = sc.parse_settings_json((pdir / "base.json").read_text())
+            for k in effect_keys:
+                if k in ebase:
+                    v, _why = choose_value(meta_by_key[k], ebase[k])
+                    if v is not None:
+                        effect_probes[k] = v
+
+        def eflag(k):
+            return f"--{k.replace('_', '-')}={effect_probes[k]}"
+
         (bdir := work / "effect_base").mkdir(exist_ok=True)
         rc, cwd = sweep.run(sweep.base_args(bdir) + ["--slice", "0", model_stl], timeout=180)
         gbase = bdir / "plate_1.gcode"
@@ -319,22 +411,28 @@ def override_results(orca_bin, seeded_data_dir, tmp_path_factory, request):
         base_stream = normalized_stream(base_text)
         base_metrics = gcode_metrics.parse(base_text)
         for k in effect_keys:
+            if k in UNOBSERVABLE:
+                # comment, estimate, GUI or metadata only -- the normalized
+                # stream cannot show it, so slicing it proves nothing
+                effect[k] = {"bucket": "unobservable"}
+                continue
             (edir := work / f"effect_{k}").mkdir(exist_ok=True)
-            rc, _ = sweep.run(sweep.base_args(edir) + [flag(k), "--slice", "0", model_stl], timeout=180)
+            rc, _ = sweep.run(sweep.base_args(edir) + [eflag(k), "--slice", "0", model_stl], timeout=180)
             g = edir / "plate_1.gcode"
             if rc != 0 or not g.exists():
-                effect[k] = {"bucket": failure_kind(rc)}
+                effect[k] = {"bucket": failure_kind(rc), "probe": effect_probes[k]}
                 continue
             text = g.read_text(errors="replace")
             if normalized_stream(text) == base_stream:
-                effect[k] = {"bucket": "inert"}
+                effect[k] = {"bucket": "inert", "probe": effect_probes[k]}
             else:
                 m = gcode_metrics.parse(text)
                 moved = sorted(f for f in base_metrics
                                if not str(f).startswith("_") and m.get(f) != base_metrics[f])
-                effect[k] = {"bucket": "effective", "moved": moved}
+                effect[k] = {"bucket": "effective", "moved": moved, "probe": effect_probes[k]}
 
-    report = {"probes": probes, "skipped": skipped, "merge": merge, "gcode": gcode, "effect": effect,
+    report = {"probes": probes, "effect_probes": effect_probes, "skipped": skipped,
+              "merge": merge, "gcode": gcode, "effect": effect,
               "invocations": sweep.n,
               "binary": str(orca_bin), "surface_origin": surface_mod.load()["origin"]}
     text = json.dumps(report, indent=2, sort_keys=True)
@@ -382,9 +480,11 @@ def test_override_sweep_effect_stage(override_results):
         pytest.skip("effect stage disabled (--effect-sample 0 and no --effect-full)")
     effective = sorted(k for k, v in eff.items() if v["bucket"] == "effective")
     inert = sorted(k for k, v in eff.items() if v["bucket"] == "inert")
+    unobservable = sorted(k for k, v in eff.items() if v["bucket"] == "unobservable")
     broken = sorted(k for k, v in eff.items() if v["bucket"] in ("crash", "hang"))
-    print(f"\n[override sweep / effect] {len(eff)} options sliced individually: "
-          f"{len(effective)} effective, {len(inert)} inert, {len(broken)} crashed/hung")
+    print(f"\n[override sweep / effect] {len(eff) - len(unobservable)} options sliced individually: "
+          f"{len(effective)} effective, {len(inert)} inert, {len(broken)} crashed/hung; "
+          f"{len(unobservable)} not observable in a comment-free stream (not sliced)")
     # inert is the mining output, not a failure: an option can be legitimately
     # inert for this model/config (support options with supports off, ...) --
     # but a key that SHOULD matter appearing here is a silently-ignored-flag bug
