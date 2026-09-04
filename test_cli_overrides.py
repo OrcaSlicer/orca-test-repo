@@ -169,14 +169,22 @@ def _numeric_probe(cur: str, lo, hi, integer: bool, down_first: bool = False) ->
     return None
 
 
-def choose_value(meta: dict, current) -> tuple[str | None, str]:
-    """Return (cli_value, expected) or (None, reason) if no valid probe exists."""
+def choose_value(meta: dict, current, flip: bool = False) -> tuple[str | None, str]:
+    """Return (cli_value, expected) or (None, reason) if no valid probe exists.
+
+    `flip` reverses the numeric search direction. Direction matters and is not
+    knowable up front: a print speed raised past the volumetric clamp lands on
+    the same number as the baseline, while a *floor* like
+    min_resonance_avoidance_speed only does anything when raised. The effect
+    stage probes once, and retries inert numeric options the other way rather
+    than keeping a hand-maintained list of which is which.
+    """
     t, lo, hi = meta["type"], meta["min"], meta["max"]
     enums = meta["enum_values"]
     key = meta["key"]
     cur_list = current if isinstance(current, list) else None
     cur = current[0] if cur_list else current
-    down_first = "speed" in key
+    down_first = ("speed" in key) != flip
     if key in STRUCTURED_STRINGS:
         return STRUCTURED_STRINGS[key], STRUCTURED_STRINGS[key]
     if key in INHERIT_ZERO_KEYS:
@@ -426,6 +434,7 @@ def override_results(orca_bin, seeded_data_dir, tmp_path_factory, request):
             (pdir := work / f"probe_{vname}").mkdir(exist_ok=True)
             rc, _ = sweep.run(sweep.variant_args(pdir, spec) +
                               ["--export-settings", pdir / "base.json"] + models, timeout=300)
+            vbase = {}
             if rc == 0 and (pdir / "base.json").exists():
                 vbase = sc.parse_settings_json((pdir / "base.json").read_text())
                 for k in keys:
@@ -464,6 +473,22 @@ def override_results(orca_bin, seeded_data_dir, tmp_path_factory, request):
                                  "probe": effect_probes[k]}
                     continue
                 text = g.read_text(errors="replace")
+                if normalized_stream(text) == base_stream and k not in effect_variants.PROBE_OVERRIDES:
+                    # inert may just mean the probe moved the wrong way; try the
+                    # other direction once before believing it
+                    alt, _why = (choose_value(meta_by_key[k], vbase[k], flip=True)
+                                 if k in vbase else (None, ""))
+                    if alt is not None and alt != effect_probes[k]:
+                        (adir := work / f"effect_flip_{k}").mkdir(exist_ok=True)
+                        rc, _ = sweep.run(sweep.variant_args(adir, spec) +
+                                          [f"--{k.replace('_', '-')}={alt}", "--slice", "0"]
+                                          + models, timeout=600)
+                        ag = adir / "plate_1.gcode"
+                        if rc == 0 and ag.exists():
+                            atext = ag.read_text(errors="replace")
+                            if normalized_stream(atext) != base_stream:
+                                effect_probes[k] = alt
+                                text = atext
                 if normalized_stream(text) == base_stream:
                     effect[k] = {"bucket": "inert", "variant": vname, "probe": effect_probes[k]}
                 else:
@@ -538,13 +563,29 @@ def test_override_sweep_effect_stage(override_results):
     if no_base:
         print("  fixtures that would not slice:",
               sorted({eff[k]["variant"] for k in no_base}))
+    assert not broken, (
+        "options whose individual override slice crashed or hung: "
+        + ", ".join(f"{k}={eff[k].get('probe')}" for k in broken))
+    # Structural gates, deliberately not count-based: the effective counts move
+    # by tens between builds of the same slicer (Release vs RelWithDebInfo), so
+    # pinning them would be permanently flaky. These two catch the failure mode
+    # that actually bit us -- a fixture that is built but measures nothing.
+    assert not no_base, (
+        "fixtures that would not slice, so their options went unmeasured: "
+        + ", ".join(f"{v} ({sum(1 for k in no_base if eff[k]['variant'] == v)} options)"
+                    for v in sorted({eff[k]["variant"] for k in no_base})))
+    # 'cube' is the fallback for options no fixture is known to show, so it is
+    # legitimately all-inert in some shards; every other fixture exists because
+    # options were measured effective on it.
+    dead = sorted(v for v, n in per.items()
+                  if v != "cube" and n and not hit[v])
+    assert not dead, (
+        "fixtures that sliced but showed no option any effect - the overlay is "
+        "probably not being applied: " + ", ".join(f"{v} (0/{per[v]})" for v in dead))
     # inert is the mining output, not a failure: an option can be legitimately
     # inert for this model/config (support options with supports off, ...) --
     # but a key that SHOULD matter appearing here is a silently-ignored-flag bug
     print("  inert:", inert)
-    assert not broken, (
-        "options whose individual override slice crashed or hung: "
-        + ", ".join(f"{k}={r['probes'][k]}" for k in broken))
 
 
 @pytest.mark.cli_overrides
