@@ -42,6 +42,7 @@ not fail the run. Options that are structural/identity (bed shape, preset
 names, ...) or whose value cannot be derived (dynamic enums, keys absent from
 the baseline) are skipped and listed as such.
 """
+import collections
 import datetime
 import json
 import random
@@ -259,6 +260,12 @@ class Sweep:
                 "--load-settings", f"{self.datadir / SYS_MACHINE};{self.datadir / SYS_PROCESS}",
                 "--load-filaments", self.datadir / SYS_FILAMENT]
 
+    def variant_args(self, outdir, spec):
+        """base_args for a fixture: its own presets, overlay and models."""
+        return (["--datadir", self.datadir, "--outputdir", outdir, "--allow-newer-file",
+                 "--load-settings", spec["settings"], "--load-filaments", spec["filaments"]]
+                + [f"--{k.replace('_', '-')}={v}" for k, v in spec["overlay"].items()])
+
 
 def _bisect(sweep, keys, probes, runner):
     """runner(keys) -> (ok: bool, failure: 'crash'|'hang'|'rejected'|None, landed: dict key->bool).
@@ -380,58 +387,94 @@ def override_results(orca_bin, seeded_data_dir, tmp_path_factory, request):
         mine |= {k for j, k in enumerate(sorted(unrouted)) if j % n == i}
         effect_keys = [k for k in effect_keys if k in mine]
         print(f"\n[override sweep] shard {i}/{n}: {len(effect_keys)} of the landed options")
-    effect, effect_probes = {}, dict(probes)
+    effect, effect_probes, effect_variant = {}, dict(probes), {}
     if effect_keys:
-        # The probes above were chosen against the 3mf's merged config, but this
-        # stage slices model_stl with the presets only. Wherever the two disagree
-        # the probe can land exactly on the value being sliced, and the option is
-        # scored inert without ever having been tested -- 28 options on a stock
-        # X1C profile, among them enable_support, brim_type and support_style.
-        # Re-probe against the baseline this stage actually slices.
-        (pdir := work / "effect_probe").mkdir(exist_ok=True)
-        rc, _ = sweep.run(sweep.base_args(pdir) +
-                          ["--export-settings", pdir / "base.json", model_stl], timeout=120)
-        if rc == 0 and (pdir / "base.json").exists():
-            ebase = sc.parse_settings_json((pdir / "base.json").read_text())
-            for k in effect_keys:
-                if k in ebase:
-                    v, _why = choose_value(meta_by_key[k], ebase[k])
-                    if v is not None:
-                        effect_probes[k] = v
+        import effect_variants
 
-        def eflag(k):
-            return f"--{k.replace('_', '-')}={effect_probes[k]}"
+        # The Custom-vendor Klipper/Marlin/toolchanger presets have to be
+        # flattened before the CLI will load them: it reads one file, never
+        # walks `inherits`, and takes compatible_printers from the leaf alone.
+        # If that fails, those variants are dropped and their options fall back
+        # to the cube rather than failing the run.
+        flat = work / "flat_presets"
+        try:
+            subprocess.run([sys.executable, str(REPO_ROOT / "parity" / "make_custom_presets.py"),
+                            "--seed", str(sweep.datadir), "--out", str(flat)],
+                           check=True, capture_output=True, timeout=120)
+        except Exception as exc:
+            print(f"\n[override sweep / effect] no flattened Custom presets ({exc}); "
+                  "Klipper/Marlin/toolchanger options fall back to the cube")
+            flat = None
+        specs = effect_variants.specs(sweep.datadir, model_stl, flat)
 
-        (bdir := work / "effect_base").mkdir(exist_ok=True)
-        rc, cwd = sweep.run(sweep.base_args(bdir) + ["--slice", "0", model_stl], timeout=180)
-        gbase = bdir / "plate_1.gcode"
-        if rc != 0 or not gbase.exists():
-            raise AssertionError(f"effect-stage baseline slice failed rc={rc}; cwd={cwd}")
-        base_text = gbase.read_text(errors="replace")
-        base_stream = normalized_stream(base_text)
-        base_metrics = gcode_metrics.parse(base_text)
+        wanted = {}
         for k in effect_keys:
             if k in UNOBSERVABLE:
                 # comment, estimate, GUI or metadata only -- the normalized
                 # stream cannot show it, so slicing it proves nothing
                 effect[k] = {"bucket": "unobservable"}
                 continue
-            (edir := work / f"effect_{k}").mkdir(exist_ok=True)
-            rc, _ = sweep.run(sweep.base_args(edir) + [eflag(k), "--slice", "0", model_stl], timeout=180)
-            g = edir / "plate_1.gcode"
-            if rc != 0 or not g.exists():
-                effect[k] = {"bucket": failure_kind(rc), "probe": effect_probes[k]}
-                continue
-            text = g.read_text(errors="replace")
-            if normalized_stream(text) == base_stream:
-                effect[k] = {"bucket": "inert", "probe": effect_probes[k]}
-            else:
-                m = gcode_metrics.parse(text)
-                moved = sorted(f for f in base_metrics
-                               if not str(f).startswith("_") and m.get(f) != base_metrics[f])
-                effect[k] = {"bucket": "effective", "moved": moved, "probe": effect_probes[k]}
+            wanted.setdefault(effect_variants.route(k, specs), []).append(k)
 
-    report = {"probes": probes, "effect_probes": effect_probes, "skipped": skipped,
+        for vname, keys in sorted(wanted.items()):
+            spec = specs[vname]
+            models = [str(m) for m in spec["models"]]
+            # Probe against this fixture's own merged config. Probing against a
+            # different baseline than the one sliced lands the probe on the value
+            # being sliced and scores the option without testing it (28 options
+            # on a stock X1C profile).
+            (pdir := work / f"probe_{vname}").mkdir(exist_ok=True)
+            rc, _ = sweep.run(sweep.variant_args(pdir, spec) +
+                              ["--export-settings", pdir / "base.json"] + models, timeout=300)
+            if rc == 0 and (pdir / "base.json").exists():
+                vbase = sc.parse_settings_json((pdir / "base.json").read_text())
+                for k in keys:
+                    if k in effect_variants.PROBE_OVERRIDES:
+                        effect_probes[k] = effect_variants.PROBE_OVERRIDES[k]
+                    elif k in vbase:
+                        val, _why = choose_value(meta_by_key[k], vbase[k])
+                        if val is not None:
+                            effect_probes[k] = val
+
+            (bdir := work / f"base_{vname}").mkdir(exist_ok=True)
+            rc, cwd = sweep.run(sweep.variant_args(bdir, spec) + ["--slice", "0"] + models,
+                                timeout=600)
+            gbase = bdir / "plate_1.gcode"
+            if rc != 0 or not gbase.exists():
+                # a fixture that will not slice is a finding, not a reason to
+                # abort the other variants
+                for k in keys:
+                    effect[k] = {"bucket": "no_baseline", "variant": vname}
+                print(f"\n[override sweep / effect] fixture {vname!r} did not slice "
+                      f"(rc={rc}, cwd={cwd}); {len(keys)} options unmeasured")
+                continue
+            base_text = gbase.read_text(errors="replace")
+            base_stream = normalized_stream(base_text)
+            base_metrics = gcode_metrics.parse(base_text)
+
+            for k in keys:
+                effect_variant[k] = vname
+                (edir := work / f"effect_{k}").mkdir(exist_ok=True)
+                rc, _ = sweep.run(sweep.variant_args(edir, spec) +
+                                  [f"--{k.replace('_', '-')}={effect_probes[k]}", "--slice", "0"]
+                                  + models, timeout=600)
+                g = edir / "plate_1.gcode"
+                if rc != 0 or not g.exists():
+                    effect[k] = {"bucket": failure_kind(rc), "variant": vname,
+                                 "probe": effect_probes[k]}
+                    continue
+                text = g.read_text(errors="replace")
+                if normalized_stream(text) == base_stream:
+                    effect[k] = {"bucket": "inert", "variant": vname, "probe": effect_probes[k]}
+                else:
+                    m = gcode_metrics.parse(text)
+                    moved = sorted(f for f in base_metrics
+                                   if not str(f).startswith("_") and m.get(f) != base_metrics[f])
+                    effect[k] = {"bucket": "effective", "variant": vname,
+                                 "probe": effect_probes[k], "moved": moved}
+
+    report = {"probes": probes, "effect_probes": effect_probes,
+              "effect_variant": effect_variant, "skipped": skipped,
               "merge": merge, "gcode": gcode, "effect": effect,
               "invocations": sweep.n,
               "binary": str(orca_bin), "surface_origin": surface_mod.load()["origin"]}
@@ -482,9 +525,19 @@ def test_override_sweep_effect_stage(override_results):
     inert = sorted(k for k, v in eff.items() if v["bucket"] == "inert")
     unobservable = sorted(k for k, v in eff.items() if v["bucket"] == "unobservable")
     broken = sorted(k for k, v in eff.items() if v["bucket"] in ("crash", "hang"))
-    print(f"\n[override sweep / effect] {len(eff) - len(unobservable)} options sliced individually: "
-          f"{len(effective)} effective, {len(inert)} inert, {len(broken)} crashed/hung; "
-          f"{len(unobservable)} not observable in a comment-free stream (not sliced)")
+    no_base = sorted(k for k, v in eff.items() if v["bucket"] == "no_baseline")
+    print(f"\n[override sweep / effect] {len(eff) - len(unobservable) - len(no_base)} options "
+          f"sliced individually: {len(effective)} effective, {len(inert)} inert, "
+          f"{len(broken)} crashed/hung; {len(unobservable)} not observable in a comment-free "
+          f"stream (not sliced); {len(no_base)} whose fixture would not slice")
+    per = collections.Counter(v.get("variant", "cube") for v in eff.values()
+                              if v["bucket"] in ("effective", "inert"))
+    hit = collections.Counter(v.get("variant", "cube") for v in eff.values()
+                              if v["bucket"] == "effective")
+    print("  by fixture: " + ", ".join(f"{v} {hit[v]}/{n}" for v, n in sorted(per.items())))
+    if no_base:
+        print("  fixtures that would not slice:",
+              sorted({eff[k]["variant"] for k in no_base}))
     # inert is the mining output, not a failure: an option can be legitimately
     # inert for this model/config (support options with supports off, ...) --
     # but a key that SHOULD matter appearing here is a silently-ignored-flag bug
