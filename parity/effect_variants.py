@@ -69,6 +69,11 @@ PROBE_OVERRIDES = {
     "overhang_reverse_threshold": "0", "overhang_reverse_internal_only": "1",
     "infill_overhang_angle": "70", "center_of_surface_pattern": "each_model",
     "input_shaping_freq_x": "40", "input_shaping_type": "ZV",
+    # jerk emits against default_jerk=9; a step up to 13.5 is too small to move
+    # the stream on the Marlin profile, a drop to 3 always does
+    "initial_layer_jerk": "3", "inner_wall_jerk": "3", "outer_wall_jerk": "3",
+    "top_surface_jerk": "3", "travel_jerk": "3", "infill_jerk": "3",
+    "initial_layer_travel_jerk": "300%",
 }
 
 
