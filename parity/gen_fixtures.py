@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""(Re)generate the programmatic parity fixtures under tests/data/parity/.
+"""(Re)generate the programmatic parity fixtures under parity/fixtures/.
 
 The generated files are committed so harness runs (and CI) don't depend on
 this script; run it again only when a fixture needs to change. Fixtures that

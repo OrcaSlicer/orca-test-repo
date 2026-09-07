@@ -74,8 +74,9 @@ def pytest_addoption(parser):
         help="Run only shard I of N of the effect stage (0-based), so --effect-full fits a CI "
              "timeout. Shards come from parity/effect_routing.json, which groups options by the "
              "cheapest fixture that can show their effect and balances the groups by measured "
-             "slice cost; a shard that has no work is skipped. 8 shards keeps the longest under "
-             "55 min on a 4-vCPU runner where the un-sharded sweep is ~6 h.",
+             "slice cost; a shard that has no work is skipped. Measured on a 4-vCPU runner the "
+             "un-sharded sweep is ~24 min; 2 shards halve that for one extra repeat of the "
+             "merge and G-code stages.",
     )
 
 
