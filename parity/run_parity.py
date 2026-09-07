@@ -186,8 +186,9 @@ def classify(atoms, ledger):
     for section, key in atoms:
         hit = None
         for e in ledger["entries"]:
-            if fnmatch.fnmatch(section, e["match"]["section"]) and fnmatch.fnmatch(
-                key, e["match"]["key"]
+            globs = e["match"].get("keys") or [e["match"]["key"]]
+            if fnmatch.fnmatch(section, e["match"]["section"]) and any(
+                fnmatch.fnmatch(key, g) for g in globs
             ):
                 hit = e["id"]
                 break
