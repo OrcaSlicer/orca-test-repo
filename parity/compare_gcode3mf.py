@@ -27,7 +27,6 @@ Stdlib only.
 import argparse
 import difflib
 import fnmatch
-import io
 import json
 import math
 import re

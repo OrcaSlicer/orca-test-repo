@@ -32,19 +32,19 @@ imports OrcaSlicer source.
    own tolerance, see `gcode_metrics.py`). A whole-pipeline safety net that
    catches output drift no targeted case covers, including "same size,
    different print". See "Golden-slice layer" below.
-8. **Per-object settings** (`cases/per-object/`) -- settings embedded in a
+4. **Per-object settings** (`cases/per-object/`) -- settings embedded in a
    3mf at object level (`model_settings.config`) and per layer range
    (`layer_config_ranges.xml`) are applied, take precedence over CLI
    overrides, and survive `--export-3mf`; asserted through slicing metrics
    since the plate config block only records global values.
-4. **Settings import / export matrix** (`test_settings_import.py` +
+5. **Settings import / export matrix** (`test_settings_import.py` +
    `cases/settings-import/`) -- every way of getting settings *into* a slice
    (3mf embedded config, `--load-settings` machine/process presets,
    `--load-filaments`, CLI `--option=value` overrides, `--uptodate`) crossed
    with every way they come *out* (G-code config block, exported 3mf, JSON
    from `--export-settings`), verifying the recorded settings are the imported
    ones. See "Settings import / export" below.
-5. **Config-option override sweep** (`test_cli_overrides.py`) -- *every* one
+6. **Config-option override sweep** (`test_cli_overrides.py`) -- *every* one
    of the ~800 print/printer/filament options is set on the command line with
    a valid, distinctive value and must land in the merged config and in the
    G-code of a real slice (proving CLI > preset > 3mf precedence per key).
