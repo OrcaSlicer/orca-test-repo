@@ -1,0 +1,28 @@
+id: invalid-boolean-option-value
+title: "An invalid boolean CLI value must be rejected, not silently ignored"
+category: cli-parsing
+status: fixed
+model: Stanford_Bunny.3mf
+args:
+  - "--datadir"
+  - "{datadir}"
+  - "--outputdir"
+  - "{outputdir}"
+  - "--allow-rotations=notabool"
+  - "--info"
+  - "{model}"
+checks:
+  - no_crash: {}
+  - exit_code: {equals: 254}
+notes: >
+  Regression class: a boolean CLI option given a value that is not a boolean
+  in any spelling must produce a usage error (exit 254, the CLI's clean
+  parameter-error exit), consistent with every other option type. The
+  failure mode being pinned is a parser that discards the deserialization
+  result for booleans specifically, so an invalid literal silently keeps the
+  option's default instead of erroring. Reproduced on the public v2.4.2
+  release with "false": exit 0, as if the flag had never been passed. Fixed
+  upstream: the result is now checked, and the word literals (true/false,
+  yes/no, on/off) are accepted and mapped to 1/0 -- see
+  boolean-word-literals-accepted -- which is why the invalid value here is
+  a string no spelling accepts.

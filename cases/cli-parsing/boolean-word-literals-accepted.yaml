@@ -1,0 +1,26 @@
+id: boolean-word-literals-accepted
+title: "A boolean CLI option given \"false\" must land as 0, not be ignored or rejected"
+category: cli-parsing
+status: fixed
+model: Stanford_Bunny.3mf
+args:
+  - "--datadir"
+  - "{datadir}"
+  - "--outputdir"
+  - "{outputdir}"
+  - "--reduce-crossing-wall=false"
+  - "--export-settings"
+  - "{outputdir}/settings.json"
+  - "{model}"
+checks:
+  - no_crash: {}
+  - exit_code: {equals: 0}
+  - file_contains: {path: "{outputdir}/settings.json", text: "\"reduce_crossing_wall\": \"0\""}
+notes: >
+  Companion to invalid-boolean-option-value. The boolean option types only
+  deserialize the literals "0"/"1", so a script writing the natural
+  "--option=false" used to have its flag silently ignored (the parser
+  discarded the failed deserialization). The CLI now maps the word literals
+  (true/false, yes/no, on/off, enabled/disabled, case-insensitive) to 1/0
+  before deserializing, so the value both parses and lands: the merged
+  config must record 0 for the option, and the run must succeed.

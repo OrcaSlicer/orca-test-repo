@@ -1,0 +1,29 @@
+id: before-layer-change-gcode-emitted-per-layer
+title: before_layer_change_gcode is emitted once per layer
+category: custom-gcode
+status: fixed
+model: synthetic/cube20.stl
+args:
+- --datadir
+- '{datadir}'
+- --outputdir
+- '{outputdir}'
+- --load-settings
+- '{datadir}/system/BBL/machine/Bambu Lab X1 Carbon 0.4 nozzle.json;{datadir}/system/BBL/process/0.20mm Standard @BBL X1C.json'
+- --load-filaments
+- '{datadir}/system/BBL/filament/Bambu PLA Basic @BBL X1C.json'
+- --before-layer-change-gcode=; PROBE_BEFORE_LAYER_CHANGE_GCODE
+- --slice
+- '0'
+- '{model}'
+checks:
+- no_crash: {}
+- exit_code:
+    equals: 0
+- gcode_config_value:
+    key: before_layer_change_gcode
+    equals: ; PROBE_BEFORE_LAYER_CHANGE_GCODE
+- gcode_body_count:
+    text: PROBE_BEFORE_LAYER_CHANGE_GCODE
+    equals: 100
+notes: Emitted before every layer change on the 100-layer cube.

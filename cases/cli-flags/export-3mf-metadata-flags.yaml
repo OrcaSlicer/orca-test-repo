@@ -1,0 +1,40 @@
+id: export-3mf-metadata-flags
+title: --makerlab-name/--makerlab-version/--metadata-name/--metadata-value are written into the exported 3mf
+category: cli-flags
+status: fixed
+model: synthetic/cube20.stl
+args:
+- --datadir
+- '{datadir}'
+- --outputdir
+- '{outputdir}'
+- --makerlab-name
+- ProbeLab
+- --makerlab-version
+- '9.9'
+- --metadata-name
+- probe_k1;probe_k2
+- --metadata-value
+- probe_v1;probe_v2
+- --export-3mf
+- out.3mf
+- '{model}'
+checks:
+- no_crash: {}
+- exit_code:
+    equals: 0
+- threemf_member_contains:
+    path: '{outputdir}/out.3mf'
+    member: 3D/3dmodel.model
+    text: <metadata name="MakerLab">ProbeLab</metadata>
+- threemf_member_contains:
+    path: '{outputdir}/out.3mf'
+    member: 3D/3dmodel.model
+    text: <metadata name="MakerLabVersion">9.9</metadata>
+- threemf_member_contains:
+    path: '{outputdir}/out.3mf'
+    member: 3D/3dmodel.model
+    text: <metadata name="probe_k2">probe_v2</metadata>
+notes: |
+  The four metadata flags land as <metadata> elements of 3D/3dmodel.model,
+  name/value lists paired by position.

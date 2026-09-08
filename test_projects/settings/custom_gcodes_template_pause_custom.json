@@ -1,0 +1,26 @@
+{
+  "mode": "SingleExtruder",
+  "gcodes": [
+    {
+      "type": "Template",
+      "print_z": 5.0,
+      "color": "",
+      "extruder": 1,
+      "extra": ""
+    },
+    {
+      "type": "PausePrint",
+      "print_z": 10.0,
+      "color": "",
+      "extruder": 1,
+      "extra": "probe pause message"
+    },
+    {
+      "type": "Custom",
+      "print_z": 15.0,
+      "color": "",
+      "extruder": 1,
+      "extra": "; PROBE_CUSTOM_ITEM"
+    }
+  ]
+}

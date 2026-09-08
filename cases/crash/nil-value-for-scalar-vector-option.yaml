@@ -1,0 +1,33 @@
+id: nil-value-for-scalar-vector-option
+title: "Assigning nil to a second, independently-found vector option must also error cleanly"
+category: crash
+status: fixed
+model: Stanford_Bunny.3mf
+args:
+  - "--datadir"
+  - "{datadir}"
+  - "--outputdir"
+  - "{outputdir}"
+  - "--filament-multitool-ramming-flow=nil"
+  - "--info"
+  - "{model}"
+checks:
+  - no_crash: {}
+  - exit_code: {equals: 254}
+notes: >
+  Same bug class as nil-value-for-vector-option.yaml (assigning "nil" to a
+  non-nullable vector-typed CLI option aborts instead of erroring cleanly),
+  found by sweeping the option surface with junk values rather than by hand:
+  a class confirmed on one option (nozzle_diameter) turned out to also affect
+  filament_multitool_ramming_flow, an option nobody had tested.
+
+  Confirmed reproducing on the public v2.4.2 release build: aborts with an
+  uncaught Slic3r::ConfigurationError ("Deserializing nil into a
+  non-nullable object"), identical failure text to the original case. Kept
+  as a separate case rather than folded into the original -- they pin two
+  independently-confirmed instances of the same class, and either one
+  regressing/getting fixed should be visible on its own, not entangled with
+  the other's status.
+
+  Fixed upstream together with the original case: the value is rejected as
+  a clean parameter error (exit 254) instead of aborting.

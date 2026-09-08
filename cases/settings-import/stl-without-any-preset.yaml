@@ -1,0 +1,26 @@
+id: stl-without-any-preset
+category: settings-import
+status: fixed
+title: Slicing a bare STL with no printer/process/filament loaded must fail with a validation error, not crash
+model: synthetic/cube20.stl
+args:
+- --datadir
+- '{datadir}'
+- --outputdir
+- '{outputdir}'
+- --slice
+- '0'
+- '{model}'
+checks:
+- no_crash: {}
+- exit_code:
+    equals: 205
+- result_json_field:
+    field: return_code
+    equals: -51
+notes: |
+  Regression class (settings import): an STL carries no config, so without
+  --load-settings the slicer runs on registered defaults, which do not describe
+  a real printer. The expected behaviour is CLI_VALIDATE_ERROR (-51, exit 205)
+  with a clean error string; a crash or a "successful" slice against default
+  geometry would be a regression. Verified on the public v2.4.2 build.

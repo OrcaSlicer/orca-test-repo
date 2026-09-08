@@ -1,0 +1,32 @@
+id: machine-start-gcode-emitted
+title: machine_start_gcode set on the CLI is recorded AND emitted once in the G-code
+category: custom-gcode
+status: fixed
+model: synthetic/cube20.stl
+args:
+- --datadir
+- '{datadir}'
+- --outputdir
+- '{outputdir}'
+- --load-settings
+- '{datadir}/system/BBL/machine/Bambu Lab X1 Carbon 0.4 nozzle.json;{datadir}/system/BBL/process/0.20mm Standard @BBL X1C.json'
+- --load-filaments
+- '{datadir}/system/BBL/filament/Bambu PLA Basic @BBL X1C.json'
+- --machine-start-gcode=; PROBE_MACHINE_START_GCODE
+- --slice
+- '0'
+- '{model}'
+checks:
+- no_crash: {}
+- exit_code:
+    equals: 0
+- gcode_config_value:
+    key: machine_start_gcode
+    equals: ; PROBE_MACHINE_START_GCODE
+- gcode_body_count:
+    text: PROBE_MACHINE_START_GCODE
+    equals: 1
+notes: |
+  The custom start G-code must appear exactly once in the emitted G-code body
+  (the CONFIG_BLOCK settings dump is excluded from the count). Baseline: X1C
+  machine + 0.20mm Standard + Bambu PLA Basic on the 20 mm cube, 100 layers.

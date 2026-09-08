@@ -1,0 +1,38 @@
+id: transform-rotate-z
+title: --rotate rotates the model about Z, including on a plain STL input
+category: cli-flags
+status: fixed
+model: synthetic/cube20.stl
+args:
+- --datadir
+- '{datadir}'
+- --outputdir
+- '{outputdir}'
+- --rotate
+- '45'
+- --info
+- '{model}'
+checks:
+- no_crash: {}
+- exit_code:
+    equals: 0
+- stdout_contains:
+    text: size_x = 28.284271
+- stdout_contains:
+    text: size_y = 28.284271
+- stdout_contains:
+    text: size_z = 20.000000
+notes: |
+  cube20.stl is a 20mm cube; a 45-degree Z rotation swaps its square footprint
+  for the diagonal (20 * sqrt(2) = 28.284271 on both X and Y) and leaves Z
+  untouched -- a real geometry check, unlike the X/Y rotation cases where a
+  cube's symmetry hides any change. Regression class (CLI transforms): --rotate
+  used to work on a 3mf project but segfault on a plain STL/mesh input, with or
+  without --load-settings and regardless of the action (--info or
+  --export-3mf), reproducing deterministically on the public v2.4.2 build.
+  Combined with the former transform-rotate-z-on-stl-segfault case
+  (2026-08-31): same op, same args shape, so one case now covers both "doesn't
+  crash on STL" and "computes the right size" instead of splitting
+  no-crash-only and correctness across two files. Status flipped to fixed
+  after XPASSing against the cli-mode-bug-sweep fix build (2026-08-30); on the
+  v2.4.2 public release this case reports a plain crash, which is accurate.

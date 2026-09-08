@@ -1,0 +1,31 @@
+id: load-defaultfila
+title: --load-defaultfila must load the machine's default filament, not leave the filament preset empty
+category: cli-flags
+status: open
+model: synthetic/cube20.stl
+args:
+- --datadir
+- '{datadir}'
+- --outputdir
+- '{outputdir}'
+- --load-settings
+- '{datadir}/system/BBL/machine/Bambu Lab X1 Carbon 0.4 nozzle.json;{datadir}/system/BBL/process/0.20mm Standard @BBL X1C.json'
+- --load-defaultfila
+- --slice
+- '0'
+- '{model}'
+checks:
+- no_crash: {}
+- exit_code:
+    equals: 0
+- file_not_contains:
+    path: '{outputdir}/plate_1.gcode'
+    text: ; filament_settings_id = ""
+notes: |
+  Regression class (CLI flags / settings import): --load-defaultfila is
+  documented as loading the default filament for the loaded machine when none is
+  given. On the public v2.4.2 build an STL with a system machine+process and
+  --load-defaultfila slices (exit 0) but the G-code records filament_settings_id
+  = "" -- no filament preset was actually applied, the slice ran on registered
+  filament defaults. The check asserts the desired outcome: a non-empty filament
+  preset identity in the G-code config block.

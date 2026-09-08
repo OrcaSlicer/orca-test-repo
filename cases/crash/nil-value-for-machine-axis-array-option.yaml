@@ -1,0 +1,32 @@
+id: nil-value-for-machine-axis-array-option
+title: "Assigning nil to a third, independently-found vector option must also error cleanly"
+category: crash
+status: fixed
+model: Stanford_Bunny.3mf
+args:
+  - "--datadir"
+  - "{datadir}"
+  - "--outputdir"
+  - "{outputdir}"
+  - "--machine-max-speed-e=nil"
+  - "--info"
+  - "{model}"
+checks:
+  - no_crash: {}
+  - exit_code: {equals: 254}
+notes: >
+  Third independently-confirmed instance of the same class as
+  nil-value-for-vector-option.yaml and nil-value-for-scalar-vector-
+  option.yaml, again found by sweeping the option surface rather than by
+  hand. Confirmed reproducing on the public v2.4.2 release build:
+  identical failure ("Deserializing nil into a non-nullable object").
+
+  These three are pinned individually and no more were added: the root
+  cause is a single defect in read_cli()'s vector-deserialization handling
+  (see nil-value-for-vector-option.yaml) that plausibly affects most of the
+  ~235 coFloats/coInts/coBools/coPercents/coFloatsOrPercents options, so one
+  case per option would say the same thing many times over. Value parsing
+  across the whole option table belongs in OrcaSlicer's own unit tests; what
+  these cases pin is that the class stays fixed through a real CLI run.
+  Fixed upstream together with the original case: the value is rejected as
+  a clean parameter error (exit 254) instead of aborting.
