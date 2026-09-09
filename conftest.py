@@ -14,7 +14,6 @@ from case_registry import CASES_BY_ID
 
 REPO_ROOT = Path(__file__).resolve().parent
 TEST_PROJECTS = REPO_ROOT / "test_projects"
-DATA_DIR_SEED = REPO_ROOT / "data_dir"
 
 
 def pytest_collection_modifyitems(config, items):
@@ -50,6 +49,34 @@ def pytest_addoption(parser):
         default=None,
         help="Path to an OrcaSlicer source checkout (or set $ORCA_SOURCE): the CLI option surface is "
              "enumerated live from it instead of the committed cases/_snapshots/cli_surface_full.json.",
+    )
+    parser.addoption(
+        "--effect-sample",
+        action="store",
+        type=int,
+        default=15,
+        help="How many landed options test_cli_overrides.py's effect stage re-slices one at a "
+             "time to check the value actually changes the G-code (a daily-rotating but "
+             "reproducible-within-a-day sample; 0 disables the stage). Each costs one slice.",
+    )
+    parser.addoption(
+        "--effect-full",
+        action="store_true",
+        default=False,
+        help="Effect-stage every landed option instead of a sample (slow -- one slice per "
+             "option; intended for a scheduled/nightly run).",
+    )
+    parser.addoption(
+        "--effect-shard",
+        action="store",
+        default="",
+        metavar="I/N",
+        help="Run only shard I of N of the effect stage (0-based), so --effect-full fits a CI "
+             "timeout. Shards come from parity/effect_routing.json, which groups options by the "
+             "cheapest fixture that can show their effect and balances the groups by measured "
+             "slice cost; a shard that has no work is skipped. Measured on a 4-vCPU runner the "
+             "un-sharded sweep is ~24 min; 2 shards halve that for one extra repeat of the "
+             "merge and G-code stages.",
     )
 
 
@@ -87,14 +114,38 @@ def orca_bin(request):
 
 @pytest.fixture(scope="session")
 def seeded_data_dir(tmp_path_factory):
-    """One copy-on-session of the checked-in data_dir/ (printer & filament profiles).
+    """One generated-per-session datadir seed (system profiles + app config).
+
+    Generated from the OrcaSlicer source checkout by parity/make_seed.py, so
+    the profiles always match the binary under test (this replaced an 11 MB
+    checked-in data_dir/ that could silently drift from upstream). Requires
+    the source checkout: --orca-source / $ORCA_SOURCE -- run_test.py
+    auto-detects it from the binary path, and OrcaSlicer's CI provides it via
+    $GITHUB_WORKSPACE.
 
     orca-slicer writes a machine-id file and a hint cache into --datadir at
-    runtime, so tests must never point --datadir at the repo's own data_dir/
-    directly -- that would mutate a tracked fixture on every run.
+    runtime, so tests copy this seed per test rather than pointing --datadir
+    at it directly.
     """
+    import sys
+
+    import surface
+
+    src = surface.source_dir()
+    if src is None:
+        pytest.exit(
+            "the datadir seed is generated from an OrcaSlicer source checkout: "
+            "pass --orca-source /path/to/OrcaSlicer (or set $ORCA_SOURCE). "
+            "run_test.py auto-detects it from the binary's path or $GITHUB_WORKSPACE.",
+            returncode=2,
+        )
     dest = tmp_path_factory.mktemp("data_dir_seed")
-    shutil.copytree(DATA_DIR_SEED, dest, dirs_exist_ok=True)
+    subprocess.run(
+        [sys.executable, str(REPO_ROOT / "parity" / "make_seed.py"),
+         "--out", str(dest), "--repo", str(src), "--force",
+         "--vendor", "BBL", "--vendor", "Custom"],
+        check=True, capture_output=True,
+    )
     return dest
 
 
