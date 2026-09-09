@@ -179,7 +179,7 @@
     },
     {
       "id": "user-preset-inherits",
-      "description": "BUG-32 sentinel: user process preset with inherits and no leaf compatible_printers. GUI accepts the pair; CLI compat gate exits CLI_PROCESS_NOT_COMPATIBLE (-17). When this fixture's lane C turns green, BUG-32 got fixed.",
+      "description": "Regression sentinel: user process preset with inherits and no leaf compatible_printers. Both pipelines must accept the pair. The CLI compat gate used to read the leaf only and exit CLI_PROCESS_NOT_COMPATIBLE (-17); inherits resolution fixed that, so lane C exiting non-zero here is a regression.",
       "input": "fixtures/20mmbox-LF.stl",
       "process": "0.20mm Deviant @parity",
       "install_user_presets": [
