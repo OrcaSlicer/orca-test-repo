@@ -62,6 +62,9 @@ from compare_gcode3mf import normalized_stream  # noqa: E402
 REPO_ROOT = Path(__file__).resolve().parent
 ROUTING = REPO_ROOT / "parity" / "effect_routing.json"
 BATCH = 40
+# How many options a fixture must have measured before "none of them changed the
+# G-code" is evidence that its overlay is broken rather than ordinary luck.
+EFFECT_GATE_MIN = 3
 
 SYS_MACHINE = "system/BBL/machine/Bambu Lab X1 Carbon 0.4 nozzle.json"
 SYS_PROCESS = "system/BBL/process/0.20mm Standard @BBL X1C.json"
@@ -587,6 +590,11 @@ def test_override_sweep_effect_stage(override_results):
     if no_base:
         print("  fixtures that would not slice:",
               sorted({eff[k]["variant"] for k in no_base}))
+    # inert is the mining output, not a failure: an option can be legitimately
+    # inert for this model/config (support options with supports off, ...) --
+    # but a key that SHOULD matter appearing here is a silently-ignored-flag bug.
+    # Printed before the assertions below, so a failing run still names them.
+    print("  inert:", inert)
     assert not broken, (
         "options whose individual override slice crashed or hung: "
         + ", ".join(f"{k}={eff[k].get('probe')}" for k in broken))
@@ -601,15 +609,18 @@ def test_override_sweep_effect_stage(override_results):
     # 'cube' is the fallback for options no fixture is known to show, so it is
     # legitimately all-inert in some shards; every other fixture exists because
     # options were measured effective on it.
+    #
+    # Only conclude that from a fixture that had a fair chance to show one. A
+    # sampled run spreads ~15 options over six fixtures, so a fixture routinely
+    # draws one, and one legitimately-inert option then looks exactly like a
+    # fixture whose overlay never applied -- which is how this gate failed a run
+    # on `klipper 0/1`. The floor applies to the full sweep too: five fixtures
+    # carry one or two options there as well.
     dead = sorted(v for v, n in per.items()
-                  if v != "cube" and n and not hit[v])
+                  if v != "cube" and n >= EFFECT_GATE_MIN and not hit[v])
     assert not dead, (
         "fixtures that sliced but showed no option any effect - the overlay is "
         "probably not being applied: " + ", ".join(f"{v} (0/{per[v]})" for v in dead))
-    # inert is the mining output, not a failure: an option can be legitimately
-    # inert for this model/config (support options with supports off, ...) --
-    # but a key that SHOULD matter appearing here is a silently-ignored-flag bug
-    print("  inert:", inert)
 
 
 @pytest.mark.cli_overrides
