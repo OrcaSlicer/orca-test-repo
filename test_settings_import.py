@@ -77,9 +77,9 @@ KNOWN_OPEN_DIVERGENCES = {
     # keys observed carrying the zero-fill signature below; listed so the
     # coverage is visible, but the signature is what actually classifies
     "filament_ramming_volumetric_speed": "cases/settings-import/partial-load-filaments-variant-key-zero-filled.yaml",
-    "filament_retract_length_nc": "cases/settings-import/variant-key-zero-filled-on-full-filament-load.yaml",
-    "filament_cooling_before_tower": "cases/settings-import/variant-key-zero-filled-on-full-filament-load.yaml",
-    "filament_ramming_volumetric_speed_nc": "cases/settings-import/variant-key-zero-filled-on-full-filament-load.yaml",
+    "filament_retract_length_nc": "cases/settings-import/partial-load-filaments-variant-key-zero-filled.yaml",
+    "filament_cooling_before_tower": "cases/settings-import/partial-load-filaments-variant-key-zero-filled.yaml",
+    "filament_ramming_volumetric_speed_nc": "cases/settings-import/partial-load-filaments-variant-key-zero-filled.yaml",
 }
 
 
