@@ -191,6 +191,56 @@
         "C",
         "R"
       ]
+    },
+    {
+      "id": "mixed-filament-whole-layer",
+      "description": "Mixed (virtual) filament: slot 3 mixes filaments 1+2 at 40:60 in whole-layer mode, the cube on slot 3. GUI-saved project 3mf (the realistic 'set up in the GUI, slice on the CLI' case), so both pipelines slice the same mix with full per-filament columns; the mixed slot's colour is the GUI's own blend so it is not recoloured on load. Expected to match on every lane.",
+      "input": "fixtures/mixed_filament_whole_layer.3mf",
+      "flags": {}
+    },
+    {
+      "id": "mixed-filament-sublayer",
+      "description": "Same mix in sub-layer mode, GUI-saved (enable_mixed_color_sublayer = 1, listed in different_settings_to_system), so every layer after the first is two passes, 0.08 + 0.12 mm. The CLI keeps the project's dirty list, so the setting survives the GUI reopen; a command-line override does not (mixed-filament-sublayer-flag-reopen).",
+      "input": "fixtures/mixed_filament_sublayer.3mf",
+      "flags": {}
+    },
+    {
+      "id": "mixed-filament-sublayer-flag-reopen",
+      "description": "Sentinel: the whole-layer mix sliced with --enable-mixed-color-sublayer=1. The CLI does not record a command-line override in different_settings_to_system (BUG-34 family), so on reopen the GUI resets enable_mixed_color_sublayer to the preset's 0 and re-slices in whole-layer mode. Remove the expectations once CLI flag overrides are recorded in the dirty list.",
+      "input": "fixtures/mixed_filament_whole_layer.3mf",
+      "flags": {
+        "enable-mixed-color-sublayer=1": ""
+      },
+      "lanes": [
+        "C",
+        "RB"
+      ],
+      "expect": [
+        {
+          "section": "*",
+          "key": "enable_mixed_color_sublayer*"
+        },
+        {
+          "section": "gcode",
+          "key": "*"
+        },
+        {
+          "section": "gcode_header",
+          "key": "model printing time"
+        },
+        {
+          "section": "slice_info",
+          "key": "prediction"
+        },
+        {
+          "section": "slice_info",
+          "key": "weight"
+        },
+        {
+          "section": "slice_info",
+          "key": "first_layer_time"
+        }
+      ]
     }
   ]
 }
