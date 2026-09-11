@@ -1,0 +1,54 @@
+id: mixed-filament-slot-without-filament-rejected
+title: A mixed slot defined on the command line without a filament of its own is refused, not printed single-colour
+category: mixed-filament
+status: open
+model: synthetic/cube20.stl
+args:
+- --datadir
+- '{datadir}'
+- --outputdir
+- '{outputdir}'
+- --load-settings
+- '{datadir}/system/BBL/machine/Bambu Lab X1 Carbon 0.4 nozzle.json;{datadir}/system/BBL/process/0.20mm Standard @BBL X1C.json'
+- --load-filaments
+- '{datadir}/system/BBL/filament/Bambu PLA Basic @BBL X1C.json;{datadir}/system/BBL/filament/Bambu PLA Basic @BBL X1C.json'
+- --filament-colour
+- '#FF0000;#0000FF'
+- --filament-is-mixed=0,0,1
+- --filament-mixed-components
+- ;;1,2
+- --filament-mixed-sublayer-ratios
+- ;;0.4,0.6
+- --outer-wall-filament-id
+- '3'
+- --inner-wall-filament-id
+- '3'
+- --sparse-infill-filament-id
+- '3'
+- --internal-solid-filament-id
+- '3'
+- --top-surface-filament-id
+- '3'
+- --bottom-surface-filament-id
+- '3'
+- --slice
+- '0'
+- '{model}'
+checks:
+- no_crash: {}
+- exit_code:
+    equals: 187
+- result_json_field:
+    field: return_code
+    equals: -69
+notes: |
+  Two filaments are loaded but filament_is_mixed describes three slots, so the
+  mixed slot 3 has no filament entry. Feature filament ids aimed at it are
+  past the filament count and get reset to filament 1, so the slice used to
+  succeed and print the whole model in one colour, with no warning. The CLI
+  now refuses it with CLI_MIXED_FILAMENT_INVALID (-69).
+
+  The working form loads one filament per slot, including a placeholder for
+  the mixed one, and assigns the model with --load-filament-ids (see
+  mixed-filament-defined-on-cli-slices). Bool vectors need the `=` form:
+  `--filament-is-mixed 0,0,1` with a space becomes `[1]`.

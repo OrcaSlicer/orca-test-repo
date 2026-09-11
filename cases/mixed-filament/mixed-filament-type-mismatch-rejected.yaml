@@ -1,0 +1,32 @@
+id: mixed-filament-type-mismatch-rejected
+title: A plate using a mixed filament whose components are different filament types is refused
+category: mixed-filament
+status: open
+model: synthetic/mixed_filament_type_mismatch.3mf
+args:
+- --datadir
+- '{datadir}'
+- --outputdir
+- '{outputdir}'
+- --slice
+- '0'
+- '{model}'
+checks:
+- no_crash: {}
+- exit_code:
+    equals: 187
+- result_json_field:
+    field: return_code
+    equals: -69
+notes: |
+  The GUI refuses to slice a plate that uses a mixed filament mixing, say, PLA
+  with PETG (Sidebar::has_broken_mixed_filament). The CLI now applies the same
+  gate per plate and exits with CLI_MIXED_FILAMENT_INVALID (-69, process exit
+  187) instead of slicing it.
+
+  Fixture: mixed_filament.3mf with filament_type[1] set to PETG
+  (scripts/patch_3mf.py extract / replace on Metadata/project_settings.config).
+  filament_settings_id[1] still names a PLA preset on purpose: without
+  --load-filaments the CLI reads filament_type from the project config, which
+  is what the gate compares. Do not "fix" the preset name, and do not add
+  --load-filaments here, or the PETG type is replaced and the case goes quiet.
