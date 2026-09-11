@@ -142,6 +142,25 @@ def gcode_config_vector_nonzero(result, ctx, key, path="{outputdir}/plate_1.gcod
         _fail(f"G-code config {key!r} has zero/empty elements at {zeros}: {vals!r}", result)
 
 
+def gcode_config_element(result, ctx, key, index, equals=None, not_equals=None, path="{outputdir}/plate_1.gcode"):
+    """Element `index` of vector option `key` in the G-code config block reads as
+    `equals` (or anything but `not_equals`), numerically tolerant -- for asserting
+    a few cells of a large vector such as flush_volumes_matrix."""
+    import settings_compare as sc
+
+    cfg = _gcode_config(result, ctx, path)
+    if key not in cfg:
+        _fail(f"G-code config block has no key {key!r}", result)
+    vals = cfg[key] if isinstance(cfg[key], list) else [cfg[key]]
+    if not 0 <= index < len(vals):
+        _fail(f"G-code config {key!r} has {len(vals)} elements, no index {index}: {vals!r}", result)
+    got = vals[index]
+    if equals is not None and not sc._num_eq(got, str(equals)):
+        _fail(f"G-code config {key!r}[{index}]: expected {equals!r}, got {got!r}", result)
+    if not_equals is not None and sc._num_eq(got, str(not_equals)):
+        _fail(f"G-code config {key!r}[{index}]: expected anything but {not_equals!r}", result)
+
+
 def gcode_metric(result, ctx, name, equals=None, min=None, max=None, index=0, path="{outputdir}/plate_1.gcode"):
     """A slicing metric parsed from the G-code (see gcode_metrics.py: layers,
     max_z_mm, filament_mm, e_sum_mm, print_time_s, ...) equals / is within
@@ -268,6 +287,7 @@ CHECKS = {
     "file_not_contains": file_not_contains,
     "gcode_config_value": gcode_config_value,
     "gcode_config_vector_nonzero": gcode_config_vector_nonzero,
+    "gcode_config_element": gcode_config_element,
     "gcode_metric": gcode_metric,
     "gcode_z_above_bed": gcode_z_above_bed,
     "gcode_body_count": gcode_body_count,
