@@ -638,7 +638,7 @@
       "max": null,
       "enum_values": [],
       "enum_dynamic": false,
-      "default": "FloatOrPercent(50,true)",
+      "default": "FloatOrPercent(50, true)",
       "nullable": true
     },
     {
@@ -2254,7 +2254,7 @@
       "max": null,
       "enum_values": [],
       "enum_dynamic": false,
-      "default": "Vec2d(0,0)",
+      "default": "Vec2d(0, 0)",
       "nullable": false
     },
     {
@@ -4402,7 +4402,7 @@
       "max": null,
       "enum_values": [],
       "enum_dynamic": false,
-      "default": "{0}",
+      "default": "0",
       "nullable": false
     },
     {
@@ -6363,7 +6363,7 @@
       "max": null,
       "enum_values": [],
       "enum_dynamic": false,
-      "default": "{ 1., 1., 1. }",
+      "default": "1., 1., 1.",
       "nullable": false
     },
     {
@@ -6950,7 +6950,7 @@
         "brass"
       ],
       "enum_dynamic": false,
-      "default": "{ ntUndefine }",
+      "default": "ntUndefine",
       "nullable": true
     },
     {
@@ -6963,7 +6963,7 @@
       "max": null,
       "enum_values": [],
       "enum_dynamic": false,
-      "default": "{0.0}",
+      "default": "0.0",
       "nullable": true
     },
     {
@@ -8369,7 +8369,7 @@
       "max": null,
       "enum_values": [],
       "enum_dynamic": false,
-      "default": "{ 1., 1.}",
+      "default": "1., 1.",
       "nullable": false
     },
     {
@@ -8790,7 +8790,7 @@
       "max": null,
       "enum_values": [],
       "enum_dynamic": false,
-      "default": "10,true",
+      "default": "10, true",
       "nullable": false
     },
     {
@@ -11528,7 +11528,7 @@
       "max": null,
       "enum_values": [],
       "enum_dynamic": false,
-      "default": "80,true",
+      "default": "80, true",
       "nullable": false
     },
     {

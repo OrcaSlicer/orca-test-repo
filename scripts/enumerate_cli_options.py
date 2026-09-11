@@ -52,6 +52,23 @@ DEF_ALIAS_SELF_RE = re.compile(r"^\s*(?:auto|const ConfigOptionDef\s*\*|ConfigOp
 DEFAULT_RE = re.compile(r"^\s*def->set_default_value\(new\s+ConfigOption\w+\s*[({](.*)[)}]\s*\)\s*;")
 NULLABLE_RE = re.compile(r"^\s*def->nullable\s*=\s*true\s*;")
 
+
+def normalise_default(raw: str) -> str:
+    """Reduce a captured default initialiser to its bare value list.
+
+    The capture is source text, so cosmetic upstream edits (``{ {0.0} }`` vs
+    ``{ 0.0 }``, ``(50,true)`` vs ``(50, true)``) would otherwise churn the
+    snapshot without any change to the option. Peel redundant outer braces and
+    settle comma spacing; quoted literals are left untouched.
+    """
+    value = raw.strip()
+    while value.startswith("{") and value.endswith("}"):
+        value = value[1:-1].strip()
+    if '"' not in value:
+        value = ", ".join(part.strip() for part in value.split(","))
+    return value
+
+
 # Options added via a computed key, not recoverable from a single line --
 # resolved once by hand from their source (re-check after any upstream edit
 # near these loops; the enumerator's warning output will flag if the pattern
@@ -155,7 +172,7 @@ def enumerate_options(source: Path):
         elif ENUM_DYNAMIC_RE.match(line):
             pending["enum_dynamic"] = True
         elif (mm := DEFAULT_RE.match(line)):
-            pending["default"] = mm.group(1).strip()
+            pending["default"] = normalise_default(mm.group(1))
         elif NULLABLE_RE.match(line):
             pending["nullable"] = True
 
