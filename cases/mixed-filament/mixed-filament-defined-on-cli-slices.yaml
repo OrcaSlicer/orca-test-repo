@@ -1,0 +1,46 @@
+id: mixed-filament-defined-on-cli-slices
+title: A mixed filament defined entirely on the command line slices in sub-layer mode
+category: mixed-filament
+status: fixed
+model: synthetic/cube20.stl
+args:
+- --datadir
+- '{datadir}'
+- --outputdir
+- '{outputdir}'
+- --load-settings
+- '{datadir}/system/BBL/machine/Bambu Lab X1 Carbon 0.4 nozzle.json;{datadir}/system/BBL/process/0.20mm Standard @BBL X1C.json'
+- --load-filaments
+- '{datadir}/system/BBL/filament/Bambu PLA Basic @BBL X1C.json;{datadir}/system/BBL/filament/Bambu PLA Basic @BBL X1C.json;{datadir}/system/BBL/filament/Bambu PLA Basic @BBL X1C.json'
+- --load-filament-ids
+- '3'
+- --filament-colour
+- '#FF0000;#0000FF;#8000FF'
+- --filament-is-mixed=0,0,1
+- --filament-mixed-components
+- ;;1,2
+- --filament-mixed-sublayer-ratios
+- ;;0.4,0.6
+- --enable-mixed-color-sublayer=1
+- --slice
+- '0'
+- '{model}'
+checks:
+- no_crash: {}
+- exit_code:
+    equals: 0
+- gcode_config_value:
+    key: filament_is_mixed
+    equals: ['0', '0', '1']
+- gcode_body_count:
+    text: '; LAYER_HEIGHT: 0.08'
+    at_least: 90
+- gcode_body_count:
+    text: '; LAYER_HEIGHT: 0.12'
+    at_least: 90
+notes: |
+  The third --load-filaments entry is a placeholder the mixed slot needs; it
+  never prints. With sub-layer mixing on, every 0.2 mm layer after the first
+  is printed as filament 1 at 0.08 mm and then filament 2 at 0.12 mm (40:60).
+  The same project re-sliced in the GUI gives the same layers, tool changes
+  and extrusion.

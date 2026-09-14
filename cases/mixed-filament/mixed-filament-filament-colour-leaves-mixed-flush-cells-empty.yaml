@@ -1,0 +1,43 @@
+id: mixed-filament-filament-colour-leaves-mixed-flush-cells-empty
+title: Recomputing the flush matrix for --filament-colour leaves a mixed slot's row and column at zero
+category: mixed-filament
+status: open
+model: synthetic/mixed_filament.3mf
+args:
+- --datadir
+- '{datadir}'
+- --outputdir
+- '{outputdir}'
+- --filament-colour
+- '#FF0000;#00FF00;#0000FF;#FFFF00;#13D38C'
+- --slice
+- '0'
+- '{model}'
+checks:
+- no_crash: {}
+- exit_code:
+    equals: 0
+- gcode_config_element:
+    key: flush_volumes_matrix
+    index: 4
+    equals: '0'
+- gcode_config_element:
+    key: flush_volumes_matrix
+    index: 20
+    equals: '0'
+- gcode_config_element:
+    key: flush_volumes_matrix
+    index: 23
+    equals: '0'
+- gcode_config_element:
+    key: flush_volumes_matrix
+    index: 1
+    not_equals: '0'
+notes: |
+  The 5x5 matrix is row-major (from, to). Slot 5 is mixed: it never reaches a
+  nozzle, so the GUI leaves its row (indices 20-24) and column (4, 9, 14, 19)
+  empty. The CLI's --filament-colour recompute used to write real volumes
+  there. Index 1 (filament 1 -> 2) is the control: a physical pair still gets
+  a volume.
+
+  Fixture: see mixed-filament-prime-tower-kept-with-identical-presets.

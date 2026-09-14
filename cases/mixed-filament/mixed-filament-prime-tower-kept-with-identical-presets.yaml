@@ -1,0 +1,34 @@
+id: mixed-filament-prime-tower-kept-with-identical-presets
+title: A mixed filament keeps the prime tower when every --load-filaments preset is the same
+category: mixed-filament
+status: open
+model: synthetic/mixed_filament.3mf
+args:
+- --datadir
+- '{datadir}'
+- --outputdir
+- '{outputdir}'
+- --load-filaments
+- '{datadir}/system/OrcaFilamentLibrary/filament/Generic PLA @System.json;{datadir}/system/OrcaFilamentLibrary/filament/Generic PLA @System.json;{datadir}/system/OrcaFilamentLibrary/filament/Generic PLA @System.json;{datadir}/system/OrcaFilamentLibrary/filament/Generic PLA @System.json'
+- --slice
+- '0'
+- '{model}'
+checks:
+- no_crash: {}
+- exit_code:
+    equals: 0
+- gcode_config_value:
+    key: enable_prime_tower
+    equals: '1'
+notes: |
+  When every loaded filament preset has the same name the CLI turns the prime
+  tower off, reasoning that one filament needs no purge. A mixed filament
+  swaps between its components every layer, so the print keeps its tool
+  changes and loses the tower they purge on. The config-side rule for the same
+  situation keeps the tower when a mixed filament is present; the CLI now does
+  too.
+
+  Fixture: klipper_multicolor.3mf with a fifth, mixed slot (filaments 1+2 at
+  50/50, OrcaCube assigned to it): every per-filament array grown by one, the
+  flush matrix grown with a zero row and column, and the filament_is_mixed /
+  filament_mixed_* arrays set for slot 5.
