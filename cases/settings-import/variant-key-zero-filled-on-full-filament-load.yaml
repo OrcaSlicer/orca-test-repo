@@ -1,7 +1,7 @@
 id: variant-key-zero-filled-on-full-filament-load
 title: A per-filament variant key the presets leave unset must not be zero-filled for filaments 2..N
 category: settings-import
-status: open
+status: fixed
 model: p1s_multicolor.3mf
 args:
   - --datadir
@@ -17,7 +17,6 @@ args:
 checks:
   - no_crash: {}
   - exit_code: {equals: 0}
-  - gcode_config_vector_nonzero: {key: filament_retract_length_nc}
   - gcode_config_vector_nonzero: {key: filament_cooling_before_tower}
   - gcode_config_vector_nonzero: {key: filament_ramming_volumetric_speed_nc}
 notes: >
@@ -35,3 +34,11 @@ notes: >
   isolates the trigger to "unset in every loaded preset".
   The checks assert only that no element is zero, so the case does not
   presuppose whether the fix broadcasts the value or resizes with the default.
+
+  Fixed on main once --load-filaments presets were resolved through their
+  inherits chain: every loaded preset now carries these keys, so the columns
+  are complete (10,10,10,10 and -1,-1,-1,-1). filament_retract_length_nc is no
+  longer checked: its preset value is nil (no nozzle-change override) for every
+  filament, and the G-code config block omits an all-nil option, so the key is
+  absent rather than zero. The partial-load sibling still zero-fills until the
+  variant-stride read keeps the first value for a short column.
