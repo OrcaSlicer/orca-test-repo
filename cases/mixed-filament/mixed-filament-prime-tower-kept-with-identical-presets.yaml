@@ -1,7 +1,7 @@
 id: mixed-filament-prime-tower-kept-with-identical-presets
 title: A mixed filament keeps the prime tower when every --load-filaments preset is the same
 category: mixed-filament
-status: open
+status: fixed
 model: synthetic/mixed_filament.3mf
 args:
 - --datadir
@@ -32,3 +32,5 @@ notes: |
   50/50, OrcaCube assigned to it): every per-filament array grown by one, the
   flush matrix grown with a zero row and column, and the filament_is_mixed /
   filament_mixed_* arrays set for slot 5.
+
+  Fixed on main: the prime tower stays on when a mixed filament is present.

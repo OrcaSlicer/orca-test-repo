@@ -1,6 +1,6 @@
 id: vector-override-single-value-multi-filament
 category: settings-import
-status: open
+status: fixed
 title: A single-value per-filament CLI override on a multi-filament project must not zero the other filaments
 model: p1s_multicolor.3mf
 args:
@@ -16,8 +16,17 @@ args:
 - '{model}'
 checks:
 - no_crash: {}
+- exit_code:
+    equals: 0
 - gcode_config_vector_nonzero:
     key: nozzle_temperature
+- gcode_config_value:
+    key: nozzle_temperature
+    equals:
+    - '211'
+    - '211'
+    - '211'
+    - '211'
 notes: |
   Regression class (settings import / precedence): `--nozzle-temperature=211` on
   a 4-filament project replaces the whole vector with a 1-element one; the
@@ -30,3 +39,6 @@ notes: |
   so it stays a tracked open item until a fix that produces G-code with non-zero
   values lands). On a single-filament project the same override works
   (verified).
+
+  Fixed on main: the single value is broadcast to every filament and the slice
+  succeeds (nozzle_temperature = 211,211,211,211); the checks pin that result.

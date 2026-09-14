@@ -1,7 +1,7 @@
 id: mixed-filament-filament-colour-leaves-mixed-flush-cells-empty
 title: Recomputing the flush matrix for --filament-colour leaves a mixed slot's row and column at zero
 category: mixed-filament
-status: open
+status: fixed
 model: synthetic/mixed_filament.3mf
 args:
 - --datadir
@@ -41,3 +41,6 @@ notes: |
   a volume.
 
   Fixture: see mixed-filament-prime-tower-kept-with-identical-presets.
+
+  Fixed on main: the recompute leaves the mixed slot's row and column at zero
+  while physical pairs keep their volumes.

@@ -1,7 +1,7 @@
 id: partial-load-filaments-variant-key-zero-filled
 title: Loading fewer filaments than the project has must not zero-fill per-filament variant keys for the remaining filaments
 category: settings-import
-status: open
+status: fixed
 model: p1s_multicolor.3mf
 args:
 - --datadir
@@ -38,3 +38,6 @@ notes: |
   option does not exist on the v2.4.2 reference build, where this case fails
   inside xfail on "no such key". The full 4-of-4 load is unaffected (all 8
   elements present).
+
+  Fixed on main: a variant column shorter than the filament count keeps its
+  first value instead of zero, so filaments 3-4 read -1 like the loaded ones.
