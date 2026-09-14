@@ -146,10 +146,13 @@ def specs(datadir, model_stl, flat_dir=None):
     v["lockedzag"] = dict(settings=x1c, filaments=pla, models=plate,
                           overlay={**SWITCHES, "sparse_infill_pattern": "lockedzag",
                                    "infill_lock_depth": "2", "skin_infill_depth": "2"})
-    # only the current bed's temperature pair is emitted, so one plate per type
+    # only the current bed's temperature pair is emitted, so one plate per type.
+    # PLA's profile sets the Engineering Plate temperatures to 0 (unsupported),
+    # which the slicer rejects, so that plate gets a filament that supports it.
+    petg = str(bf / "Bambu PETG Basic @BBL X1C.json")
     for key, bed in BED_TYPES.items():
-        v[f"bed_{key}"] = dict(settings=x1c, filaments=pla, models=plate,
-                               overlay={"curr_bed_type": bed})
+        v[f"bed_{key}"] = dict(settings=x1c, filaments=petg if key == "eng" else pla,
+                               models=plate, overlay={"curr_bed_type": bed})
     # Multi-filament: the committed multicolor projects, never a CLI-authored
     # one -- --export-3mf leaves filament_colour/type/map at length 1 and the
     # plate reloads as single-filament with the prime tower forced off.
