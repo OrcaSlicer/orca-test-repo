@@ -262,6 +262,15 @@
       },
       "catalog": "pilot - GUI sliced export has empty resources/build",
       "reason": "follows mesh-embedding"
+    },
+    {
+      "id": "plate-json-bbox-float",
+      "match": {
+        "section": "plate_json",
+        "key": "bbox_all*"
+      },
+      "catalog": "mixed-filament fixtures - float formatting noise (~1e-5 mm) between the two writers in the plate bounding box",
+      "reason": "cosmetic; geometry and G-code identical"
     }
   ]
 }
