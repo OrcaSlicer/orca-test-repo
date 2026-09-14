@@ -40,5 +40,5 @@ notes: >
   are complete (10,10,10,10 and -1,-1,-1,-1). filament_retract_length_nc is no
   longer checked: its preset value is nil (no nozzle-change override) for every
   filament, and the G-code config block omits an all-nil option, so the key is
-  absent rather than zero. The partial-load sibling still zero-fills until the
-  variant-stride read keeps the first value for a short column.
+  absent rather than zero. The partial-load sibling is fixed too: the
+  variant-stride read now keeps the first value for a short column.

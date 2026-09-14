@@ -1,7 +1,7 @@
 id: mixed-filament-slot-without-filament-rejected
 title: A mixed slot defined on the command line without a filament of its own is refused, not printed single-colour
 category: mixed-filament
-status: open
+status: fixed
 model: synthetic/cube20.stl
 args:
 - --datadir
@@ -52,3 +52,5 @@ notes: |
   the mixed one, and assigns the model with --load-filament-ids (see
   mixed-filament-defined-on-cli-slices). Bool vectors need the `=` form:
   `--filament-is-mixed 0,0,1` with a space becomes `[1]`.
+
+  Fixed on main: the slice is refused with -69 (process exit 187).

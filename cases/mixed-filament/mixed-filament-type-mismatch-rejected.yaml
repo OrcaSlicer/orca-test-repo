@@ -1,7 +1,7 @@
 id: mixed-filament-type-mismatch-rejected
 title: A plate using a mixed filament whose components are different filament types is refused
 category: mixed-filament
-status: open
+status: fixed
 model: synthetic/mixed_filament_type_mismatch.3mf
 args:
 - --datadir
@@ -30,3 +30,5 @@ notes: |
   --load-filaments the CLI reads filament_type from the project config, which
   is what the gate compares. Do not "fix" the preset name, and do not add
   --load-filaments here, or the PETG type is replaced and the case goes quiet.
+
+  Fixed on main: the plate is refused with -69 (process exit 187).

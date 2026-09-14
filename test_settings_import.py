@@ -73,36 +73,8 @@ SYS_FILAMENTS_4 = [
 # excludes them from its artifact-agreement check so a known bug does not turn
 # every recipe that happens to touch it red; the dedicated case is what flips
 # (via strict xfail) when upstream fixes it. Keep this in step with cases/.
-KNOWN_OPEN_DIVERGENCES = {
-    # keys observed carrying the zero-fill signature below; listed so the
-    # coverage is visible, but the signature is what actually classifies
-    "filament_ramming_volumetric_speed": "cases/settings-import/partial-load-filaments-variant-key-zero-filled.yaml",
-    "filament_retract_length_nc": "cases/settings-import/partial-load-filaments-variant-key-zero-filled.yaml",
-    "filament_cooling_before_tower": "cases/settings-import/partial-load-filaments-variant-key-zero-filled.yaml",
-    "filament_ramming_volumetric_speed_nc": "cases/settings-import/partial-load-filaments-variant-key-zero-filled.yaml",
-}
+KNOWN_OPEN_DIVERGENCES = {}
 
-
-def _is_zero_fill(gcode_val, json_val) -> bool:
-    """The signature of the tracked zero-fill bug: the merged config leaves a
-    per-filament slot unset (nil) and the applied config records 0 for it.
-
-    Matched by shape rather than by key name on purpose. The bug is one
-    mechanism -- a variant-stride read over a vector shorter than the filament
-    count -- and which keys it touches changes as upstream adds per-filament
-    options, so a name list goes stale silently while the shape does not. Only
-    nil-to-zero counts: any other value difference is still a finding.
-    """
-    if not isinstance(gcode_val, list) or not isinstance(json_val, list):
-        return False
-    if len(gcode_val) != len(json_val) or "nil" not in json_val:
-        return False
-    for g, j in zip(gcode_val, json_val):
-        if g == j:
-            continue
-        if not (j == "nil" and str(g).rstrip("%") in ("0", "0.0", "-0")):
-            return False
-    return True
 
 # Keys read out of a 3mf's embedded config when the recipe expects "embedded"
 # values to survive into the G-code untouched.
@@ -283,7 +255,6 @@ def test_settings_roundtrip(recipe, run_orca, datadir, outputdir, model):
         failures.append(f"--export-settings JSON differs from the 3mf's project_settings.config: {ps_diff[:10]} "
                         f"only-json={sorted(set(json_cfg) - set(ps_cfg))[:5]} only-3mf={sorted(set(ps_cfg) - set(json_cfg))[:5]}")
     mism = sc.compare_gcode_to_json(gcode_cfg, json_cfg, ignore=sc.KNOWN_DIVERGENT | set(KNOWN_OPEN_DIVERGENCES))
-    mism = [m for m in mism if not _is_zero_fill(m[1], m[2])]
     if mism:
         failures.append("G-code block vs --export-settings disagree on: " +
                         "; ".join(f"{k}: gcode={a!r} json={b!r}" for k, a, b in mism[:10]))
