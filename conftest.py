@@ -142,12 +142,16 @@ def seeded_data_dir(tmp_path_factory):
             returncode=2,
         )
     dest = tmp_path_factory.mktemp("data_dir_seed")
-    subprocess.run(
-        [sys.executable, str(REPO_ROOT / "parity" / "make_seed.py"),
-         "--out", str(dest), "--repo", str(src), "--force",
-         "--vendor", "BBL", "--vendor", "Custom"],
-        check=True, capture_output=True,
-    )
+    try:
+        subprocess.run(
+            [sys.executable, str(REPO_ROOT / "parity" / "make_seed.py"),
+             "--out", str(dest), "--repo", str(src), "--force",
+             "--vendor", "BBL", "--vendor", "Custom"],
+            check=True, capture_output=True, text=True,
+        )
+    except subprocess.CalledProcessError as exc:
+        pytest.exit("generating the datadir seed from %s failed: %s"
+                    % (src, (exc.stderr or exc.stdout or str(exc)).strip()), returncode=2)
     return dest
 
 

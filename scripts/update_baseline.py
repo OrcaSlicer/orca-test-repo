@@ -61,12 +61,16 @@ def main() -> int:
         tmp_path = Path(tmp)
         datadir = tmp_path / "datadir"
         outputdir = tmp_path / "result"
-        subprocess.run(
+        seed = subprocess.run(
             [sys.executable, str(REPO_ROOT / "parity" / "make_seed.py"),
              "--out", str(datadir), "--repo", str(args.orca_source), "--force",
              "--vendor", "BBL", "--vendor", "Custom"],
-            check=True, capture_output=True,
+            capture_output=True, text=True,
         )
+        if seed.returncode != 0:
+            print(f"ERROR: generating the datadir seed failed: {(seed.stderr or seed.stdout).strip()}",
+                  file=sys.stderr)
+            return 1
         outputdir.mkdir()
 
         inputs = sorted(TEST_PROJECTS.glob("*.3mf"))
