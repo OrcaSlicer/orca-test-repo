@@ -27,7 +27,7 @@
     },
     {
       "id": "cube-flag-injection",
-      "description": "CLI slices with --sparse-infill-density 25%; RB measures whether the injected value survives the GUI reopen (BUG-34 sentinel: it currently does not).",
+      "description": "Keep-green sentinel: CLI slices with --sparse-infill-density 25%; RB checks the injected value survives the GUI reopen. The CLI records command-line overrides in different_settings_to_system, so the reopened slice matches lane C; a divergence here means overrides are being dropped on reopen again.",
       "input": "fixtures/20mmbox-LF.stl",
       "flags": {
         "sparse-infill-density": "25%"
@@ -35,28 +35,6 @@
       "lanes": [
         "C",
         "RB"
-      ],
-      "expect": [
-        {
-          "section": "*",
-          "key": "sparse_infill_density*"
-        },
-        {
-          "section": "gcode",
-          "key": "*"
-        },
-        {
-          "section": "gcode_header",
-          "key": "model printing time"
-        },
-        {
-          "section": "slice_info",
-          "key": "prediction"
-        },
-        {
-          "section": "slice_info",
-          "key": "weight"
-        }
       ]
     },
     {
@@ -200,13 +178,13 @@
     },
     {
       "id": "mixed-filament-sublayer",
-      "description": "Same mix in sub-layer mode, GUI-saved (enable_mixed_color_sublayer = 1, listed in different_settings_to_system), so every layer after the first is two passes, 0.08 + 0.12 mm. The CLI keeps the project's dirty list, so the setting survives the GUI reopen; a command-line override does not (mixed-filament-sublayer-flag-reopen).",
+      "description": "Same mix in sub-layer mode, GUI-saved (enable_mixed_color_sublayer = 1, listed in different_settings_to_system), so every layer after the first is two passes, 0.08 + 0.12 mm. The CLI keeps the project's dirty list, so the setting survives the GUI reopen; the command-line form of the same setting is covered by mixed-filament-sublayer-flag-reopen.",
       "input": "fixtures/mixed_filament_sublayer.3mf",
       "flags": {}
     },
     {
       "id": "mixed-filament-sublayer-flag-reopen",
-      "description": "Sentinel: the whole-layer mix sliced with --enable-mixed-color-sublayer=1. The CLI does not record a command-line override in different_settings_to_system (BUG-34 family), so on reopen the GUI resets enable_mixed_color_sublayer to the preset's 0 and re-slices in whole-layer mode. Remove the expectations once CLI flag overrides are recorded in the dirty list.",
+      "description": "Keep-green sentinel: the whole-layer mix sliced with --enable-mixed-color-sublayer=1. The CLI records the override in different_settings_to_system, so on reopen the GUI keeps sub-layer mode and re-slices the same G-code; a divergence here means command-line overrides are being dropped on reopen again.",
       "input": "fixtures/mixed_filament_whole_layer.3mf",
       "flags": {
         "enable-mixed-color-sublayer=1": ""
@@ -214,32 +192,6 @@
       "lanes": [
         "C",
         "RB"
-      ],
-      "expect": [
-        {
-          "section": "*",
-          "key": "enable_mixed_color_sublayer*"
-        },
-        {
-          "section": "gcode",
-          "key": "*"
-        },
-        {
-          "section": "gcode_header",
-          "key": "model printing time"
-        },
-        {
-          "section": "slice_info",
-          "key": "prediction"
-        },
-        {
-          "section": "slice_info",
-          "key": "weight"
-        },
-        {
-          "section": "slice_info",
-          "key": "first_layer_time"
-        }
       ]
     }
   ]
