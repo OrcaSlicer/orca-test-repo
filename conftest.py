@@ -54,10 +54,12 @@ def pytest_addoption(parser):
         "--effect-sample",
         action="store",
         type=int,
-        default=15,
+        default=0,
         help="How many landed options test_cli_overrides.py's effect stage re-slices one at a "
              "time to check the value actually changes the G-code (a daily-rotating but "
-             "reproducible-within-a-day sample; 0 disables the stage). Each costs one slice.",
+             "reproducible-within-a-day sample). Each costs one slice. Off by default: the "
+             "stage belongs to OrcaSlicer's nightly parity workflow (--effect-full, sharded), "
+             "not to run_test.py's per-build run.",
     )
     parser.addoption(
         "--effect-full",

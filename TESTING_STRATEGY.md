@@ -12,8 +12,8 @@ imports OrcaSlicer source.
    round-trips) of full slicing runs on committed fixtures, scored as
    metrics with a known-differences ledger; never gates. Needs an X-capable
    environment and an OrcaSlicer checkout/AppImage for `resources/`
-   (`ORCA_SLICER_ROOT`); see `parity/README.md`.
-
+   (`ORCA_SLICER_ROOT`); see `parity/README.md`. Runs nightly in
+   OrcaSlicer's `parity_nightly.yml`, never from `run_test.py`.
 
 1. **Declarative regression cases** (`cases/**/*.yaml`, run by
    `test_cases.py`) -- fast, targeted checks that a known *class* of input
@@ -48,7 +48,9 @@ imports OrcaSlicer source.
    of the ~800 print/printer/filament options is set on the command line with
    a valid, distinctive value and must land in the merged config and in the
    G-code of a real slice (proving CLI > preset > 3mf precedence per key).
-   See "Override sweep" below.
+   Its effect stage (does the value change the G-code) is off by default and
+   runs with `--effect-full --effect-shard I/2` in OrcaSlicer's nightly
+   `parity_nightly.yml`. See "Override sweep" below.
 7. **CLI flag behaviour** (`cases/cli-flags/`) -- the CLI-only action,
    transform and misc flags (`--scale`, `--rotate-*`, `--export-stl`,
    `--min-save`, `--mtcpp`, ...) each with an observable-effect assertion.
@@ -523,7 +525,7 @@ pinned to four CPUs), and a third worker gains little because every slice
 is itself multithreaded. Session-scoped fixtures (the datadir seed, the
 override sweep's baseline) run once per worker, so the sweep's invocation
 count in the log is higher than in a serial run. Add `-n 2` to a local run
-for the same effect; the parity branch's `--effect-shard` runs stay serial.
+for the same effect; the nightly `--effect-shard` runs stay serial.
 
 Invoking pytest directly works the same way, with one gotcha: **always
 include an explicit path argument (e.g. `.`)** alongside `--orca-bin`:

@@ -22,9 +22,10 @@ line and verify it shows up:
                     ignored by the slicing pipeline, unless it is
                     legitimately inert for this model, e.g. support options
                     with supports off). Reported, not asserted. Because it
-                    cannot batch, routine runs take a daily-rotating sample
-                    (--effect-sample, default 15); --effect-full sweeps
-                    every landed option.
+                    cannot batch, it is off unless asked for:
+                    --effect-sample N takes a daily-rotating sample,
+                    --effect-full sweeps every landed option (the nightly
+                    parity workflow, sharded by --effect-shard).
 
 Options are sent in batches; a batch that fails is bisected down to the
 single option(s) responsible. Every option ends up in exactly one bucket:
