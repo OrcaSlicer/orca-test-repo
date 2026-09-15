@@ -50,6 +50,7 @@ import random
 import re
 import subprocess
 import sys
+import zlib
 from pathlib import Path
 
 import pytest
@@ -126,7 +127,7 @@ UNOBSERVABLE = {
     "time_cost",
 }
 
-# Reads its value (Print.cpp:4628 applies filament_shrink to the model) yet
+# Reads its value (the print scales the model by filament_shrink) yet
 # produces byte-identical G-code -- kept out of UNOBSERVABLE so it stays in
 # the inert list as a finding rather than being quietly exempted.
 SUSPECTED_IGNORED = {"filament_shrink"}
@@ -401,8 +402,9 @@ def override_results(orca_bin, seeded_data_dir, tmp_path_factory, request):
     for i in range(0, len(landed), BATCH):
         gcode.update(_bisect(landed[i:i + BATCH], gcode_runner))
 
-    # stage "effect": one slice per option against a baseline slice. Sampled by
-    # default, on a date-seeded rotation, because it cannot batch.
+    # stage "effect": one slice per option against a baseline slice. It cannot
+    # batch, so it is off unless --effect-sample (date-seeded rotation) or
+    # --effect-full asks for it.
     effect_keys = sorted(k for k, b in gcode.items() if b == "landed")
     if not request.config.getoption("--effect-full"):
         sample = request.config.getoption("--effect-sample")
@@ -417,9 +419,9 @@ def override_results(orca_bin, seeded_data_dir, tmp_path_factory, request):
         routing = json.loads((ROUTING).read_text())
         mine = {k for keys in routing["shards"].get(str(i), {}).values() for k in keys}
         unrouted = [k for k in effect_keys if k not in routing["routing"]]
-        # options with no recorded fixture are spread round-robin so a new option
-        # is never silently dropped from every shard
-        mine |= {k for j, k in enumerate(sorted(unrouted)) if j % n == i}
+        # options with no recorded fixture go to a shard chosen by their name, so
+        # each lands in exactly one shard whatever else landed on that runner
+        mine |= {k for k in unrouted if zlib.crc32(k.encode()) % n == i}
         effect_keys = [k for k in effect_keys if k in mine]
         print(f"\n[override sweep] shard {i}/{n}: {len(effect_keys)} of the landed options")
     effect, effect_probes, effect_variant = {}, dict(probes), {}

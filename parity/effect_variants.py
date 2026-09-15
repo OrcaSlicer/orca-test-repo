@@ -19,6 +19,7 @@ Measured 2026-09-03/04 against RelWithDebInfo b81c0e30c1: 327 of the 450
 classifiable inert options change the G-code under these fixtures.
 See FIXTURE_MEASUREMENT.md.
 """
+import functools
 import json
 from pathlib import Path
 
@@ -187,9 +188,14 @@ def specs(datadir, model_stl, flat_dir=None):
     return v
 
 
+@functools.lru_cache(maxsize=1)
+def _routing_table():
+    return json.loads(ROUTING.read_text())["routing"]
+
+
 def route(key, available):
     """Cheapest variant measured to show this option, or 'cube' as the floor."""
-    table = json.loads(ROUTING.read_text())["routing"]
+    table = _routing_table()
     name = table.get(key, "cube")
     if name == "bed":                       # one plate per bed type
         base = key.replace("_initial_layer", "").replace("_plate_temp", "")
