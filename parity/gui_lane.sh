@@ -40,8 +40,8 @@ SLICE_TIMEOUT="${SLICE_TIMEOUT:-600}"
 D=":$DISPLAY_NUM"
 
 # session-* state, gui/xvfb logs live in SESSION_DIR (shared across reused
-# jobs); screenshots go in RIG, tagged per job so G and RB don't collide
-SESSION="${SESSION_DIR:-${RIG:-}}"
+# jobs); screenshots go in RIG, tagged per job so G and RB don't collide.
+# SESSION is set in the dispatch below, once RIG is known.
 shot() { DISPLAY=$D import -window root "$RIG/${JOB_TAG:+$JOB_TAG-}$1.png" 2>/dev/null || true; }
 now() { date +%s; }
 
@@ -229,21 +229,26 @@ do_job() {
 }
 
 do_stop() {
-    local pid
-    pid=$(cat "$SESSION/session-pid" 2>/dev/null || true)
-    [ -n "$pid" ] && kill "$pid" 2>/dev/null || true
-    rm -f "$SESSION/session-pid" "$SESSION/session-main" "$SESSION/session-loaded"
+    local pid f
+    # the GUI first, then the display servers this script started, if any
+    for f in session-pid openbox.pid xvfb.pid; do
+        pid=$(cat "$SESSION/$f" 2>/dev/null || true)
+        [ -n "$pid" ] && kill "$pid" 2>/dev/null || true
+        rm -f "$SESSION/$f"
+    done
+    rm -f "$SESSION/session-main" "$SESSION/session-loaded"
 }
 
 # --- dispatch ----------------------------------------------------------------
 case "${1:-}" in
-    start) RIG="${RIG:?RIG required}"; do_start "${2:-}" ;;
-    job)   RIG="${RIG:?RIG required}"; do_job "$2" "$3" "${4:-}" ;;
-    stop)  RIG="${RIG:?RIG required}"; do_stop ;;
+    start) RIG="${RIG:?RIG required}"; SESSION="${SESSION_DIR:-$RIG}"; do_start "${2:-}" ;;
+    job)   RIG="${RIG:?RIG required}"; SESSION="${SESSION_DIR:-$RIG}"; do_job "$2" "$3" "${4:-}" ;;
+    stop)  RIG="${RIG:?RIG required}"; SESSION="${SESSION_DIR:-$RIG}"; do_stop ;;
     *)
         # one-shot: launch, do the job, tear down (backward-compatible interface)
         IN="$1"; OUT="$2"; PROJECT_OUT="${3:-}"
         RIG="${RIG:-$(dirname "$OUT")/rig}"
+        SESSION="${SESSION_DIR:-$RIG}"
         ORCA_DATADIR="${ORCA_DATADIR:-$RIG/datadir}"
         trap 'do_stop' EXIT
         do_start "$IN"
