@@ -7,6 +7,14 @@ imports OrcaSlicer source.
 
 ## Layers
 
+0. **GUI-vs-CLI parity harness** (`parity/`, run by `parity/run_parity.py`)
+   -- four-lane comparison (GUI headless under Xvfb, CLI, and both
+   round-trips) of full slicing runs on committed fixtures, scored as
+   metrics with a known-differences ledger; never gates. Needs an X-capable
+   environment and an OrcaSlicer checkout/AppImage for `resources/`
+   (`ORCA_SLICER_ROOT`); see `parity/README.md`. Runs nightly in
+   OrcaSlicer's `parity_nightly.yml`, never from `run_test.py`.
+
 1. **Declarative regression cases** (`cases/**/*.yaml`, run by
    `test_cases.py`) -- fast, targeted checks that a known *class* of input
    keeps behaving correctly: crash resistance under crafted arguments
@@ -24,23 +32,25 @@ imports OrcaSlicer source.
    own tolerance, see `gcode_metrics.py`). A whole-pipeline safety net that
    catches output drift no targeted case covers, including "same size,
    different print". See "Golden-slice layer" below.
-8. **Per-object settings** (`cases/per-object/`) -- settings embedded in a
+4. **Per-object settings** (`cases/per-object/`) -- settings embedded in a
    3mf at object level (`model_settings.config`) and per layer range
    (`layer_config_ranges.xml`) are applied, take precedence over CLI
    overrides, and survive `--export-3mf`; asserted through slicing metrics
    since the plate config block only records global values.
-4. **Settings import / export matrix** (`test_settings_import.py` +
+5. **Settings import / export matrix** (`test_settings_import.py` +
    `cases/settings-import/`) -- every way of getting settings *into* a slice
    (3mf embedded config, `--load-settings` machine/process presets,
    `--load-filaments`, CLI `--option=value` overrides, `--uptodate`) crossed
    with every way they come *out* (G-code config block, exported 3mf, JSON
    from `--export-settings`), verifying the recorded settings are the imported
    ones. See "Settings import / export" below.
-5. **Config-option override sweep** (`test_cli_overrides.py`) -- *every* one
+6. **Config-option override sweep** (`test_cli_overrides.py`) -- *every* one
    of the ~800 print/printer/filament options is set on the command line with
    a valid, distinctive value and must land in the merged config and in the
    G-code of a real slice (proving CLI > preset > 3mf precedence per key).
-   See "Override sweep" below.
+   Its effect stage (does the value change the G-code) is off by default and
+   runs with `--effect-full --effect-shard I/2` in OrcaSlicer's nightly
+   `parity_nightly.yml`. See "Override sweep" below.
 7. **CLI flag behaviour** (`cases/cli-flags/`) -- the CLI-only action,
    transform and misc flags (`--scale`, `--rotate-*`, `--export-stl`,
    `--min-save`, `--mtcpp`, ...) each with an observable-effect assertion.
@@ -515,7 +525,7 @@ pinned to four CPUs), and a third worker gains little because every slice
 is itself multithreaded. Session-scoped fixtures (the datadir seed, the
 override sweep's baseline) run once per worker, so the sweep's invocation
 count in the log is higher than in a serial run. Add `-n 2` to a local run
-for the same effect; the parity branch's `--effect-shard` runs stay serial.
+for the same effect; the nightly `--effect-shard` runs stay serial.
 
 Invoking pytest directly works the same way, with one gotcha: **always
 include an explicit path argument (e.g. `.`)** alongside `--orca-bin`:
@@ -568,8 +578,11 @@ coupling is the binary under test, supplied at run time:
 # or: ORCA_BIN=/path/to/orca-slicer python -m pytest . -c pytest.ini
 ```
 
-`data_dir/` holds checked-in printer/filament profiles used to seed each
-test's private `--datadir` copy (tests never point at the repo's own
-`data_dir/`, since the CLI writes machine-id/cache files into it).
+The datadir seed (system printer/filament profiles + app config) is
+generated once per session from the OrcaSlicer source checkout by
+`parity/make_seed.py`, so profiles always match the binary under test;
+each test still gets a private `--datadir` copy, since the CLI writes
+machine-id/cache files into it. This requires `--orca-source`/`$ORCA_SOURCE`
+(auto-detected by `run_test.py`; CI provides `$GITHUB_WORKSPACE`).
 `test_projects/` holds the fixture models. Everything else the tests create
 lives in pytest temp directories.
