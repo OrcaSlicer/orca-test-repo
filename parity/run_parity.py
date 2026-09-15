@@ -149,10 +149,14 @@ def run(cmd, cwd, timeout, logfile, env=None):
 
 
 def project_settings(path):
-    with zipfile.ZipFile(path) as z:
-        return cmp3mf.flatten_settings(
-            json.loads(z.read("Metadata/project_settings.config"))
-        )
+    """The flattened project settings of a 3mf, or None if they cannot be read."""
+    try:
+        with zipfile.ZipFile(path) as z:
+            return cmp3mf.flatten_settings(
+                json.loads(z.read("Metadata/project_settings.config"))
+            )
+    except (OSError, KeyError, zipfile.BadZipFile, ValueError):
+        return None
 
 
 # ---------------------------------------------------------------- diff atoms
@@ -204,10 +208,14 @@ def compare_pair(a, b, label_a, label_b, outdir, tag):
     tpath = os.path.join(outdir, "compare_%s.txt" % tag)
     cmd = [sys.executable, os.path.join(HERE, "compare_gcode3mf.py"),
            "--label-a", label_a, "--label-b", label_b, "--json", jpath, a, b]
-    with open(tpath, "w") as tf:
-        subprocess.run(cmd, stdout=tf, stderr=subprocess.STDOUT, timeout=300)
-    with open(jpath) as f:
-        return json.load(f)
+    try:
+        with open(tpath, "w") as tf:
+            subprocess.run(cmd, stdout=tf, stderr=subprocess.STDOUT, timeout=300)
+        with open(jpath) as f:
+            return json.load(f)
+    except (OSError, ValueError, subprocess.TimeoutExpired) as exc:
+        # one broken comparison is recorded, not allowed to end the whole run
+        return {"error": "comparator failed (%s); see %s" % (exc, tpath)}
 
 
 # ---------------------------------------------------------------- lanes
@@ -383,6 +391,12 @@ def run_fixture(fx, lanes, display, out, args, repo, ledger):
             continue
         flog("compare %s (%s vs %s)" % (tag, la, lb))
         cjson = compare_pair(a, b, la, lb, fdir, tag)
+        if "error" in cjson:
+            flog("compare %s failed: %s" % (tag, cjson["error"]))
+            entry["comparisons"][tag] = {"gcode_identical": None, "similarity": None,
+                                         "known_diffs": 0, "new_diffs": 0, "new": [],
+                                         "error": cjson["error"]}
+            continue
         # fixture-level expected diffs (documented behavior this fixture
         # deliberately provokes) are treated as known for this fixture only
         fx_ledger = {"entries": ledger["entries"] + [
@@ -402,9 +416,13 @@ def run_fixture(fx, lanes, display, out, args, repo, ledger):
     if rb.get("project") and results.get("C", {}).get("output"):
         before = project_settings(results["C"]["output"])
         after = project_settings(rb["project"])
-        changed = sorted(k for k in before if k in after and before[k] != after[k])
-        entry["settings_survival"] = {"changed_on_reopen": len(changed),
-                                      "keys": changed[:50]}
+        if before is None or after is None:
+            entry["settings_survival"] = {"error": "project settings unreadable in %s"
+                                          % (results["C"]["output"] if before is None else rb["project"])}
+        else:
+            changed = sorted(k for k in before if k in after and before[k] != after[k])
+            entry["settings_survival"] = {"changed_on_reopen": len(changed),
+                                          "keys": changed[:50]}
     return entry
 
 
@@ -503,6 +521,11 @@ def main():
         disp = display_q.get()
         try:
             return run_fixture(fx, lanes, disp, out, args, repo, ledger)
+        except Exception as exc:
+            # a harness error in one fixture is recorded; the others still run
+            log("fixture %s failed: %s: %s" % (fx["id"], type(exc).__name__, exc))
+            return {"id": fx["id"], "lanes": {}, "comparisons": {},
+                    "error": "%s: %s" % (type(exc).__name__, exc)}
         finally:
             display_q.put(disp)
 
@@ -523,9 +546,15 @@ def main():
         for f in scorecard["fixtures"]
         for c in f["comparisons"].values()
     )
+    errors = sum(
+        ("error" in f) + ("error" in f.get("settings_survival", {}))
+        + sum("error" in c for c in f["comparisons"].values())
+        for f in scorecard["fixtures"]
+    )
     scorecard["summary"] = {
         "fixtures": len(scorecard["fixtures"]),
         "new_divergences": new_total,
+        "errors": errors,
     }
 
     spath = os.path.join(out, "scorecard.json")
@@ -538,6 +567,8 @@ def main():
              "new divergences: **%d**" % new_total, ""]
     for f_ in scorecard["fixtures"]:
         lines.append("## %s" % f_["id"])
+        if "error" in f_:
+            lines.append("- ERROR: %s" % f_["error"])
         for lane, r in f_["lanes"].items():
             lines.append("- lane %s: exit %s (%ss)" % (lane, r["exit"], r["seconds"]))
         for tag, c in f_["comparisons"].items():
@@ -546,13 +577,18 @@ def main():
                 % (tag, c["gcode_identical"], c["similarity"],
                    c["known_diffs"], c["new_diffs"])
             )
+            if "error" in c:
+                lines.append("    - ERROR: %s" % c["error"])
             for n in c["new"]:
                 lines.append("    - NEW: %s / %s" % (n["section"], n["key"]))
         if "settings_survival" in f_:
             s = f_["settings_survival"]
-            lines.append("- settings changed on CLI->GUI reopen: %d" % s["changed_on_reopen"])
-            for k in s["keys"][:10]:
-                lines.append("    - %s" % k)
+            if "error" in s:
+                lines.append("- settings survival: ERROR: %s" % s["error"])
+            else:
+                lines.append("- settings changed on CLI->GUI reopen: %d" % s["changed_on_reopen"])
+                for k in s["keys"][:10]:
+                    lines.append("    - %s" % k)
         lines.append("")
     with open(os.path.join(out, "report.md"), "w") as f:
         f.write("\n".join(lines) + "\n")
