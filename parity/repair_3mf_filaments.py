@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """Normalise the per-filament vectors of a CLI-exported project.
 
 `--export-3mf` writes filament_settings_id and filament_ids with one entry per

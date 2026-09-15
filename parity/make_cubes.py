@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """Two 20 mm cubes at fixed bed coordinates, for the by-object print sequence.
 
 `print_sequence = by object` enforces extruder_clearance_radius (40 mm) between

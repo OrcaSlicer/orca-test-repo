@@ -3,9 +3,9 @@
 Measured 2026-09-03/04 against `RelWithDebInfo` at OrcaSlicer b81c0e30c1.
 ~1000 slices across eleven passes, 3 workers (a single slice already saturates
 ~12 of 32 cores through TBB, so more processes buy sublinear throughput).
-Every option is re-probed against its own fixture's merged baseline -- the
-current sweep probes against the Bunny 3mf but slices the cube, which silently
-no-ops 28 options without ever testing them.
+Every option is re-probed against its own fixture's merged baseline. The sweep
+used to probe against the Bunny 3mf but slice the cube, which silently no-oped
+28 options without ever testing them; it now probes each fixture's own config.
 
 **327 of the 450 options the cube-based effect stage calls inert change the
 G-code under these fixtures (72%). 76 remain inert; 47 cannot move a
@@ -201,15 +201,17 @@ printer or fuzzy skin, 86 a multi-filament project (55 s).
 
 Routing is not a saving against "everything on the torture plate" -- it is more,
 because the multi-filament tier is intrinsically expensive and cannot run
-anywhere cheaper. It is a 2.5x saving against the only coverage-equivalent
-alternative, running every option on the most capable fixture: 360 min vs
-886 min serial on a 4-vCPU runner.
+anywhere cheaper. It is a saving against the only coverage-equivalent
+alternative, running every option on the most capable fixture.
 
 Sharding is what makes it fit CI. `--effect-shard I/N` selects one shard;
-`effect_routing.json` carries an 8-way split balanced by measured slice cost,
-keeping variants whole where possible and splitting only the oversized ones
-(a shard that re-slices a variant pays its baseline again, which is the ~4%
-gap between 360 and 376 min serial). Longest shard 52.9 min against the
-60-minute timeout. The shards are disjoint and cover every landed option
-exactly once; options with no recorded fixture are spread round-robin so a
-newly added option is never silently dropped from every shard.
+`effect_routing.json` carries a 2-way split balanced by slice cost measured on
+CI (run 33877144840; an earlier local model over-estimated it by about 10x and
+drove an 8-way split), keeping variants whole where possible and splitting only
+the oversized ones, since a shard that re-slices a variant pays its baseline
+again. Measured on a 4-vCPU runner on 2026-09-14: 24m54s and 48m20s, then 20m28s
+and 23m30s once the CLI stopped reloading the vendor profile tree for every
+system preset file, against the 60-minute timeout. The shards are disjoint and
+cover every landed option exactly once; options with no recorded fixture are
+spread round-robin so a newly added option is never silently dropped from every
+shard.

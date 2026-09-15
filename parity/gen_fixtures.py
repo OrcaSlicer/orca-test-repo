@@ -12,8 +12,8 @@ Fixtures produced:
                           paths: GUI dialog vs CLI --convert-unit)
   cube_sunken.3mf         project with the cube half below the bed
   cube_partly_outside.3mf project with the cube half off the bed edge in XY
-                          (GUI warns and slices, CLI aborts)
-  presets/process_deviant.json  user process preset with `inherits` and no
+                          (GUI disables slicing, CLI aborts)
+  presets/0.20mm Deviant @parity.json  user process preset with `inherits` and no
                           compatible_printers (exercises the CLI compat gate)
 
 Stdlib only.

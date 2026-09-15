@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """Generate parity/torture.stl -- one plate of small primitives that between
 them exercise the geometry-gated slicer features the 20 mm cube cannot:
 overhangs at several angles, a flat bridge, vertical holes (incl. a

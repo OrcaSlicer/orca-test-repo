@@ -119,8 +119,8 @@ def build_from_resources(args):
             # opening a second project into a live session would otherwise raise,
             # so a reused GUI session can load the next fixture unattended:
             #   save_project_choise "no" -> discard the project without saving
-            #     (Plater.cpp:17554); save_preset_choise "2" -> Action::Discard
-            #     the modified presets (UnsavedChangesDialog.cpp:839)
+            #     (Plater's close-project prompt); save_preset_choise "2" ->
+            #     Action::Discard the modified presets (UnsavedChangesDialog)
             "save_project_choise": "no",
             "save_preset_choise": "2",
         },

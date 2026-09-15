@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """Generate parity/fixtures/vase.stl -- one solid tapered cone, alone on the
 plate, for the spiral-vase baseline.
 
