@@ -31,12 +31,16 @@
 #   RIG            working dir for logs/screenshots/session state
 #   DISPLAY_NUM    Xvfb display number (default 99)
 #   SLICE_TIMEOUT  max seconds to wait for a slice (default 600)
+#   WINDOW_TIMEOUT max seconds to wait for the GUI's first window (default 180)
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ORCA_BIN="${ORCA_BIN:-${ORCA_SLICER_ROOT:-/nonexistent}/build/src/RelWithDebInfo/orca-slicer}"
 DISPLAY_NUM="${DISPLAY_NUM:-99}"
 SLICE_TIMEOUT="${SLICE_TIMEOUT:-600}"
+# a crashed GUI is detected by its pid, not by this expiring, so the budget only
+# has to cover a slow start on a contended runner
+WINDOW_TIMEOUT="${WINDOW_TIMEOUT:-180}"
 D=":$DISPLAY_NUM"
 
 # session-* state, gui/xvfb logs live in SESSION_DIR (shared across reused
@@ -149,6 +153,24 @@ clear_dialogs() {
     done
 }
 
+# wait for the GUI's first window, failing early if the process is gone. Exits
+# 3 when the window never arrives, 8 when the GUI died before showing one.
+wait_for_window() {
+    local pid="$1" deadline=$(( $(now) + WINDOW_TIMEOUT ))
+    while [ "$(now)" -lt "$deadline" ]; do
+        have_win "OrcaSlicer" && return 0
+        if ! kill -0 "$pid" 2>/dev/null; then
+            # it may have mapped a window and exited between the two checks
+            have_win "OrcaSlicer" && return 0
+            echo "the GUI exited during startup, see $SESSION/gui.log" >&2
+            return 8
+        fi
+        sleep 0.2
+    done
+    echo "GUI window never appeared within ${WINDOW_TIMEOUT}s" >&2
+    return 3
+}
+
 ensure_display() {
     if ! DISPLAY=$D xdotool getdisplaygeometry >/dev/null 2>&1; then
         Xvfb "$D" -screen 0 1920x1080x24 -nolisten tcp > "$SESSION/xvfb.log" 2>&1 &
@@ -178,7 +200,11 @@ do_start() {
         ${input:+"$input"} > "$SESSION/gui.log" 2>&1 &
     echo $! > "$SESSION/session-pid"
 
-    poll 60 have_win "OrcaSlicer" || { echo "GUI window never appeared" >&2; exit 3; }
+    # wait for the first window, but stop the moment the GUI exits instead of
+    # sitting out the whole budget and then blaming the window: a GUI that died
+    # on startup says so in gui.log, and that is a different failure
+    local gui_pid; gui_pid=$(cat "$SESSION/session-pid")
+    wait_for_window "$gui_pid" || exit $?
     resolve_main
     DISPLAY=$D xdotool windowmove "$MAIN" 0 0 windowsize "$MAIN" 1920 1080 || true
 
