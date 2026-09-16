@@ -54,9 +54,29 @@ poll() {
     done
     return 1
 }
-# an unmatched search is a normal answer ("no such window"), not a failure:
-# without the `|| true` pipefail turns it into one and set -e kills the script
-find_win() { DISPLAY=$D xdotool search --name "$1" 2>/dev/null | tail -1 || true; }
+# scratch file for one xdotool stderr, see find_wins
+XDO_ERR=$(mktemp -t gui_lane_xdo.XXXXXX)
+trap 'rm -f "$XDO_ERR"' EXIT
+
+# xdotool walks the window tree (QueryTree) and reads a property on every window
+# it finds. A window destroyed between those two steps -- a dialog closing while
+# the GUI settles -- makes Xlib raise BadWindow and xdotool abort: exit 1, no
+# output, the error on stderr. That is indistinguishable from "no such window"
+# unless stderr is read, so an aborted walk is retried rather than reported as
+# an empty result. An unmatched search is a normal answer, not a failure, so it
+# must not fail the pipeline either: under pipefail set -e would kill the script.
+find_wins() {
+    local out
+    for _ in 1 2 3; do
+        : > "$XDO_ERR"
+        out=$(DISPLAY=$D xdotool search --name "$1" 2>"$XDO_ERR") || true
+        grep -q "^X Error" "$XDO_ERR" || { printf '%s' "$out"; return 0; }
+        sleep 0.1
+    done
+    printf '%s' "$out"          # three aborted walks running: report what we saw
+    return 0
+}
+find_win() { find_wins "$1" | tail -1; }
 have_win() { [ -n "$(find_win "$1")" ]; }
 gone_win() { [ -z "$(find_win "$1")" ]; }
 
@@ -65,8 +85,9 @@ gone_win() { [ -z "$(find_win "$1")" ]; }
 MAIN=""
 
 # re-resolve the main window id after something may have replaced it (a dialog
-# closing, a load). An empty search here is transient -- the window is being
-# remapped, not gone -- so keep the last known id rather than dropping it.
+# closing, a load). Belt and braces with the retry in find_wins: an empty answer
+# here is far more likely to be a lost walk than a lost window, so keep the last
+# known id rather than dropping it.
 resolve_main() {
     local found; found=$(find_win "OrcaSlicer")
     [ -n "$found" ] && MAIN="$found"
@@ -91,7 +112,7 @@ wait_file_stable() {
 # point. Returns 0 if it answered at least one dialog, 1 if none were present.
 sweep_dialogs() {
     local answered=1
-    for w in $(DISPLAY=$D xdotool search --name "." 2>/dev/null); do
+    for w in $(find_wins "."); do
         [ "$w" = "$MAIN" ] && continue
         local n
         n=$(DISPLAY=$D xdotool getwindowname "$w" 2>/dev/null || true)
