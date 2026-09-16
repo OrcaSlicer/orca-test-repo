@@ -31,12 +31,20 @@
 #   RIG            working dir for logs/screenshots/session state
 #   DISPLAY_NUM    Xvfb display number (default 99)
 #   SLICE_TIMEOUT  max seconds to wait for a slice (default 600)
+#   WINDOW_TIMEOUT max seconds to wait for the GUI's first window (default 180)
+#
+# The rig shares a display with nothing: it ignores windows that predate its own
+# launch and scopes every search to its GUI's pid, so a foreign OrcaSlicer on the
+# same display is never found, driven, or have its dialogs answered.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ORCA_BIN="${ORCA_BIN:-${ORCA_SLICER_ROOT:-/nonexistent}/build/src/RelWithDebInfo/orca-slicer}"
 DISPLAY_NUM="${DISPLAY_NUM:-99}"
 SLICE_TIMEOUT="${SLICE_TIMEOUT:-600}"
+# a crashed GUI is detected by its pid, not by this expiring, so the budget only
+# has to cover a slow start on a contended runner
+WINDOW_TIMEOUT="${WINDOW_TIMEOUT:-180}"
 D=":$DISPLAY_NUM"
 
 # session-* state, gui/xvfb logs live in SESSION_DIR (shared across reused
@@ -58,6 +66,13 @@ poll() {
 XDO_ERR=$(mktemp -t gui_lane_xdo.XXXXXX)
 trap 'rm -f "$XDO_ERR"' EXIT
 
+# Every window search is scoped to our own GUI once its pid is known, so a
+# foreign OrcaSlicer sharing the display -- another session's headless run, a
+# stray window on a reused Xvfb -- can never be picked up and driven. xdotool
+# ORs its criteria by default, hence --all. Empty until do_start resolves it,
+# and left empty if the app sets no _NET_WM_PID, which is the old behaviour.
+XDO_SCOPE=()
+
 # xdotool walks the window tree (QueryTree) and reads a property on every window
 # it finds. A window destroyed between those two steps -- a dialog closing while
 # the GUI settles -- makes Xlib raise BadWindow and xdotool abort: exit 1, no
@@ -69,7 +84,7 @@ find_wins() {
     local out
     for _ in 1 2 3; do
         : > "$XDO_ERR"
-        out=$(DISPLAY=$D xdotool search --name "$1" 2>"$XDO_ERR") || true
+        out=$(DISPLAY=$D xdotool search "${XDO_SCOPE[@]}" --name "$1" 2>"$XDO_ERR") || true
         grep -q "^X Error" "$XDO_ERR" || { printf '%s' "$out"; return 0; }
         sleep 0.1
     done
@@ -149,6 +164,52 @@ clear_dialogs() {
     done
 }
 
+# wait for the GUI's first window, failing early if the process is gone. Exits
+# 3 when the window never arrives, 8 when the GUI died before showing one.
+wait_for_window() {
+    local pid="$1" known="$2" deadline=$(( $(now) + WINDOW_TIMEOUT ))
+    while [ "$(now)" -lt "$deadline" ]; do
+        new_win "$known" && return 0
+        if ! kill -0 "$pid" 2>/dev/null; then
+            # it may have mapped a window and exited between the two checks
+            new_win "$known" && return 0
+            echo "the GUI exited during startup, see $SESSION/gui.log" >&2
+            return 8
+        fi
+        sleep 0.2
+    done
+    echo "GUI window never appeared within ${WINDOW_TIMEOUT}s" >&2
+    return 3
+}
+
+# pin every later search to the process that owns the window we accepted. Read
+# from the window rather than the launched pid so a non-exec launcher wrapper
+# cannot pin us to the wrapper; if the app sets no _NET_WM_PID, stay unscoped.
+adopt_gui_pid() {
+    local pid
+    # xdotool reads _NET_WM_PID too, and unlike xprop it is already a dependency
+    # of this rig -- the CI runner installs no x11-utils
+    pid=$(DISPLAY=$D xdotool getwindowpid "$MAIN" 2>/dev/null || true)
+    case "$pid" in
+        ''|*[!0-9]*) echo "note: no _NET_WM_PID on the main window, searches stay unscoped" >&2
+                     return 0 ;;
+    esac
+    XDO_SCOPE=(--all --pid "$pid")
+    echo "$pid" > "$SESSION/session-gui-pid"
+}
+
+# first window this launch created, ignoring any that predate it: on a shared
+# display the pre-existing ones belong to somebody else. Sets MAIN.
+new_win() {
+    local known="$1" w
+    for w in $(DISPLAY=$D xdotool search --name "OrcaSlicer" 2>/dev/null); do
+        case "$known" in *" $w "*) continue ;; esac
+        MAIN="$w"
+        return 0
+    done
+    return 1
+}
+
 ensure_display() {
     if ! DISPLAY=$D xdotool getdisplaygeometry >/dev/null 2>&1; then
         Xvfb "$D" -screen 0 1920x1080x24 -nolisten tcp > "$SESSION/xvfb.log" 2>&1 &
@@ -174,11 +235,23 @@ do_start() {
     mkdir -p "$RIG"
     ensure_display
 
+    # anything already matching belongs to another user of this display
+    # `|| true`: no foreign window is the normal answer, but xdotool exits 1 for
+    # it, and under pipefail that would take the script down with it
+    local foreign
+    foreign=" $(DISPLAY=$D xdotool search --name "OrcaSlicer" 2>/dev/null | tr '\n' ' ' || true) "
+    [ "$foreign" = "  " ] || echo "note: foreign OrcaSlicer windows on $D, ignoring them:$foreign" >&2
+
     DISPLAY=$D LIBGL_ALWAYS_SOFTWARE=1 "$ORCA_BIN" --datadir "$ORCA_DATADIR" \
         ${input:+"$input"} > "$SESSION/gui.log" 2>&1 &
     echo $! > "$SESSION/session-pid"
 
-    poll 60 have_win "OrcaSlicer" || { echo "GUI window never appeared" >&2; exit 3; }
+    # wait for the first window, but stop the moment the GUI exits instead of
+    # sitting out the whole budget and then blaming the window: a GUI that died
+    # on startup says so in gui.log, and that is a different failure
+    local gui_pid; gui_pid=$(cat "$SESSION/session-pid")
+    wait_for_window "$gui_pid" "$foreign" || exit $?
+    adopt_gui_pid
     resolve_main
     DISPLAY=$D xdotool windowmove "$MAIN" 0 0 windowsize "$MAIN" 1920 1080 || true
 
@@ -219,6 +292,9 @@ load_input() {
 
 do_job() {
     local input="$1" out="$2" project="${3:-}"
+    local pid; pid=$(cat "$SESSION/session-gui-pid" 2>/dev/null || true)
+    # an `&&` list here would be the script's exit status when there is no pid
+    if [ -n "$pid" ]; then XDO_SCOPE=(--all --pid "$pid"); fi
     MAIN=$(cat "$SESSION/session-main" 2>/dev/null || true)
     [ -n "$MAIN" ] || { echo "no GUI session to run in: start did not complete" >&2; exit 7; }
     load_input "$input"
@@ -274,7 +350,7 @@ do_stop() {
         [ -n "$pid" ] && kill "$pid" 2>/dev/null || true
         rm -f "$SESSION/$f"
     done
-    rm -f "$SESSION/session-main" "$SESSION/session-loaded"
+    rm -f "$SESSION/session-main" "$SESSION/session-loaded" "$SESSION/session-gui-pid"
 }
 
 # --- dispatch ----------------------------------------------------------------
