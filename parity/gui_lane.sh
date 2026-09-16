@@ -54,9 +54,45 @@ poll() {
     done
     return 1
 }
-find_win() { DISPLAY=$D xdotool search --name "$1" 2>/dev/null | tail -1; }
+# scratch file for one xdotool stderr, see find_wins
+XDO_ERR=$(mktemp -t gui_lane_xdo.XXXXXX)
+trap 'rm -f "$XDO_ERR"' EXIT
+
+# xdotool walks the window tree (QueryTree) and reads a property on every window
+# it finds. A window destroyed between those two steps -- a dialog closing while
+# the GUI settles -- makes Xlib raise BadWindow and xdotool abort: exit 1, no
+# output, the error on stderr. That is indistinguishable from "no such window"
+# unless stderr is read, so an aborted walk is retried rather than reported as
+# an empty result. An unmatched search is a normal answer, not a failure, so it
+# must not fail the pipeline either: under pipefail set -e would kill the script.
+find_wins() {
+    local out
+    for _ in 1 2 3; do
+        : > "$XDO_ERR"
+        out=$(DISPLAY=$D xdotool search --name "$1" 2>"$XDO_ERR") || true
+        grep -q "^X Error" "$XDO_ERR" || { printf '%s' "$out"; return 0; }
+        sleep 0.1
+    done
+    printf '%s' "$out"          # three aborted walks running: report what we saw
+    return 0
+}
+find_win() { find_wins "$1" | tail -1; }
 have_win() { [ -n "$(find_win "$1")" ]; }
 gone_win() { [ -z "$(find_win "$1")" ]; }
+
+# id of the GUI's main window, resolved by resolve_main and carried across the
+# start/job dispatch through $SESSION/session-main
+MAIN=""
+
+# re-resolve the main window id after something may have replaced it (a dialog
+# closing, a load). Belt and braces with the retry in find_wins: an empty answer
+# here is far more likely to be a lost walk than a lost window, so keep the last
+# known id rather than dropping it.
+resolve_main() {
+    local found; found=$(find_win "OrcaSlicer")
+    [ -n "$found" ] && MAIN="$found"
+    return 0
+}
 
 # wait until a file exists and its size has stopped growing (finished writing)
 wait_file_stable() {
@@ -76,7 +112,7 @@ wait_file_stable() {
 # point. Returns 0 if it answered at least one dialog, 1 if none were present.
 sweep_dialogs() {
     local answered=1
-    for w in $(DISPLAY=$D xdotool search --name "." 2>/dev/null); do
+    for w in $(find_wins "."); do
         [ "$w" = "$MAIN" ] && continue
         local n
         n=$(DISPLAY=$D xdotool getwindowname "$w" 2>/dev/null || true)
@@ -143,7 +179,7 @@ do_start() {
     echo $! > "$SESSION/session-pid"
 
     poll 60 have_win "OrcaSlicer" || { echo "GUI window never appeared" >&2; exit 3; }
-    MAIN=$(find_win "OrcaSlicer")
+    resolve_main
     DISPLAY=$D xdotool windowmove "$MAIN" 0 0 windowsize "$MAIN" 1920 1080 || true
 
     # network-plugin dialog (plugins/ excluded from the seed): closing it can
@@ -151,10 +187,11 @@ do_start() {
     if poll 8 have_win "Plug-in"; then
         DISPLAY=$D xdotool windowclose "$(find_win "Plug-in")" || true
         poll 5 gone_win "Plug-in" || true
-        MAIN=$(find_win "OrcaSlicer")
+        resolve_main
     fi
     clear_dialogs
-    MAIN=$(find_win "OrcaSlicer")
+    resolve_main
+    [ -n "$MAIN" ] || { echo "the GUI window vanished during startup" >&2; exit 3; }
     echo "$MAIN" > "$SESSION/session-main"
     echo "${input:-}" > "$SESSION/session-loaded"
     shot 01-loaded
@@ -174,15 +211,16 @@ load_input() {
     # the unsaved-changes / modified-preset prompts are suppressed by the seed;
     # wait for the open dialog to close, then clear any import dialog
     poll 20 gone_win "Choose " || true
-    MAIN=$(find_win "OrcaSlicer")
+    resolve_main
     clear_dialogs
-    MAIN=$(find_win "OrcaSlicer")
+    resolve_main
     echo "$input" > "$SESSION/session-loaded"
 }
 
 do_job() {
     local input="$1" out="$2" project="${3:-}"
-    MAIN=$(cat "$SESSION/session-main")
+    MAIN=$(cat "$SESSION/session-main" 2>/dev/null || true)
+    [ -n "$MAIN" ] || { echo "no GUI session to run in: start did not complete" >&2; exit 7; }
     load_input "$input"
 
     focus_canvas

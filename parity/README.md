@@ -4,9 +4,12 @@ Measures behavioral differences between OrcaSlicer's GUI and CLI slicing
 pipelines. Lives in orca-test-repo and drives a prebuilt `orca-slicer`;
 the OrcaSlicer checkout (or extracted AppImage) that provides
 `resources/profiles` is passed via `--slicer-root` / `ORCA_SLICER_ROOT`. It is **metrics-only**: nothing is gated, lane failures and
-divergences are recorded as data, and the run exits 0. The headline output is
-the count of *new* divergences — differences not yet documented in the
-`expected_differences.json` ledger.
+divergences are recorded as data, and the run exits 0. Two headline counts:
+*new* divergences — differences not yet documented in the
+`expected_differences.json` ledger — and *errors*, fixtures that could not
+produce the comparison they exist for (a GUI session that would not start, an
+unreadable project, a comparator crash). A run is only clean when both are
+zero: a fixture that checked nothing has no divergences to report.
 
 ## How it works
 
