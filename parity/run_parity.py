@@ -338,22 +338,37 @@ def run_fixture(fx, lanes, display, out, args, repo, ledger):
     gui_lanes = [lane for lane in ("G", "RB") if lane in lanes]
     gui_session = os.path.join(fdir, "gui-session")
     gui_datadir = os.path.join(fdir, "datadir-gui")
-    gui_started = [False]
+    gui = {"up": False, "attempted": False}
     if gui_lanes:
         shutil.copytree(seed, gui_datadir, dirs_exist_ok=True)
 
     def start_gui_once(preload=None):
-        if not gui_started[0]:
-            flog("gui session start")
-            gui_session_start(args.bin, gui_datadir, gui_session, display,
-                              preload=preload)
-            gui_started[0] = True
+        """Bring the shared GUI session up once; True if it is usable.
+
+        A start that fails is recorded as a fixture error and skips the GUI
+        lanes: without this the lanes ran against a dead session, produced no
+        output and therefore no comparison, and a fixture that checked nothing
+        scored exactly like a clean one."""
+        if gui["up"]:
+            return True
+        if gui["attempted"]:
+            return False
+        gui["attempted"] = True
+        flog("gui session start")
+        res = gui_session_start(args.bin, gui_datadir, gui_session, display,
+                                preload=preload)
+        if res["exit"] != 0:
+            entry["error"] = ("GUI session start failed (exit %s); see %s"
+                              % (res["exit"], os.path.join(gui_session, "start.log")))
+            flog(entry["error"])
+            return False
+        gui["up"] = True
+        return True
 
     results = {}
     try:
-        if "G" in lanes:
+        if "G" in lanes and start_gui_once(preload=input_path):
             flog("lane G (GUI)")
-            start_gui_once(preload=input_path)
             results["G"] = gui_job(args.bin, input_path, gui_datadir, gui_session,
                                    fdir, "gui", display,
                                    slice_timeout=fx.get("gui_slice_timeout"))
@@ -368,18 +383,18 @@ def run_fixture(fx, lanes, display, out, args, repo, ledger):
             results["R"] = lane_cli_reslice(args.bin, results["G"]["project"],
                                             datadirs["R"], fdir, "roundtrip_cli")
             entry["lanes"]["R"] = {k: results["R"][k] for k in ("exit", "seconds")}
-        if "RB" in lanes and results.get("C", {}).get("output"):
+        # preload so a cold session (RB-only fixture) launches straight onto the
+        # loaded project rather than the empty Home page, which breaks the
+        # Ctrl+O load path; a warm session (G already ran) ignores it
+        if ("RB" in lanes and results.get("C", {}).get("output")
+                and start_gui_once(preload=results["C"]["output"])):
             flog("lane RB (GUI round-trip)")
-            # preload so a cold session (RB-only fixture) launches straight onto
-            # the loaded project rather than the empty Home page, which breaks
-            # the Ctrl+O load path; a warm session (G already ran) ignores it
-            start_gui_once(preload=results["C"]["output"])
             results["RB"] = gui_job(args.bin, results["C"]["output"], gui_datadir,
                                     gui_session, fdir, "roundtrip_gui", display,
                                     slice_timeout=fx.get("gui_slice_timeout"))
             entry["lanes"]["RB"] = {k: results["RB"][k] for k in ("exit", "seconds")}
     finally:
-        if gui_started[0]:
+        if gui["attempted"]:
             flog("gui session stop")
             gui_session_stop(gui_session, display)
 
@@ -564,7 +579,8 @@ def main():
     # human-readable report
     lines = ["# GUI-vs-CLI parity scorecard", "",
              "run: %s @ %s" % (scorecard["run"]["date"], scorecard["run"]["sha"]),
-             "new divergences: **%d**" % new_total, ""]
+             "new divergences: **%d**" % new_total,
+             "errors: **%d**" % errors, ""]
     for f_ in scorecard["fixtures"]:
         lines.append("## %s" % f_["id"])
         if "error" in f_:
@@ -595,7 +611,7 @@ def main():
 
     log("scorecard: %s" % spath)
     log("report:    %s" % os.path.join(out, "report.md"))
-    log("new divergences: %d" % new_total)
+    log("new divergences: %d, errors: %d" % (new_total, errors))
     return 0
 
 

@@ -54,9 +54,24 @@ poll() {
     done
     return 1
 }
-find_win() { DISPLAY=$D xdotool search --name "$1" 2>/dev/null | tail -1; }
+# an unmatched search is a normal answer ("no such window"), not a failure:
+# without the `|| true` pipefail turns it into one and set -e kills the script
+find_win() { DISPLAY=$D xdotool search --name "$1" 2>/dev/null | tail -1 || true; }
 have_win() { [ -n "$(find_win "$1")" ]; }
 gone_win() { [ -z "$(find_win "$1")" ]; }
+
+# id of the GUI's main window, resolved by resolve_main and carried across the
+# start/job dispatch through $SESSION/session-main
+MAIN=""
+
+# re-resolve the main window id after something may have replaced it (a dialog
+# closing, a load). An empty search here is transient -- the window is being
+# remapped, not gone -- so keep the last known id rather than dropping it.
+resolve_main() {
+    local found; found=$(find_win "OrcaSlicer")
+    [ -n "$found" ] && MAIN="$found"
+    return 0
+}
 
 # wait until a file exists and its size has stopped growing (finished writing)
 wait_file_stable() {
@@ -143,7 +158,7 @@ do_start() {
     echo $! > "$SESSION/session-pid"
 
     poll 60 have_win "OrcaSlicer" || { echo "GUI window never appeared" >&2; exit 3; }
-    MAIN=$(find_win "OrcaSlicer")
+    resolve_main
     DISPLAY=$D xdotool windowmove "$MAIN" 0 0 windowsize "$MAIN" 1920 1080 || true
 
     # network-plugin dialog (plugins/ excluded from the seed): closing it can
@@ -151,10 +166,11 @@ do_start() {
     if poll 8 have_win "Plug-in"; then
         DISPLAY=$D xdotool windowclose "$(find_win "Plug-in")" || true
         poll 5 gone_win "Plug-in" || true
-        MAIN=$(find_win "OrcaSlicer")
+        resolve_main
     fi
     clear_dialogs
-    MAIN=$(find_win "OrcaSlicer")
+    resolve_main
+    [ -n "$MAIN" ] || { echo "the GUI window vanished during startup" >&2; exit 3; }
     echo "$MAIN" > "$SESSION/session-main"
     echo "${input:-}" > "$SESSION/session-loaded"
     shot 01-loaded
@@ -174,15 +190,16 @@ load_input() {
     # the unsaved-changes / modified-preset prompts are suppressed by the seed;
     # wait for the open dialog to close, then clear any import dialog
     poll 20 gone_win "Choose " || true
-    MAIN=$(find_win "OrcaSlicer")
+    resolve_main
     clear_dialogs
-    MAIN=$(find_win "OrcaSlicer")
+    resolve_main
     echo "$input" > "$SESSION/session-loaded"
 }
 
 do_job() {
     local input="$1" out="$2" project="${3:-}"
-    MAIN=$(cat "$SESSION/session-main")
+    MAIN=$(cat "$SESSION/session-main" 2>/dev/null || true)
+    [ -n "$MAIN" ] || { echo "no GUI session to run in: start did not complete" >&2; exit 7; }
     load_input "$input"
 
     focus_canvas
