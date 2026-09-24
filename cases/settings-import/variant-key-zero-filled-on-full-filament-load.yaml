@@ -1,5 +1,5 @@
 id: variant-key-zero-filled-on-full-filament-load
-title: A per-filament variant key the presets leave unset must not be zero-filled for filaments 2..N
+title: A per-filament variant key must not be zero-filled for filaments 2..N on a full filament load
 category: settings-import
 status: fixed
 model: p1s_multicolor.3mf
@@ -17,28 +17,31 @@ args:
 checks:
   - no_crash: {}
   - exit_code: {equals: 0}
-  - gcode_config_vector_nonzero: {key: filament_cooling_before_tower}
+  - gcode_config_value:
+      key: filament_cooling_before_tower
+      equals:
+      - '0'
+      - '0'
+      - '0'
+      - '0'
   - gcode_config_vector_nonzero: {key: filament_ramming_volumetric_speed_nc}
 notes: >
   Same variant-stride mechanism as
   partial-load-filaments-variant-key-zero-filled, but reached without any
   partial load: a full four-of-four filament load on a four-filament project.
-  Keys none of the loaded presets mention keep the single registered default in
-  the merged config, and the variant-stride read that builds the applied config
-  then writes it for filament 1 and zero for the rest. Observed on main: the
-  G-code block records filament_retract_length_nc and
-  filament_cooling_before_tower as 10,0,0,0 and
-  filament_ramming_volumetric_speed_nc as -1,0,0,0, so three of four filaments
-  would use a nozzle-change retract length of zero. A key the presets do carry
-  (filament_ramming_volumetric_speed) comes out -1,-1,-1,-1, which is what
-  isolates the trigger to "unset in every loaded preset".
-  The checks assert only that no element is zero, so the case does not
-  presuppose whether the fix broadcasts the value or resizes with the default.
+  Keys the loaded presets leave unset keep the single registered default in the
+  merged config, and the variant-stride read that builds the applied config
+  then writes it for filament 1 and zero for the rest. Observed on main:
+  filament_cooling_before_tower recorded as 10,0,0,0 and
+  filament_ramming_volumetric_speed_nc as -1,0,0,0.
 
   Fixed on main once --load-filaments presets were resolved through their
   inherits chain: every loaded preset now carries these keys, so the columns
-  are complete (10,10,10,10 and -1,-1,-1,-1). filament_retract_length_nc is no
-  longer checked: its preset value is nil (no nozzle-change override) for every
-  filament, and the G-code config block omits an all-nil option, so the key is
-  absent rather than zero. The partial-load sibling is fixed too: the
-  variant-stride read now keeps the first value for a short column.
+  are complete; the partial-load sibling's short column now keeps its first
+  value too.
+
+  The checks are complementary: cooling pins the full four-element vector and
+  catches a build that stops resolving the inherits chain (the profiles inherit
+  0 from fdm_filament_common while the registered default is 10, so such a
+  build records 10,0,0,0 or broadcasts 10); ramming catches a zero-filled tail
+  (-1,0,0,0), a guard the 0-valued cooling column cannot provide.
