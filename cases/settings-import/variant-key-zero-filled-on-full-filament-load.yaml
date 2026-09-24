@@ -17,13 +17,7 @@ args:
 checks:
   - no_crash: {}
   - exit_code: {equals: 0}
-  - gcode_config_value:
-      key: filament_cooling_before_tower
-      equals:
-      - '0'
-      - '0'
-      - '0'
-      - '0'
+  - gcode_config_vector_uniform: {key: filament_cooling_before_tower, length: 4}
   - gcode_config_vector_nonzero: {key: filament_ramming_volumetric_speed_nc}
 notes: >
   Same variant-stride mechanism as
@@ -40,8 +34,6 @@ notes: >
   are complete; the partial-load sibling's short column now keeps its first
   value too.
 
-  The checks are complementary: cooling pins the full four-element vector and
-  catches a build that stops resolving the inherits chain (the profiles inherit
-  0 from fdm_filament_common while the registered default is 10, so such a
-  build records 10,0,0,0 or broadcasts 10); ramming catches a zero-filled tail
-  (-1,0,0,0), a guard the 0-valued cooling column cannot provide.
+  Ramming catches a zero-filled tail (-1,0,0,0). Cooling must be a complete,
+  uniform four-element column. Its value is not pinned, because it depends on
+  the profiles, which may leave the registered default of 10 or set their own.

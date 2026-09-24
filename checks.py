@@ -142,6 +142,22 @@ def gcode_config_vector_nonzero(result, ctx, key, path="{outputdir}/plate_1.gcod
         _fail(f"G-code config {key!r} has zero/empty elements at {zeros}: {vals!r}", result)
 
 
+def gcode_config_vector_uniform(result, ctx, key, length=None, path="{outputdir}/plate_1.gcode"):
+    """Every element of vector option `key` in the G-code config block reads the same,
+    numerically tolerant, and `length`, if given, is the element count -- for asserting
+    a column is complete without pinning a value that depends on the profiles."""
+    import settings_compare as sc
+
+    cfg = _gcode_config(result, ctx, path)
+    if key not in cfg:
+        _fail(f"G-code config block has no key {key!r}", result)
+    vals = cfg[key] if isinstance(cfg[key], list) else [cfg[key]]
+    if length is not None and len(vals) != length:
+        _fail(f"G-code config {key!r} has {len(vals)} elements, expected {length}: {vals!r}", result)
+    if not all(sc._num_eq(v, vals[0]) for v in vals):
+        _fail(f"G-code config {key!r} is not uniform: {vals!r}", result)
+
+
 def gcode_config_element(result, ctx, key, index, equals=None, not_equals=None, path="{outputdir}/plate_1.gcode"):
     """Element `index` of vector option `key` in the G-code config block reads as
     `equals` (or anything but `not_equals`), numerically tolerant -- for asserting
@@ -287,6 +303,7 @@ CHECKS = {
     "file_not_contains": file_not_contains,
     "gcode_config_value": gcode_config_value,
     "gcode_config_vector_nonzero": gcode_config_vector_nonzero,
+    "gcode_config_vector_uniform": gcode_config_vector_uniform,
     "gcode_config_element": gcode_config_element,
     "gcode_metric": gcode_metric,
     "gcode_z_above_bed": gcode_z_above_bed,
