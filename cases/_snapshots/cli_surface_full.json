@@ -196,6 +196,19 @@
       "nullable": false
     },
     {
+      "key": "align_to_y_axis",
+      "flag": "--align-to-y-axis",
+      "type": "coBool",
+      "nocli": false,
+      "class": "CLIMiscConfigDef",
+      "min": null,
+      "max": null,
+      "enum_values": [],
+      "enum_dynamic": false,
+      "default": "false",
+      "nullable": false
+    },
+    {
       "key": "allow_mix_temp",
       "flag": "--allow-mix-temp",
       "type": "coBool",
@@ -2134,6 +2147,19 @@
       "enum_values": [],
       "enum_dynamic": false,
       "default": "",
+      "nullable": false
+    },
+    {
+      "key": "extruder_clearance_dist_to_rod",
+      "flag": "--extruder-clearance-dist-to-rod",
+      "type": "coFloat",
+      "nocli": false,
+      "class": "PrintConfigDef",
+      "min": 0.0,
+      "max": null,
+      "enum_values": [],
+      "enum_dynamic": false,
+      "default": "40",
       "nullable": false
     },
     {
@@ -4406,6 +4432,45 @@
       "nullable": false
     },
     {
+      "key": "ground_face_normal",
+      "flag": "--ground-face-normal",
+      "type": "coString",
+      "nocli": false,
+      "class": "CLITransformConfigDef",
+      "min": null,
+      "max": null,
+      "enum_values": [],
+      "enum_dynamic": false,
+      "default": "\"\"",
+      "nullable": false
+    },
+    {
+      "key": "ground_face_point",
+      "flag": "--ground-face-point",
+      "type": "coString",
+      "nocli": false,
+      "class": "CLITransformConfigDef",
+      "min": null,
+      "max": null,
+      "enum_values": [],
+      "enum_dynamic": false,
+      "default": "\"\"",
+      "nullable": false
+    },
+    {
+      "key": "ground_largest_face",
+      "flag": "--ground-largest-face",
+      "type": "coBool",
+      "nocli": false,
+      "class": "CLITransformConfigDef",
+      "min": null,
+      "max": null,
+      "enum_values": [],
+      "enum_dynamic": false,
+      "default": "false",
+      "nullable": false
+    },
+    {
       "key": "group_algo_with_time",
       "flag": "--group-algo-with-time",
       "type": "coBool",
@@ -4626,6 +4691,7 @@
         "prusaconnect",
         "octoprint",
         "duet",
+        "ultimaker",
         "flashair",
         "astrobox",
         "repetier",
@@ -5241,6 +5307,32 @@
       ],
       "enum_dynamic": false,
       "default": null,
+      "nullable": false
+    },
+    {
+      "key": "inspect_mesh",
+      "flag": "--inspect-mesh",
+      "type": "coBool",
+      "nocli": false,
+      "class": "CLIActionsConfigDef",
+      "min": null,
+      "max": null,
+      "enum_values": [],
+      "enum_dynamic": false,
+      "default": "false",
+      "nullable": false
+    },
+    {
+      "key": "inspect_paint",
+      "flag": "--inspect-paint",
+      "type": "coBool",
+      "nocli": false,
+      "class": "CLIActionsConfigDef",
+      "min": null,
+      "max": null,
+      "enum_values": [],
+      "enum_dynamic": false,
+      "default": "false",
       "nullable": false
     },
     {
@@ -9670,6 +9762,19 @@
       "nullable": false
     },
     {
+      "key": "strict",
+      "flag": "--strict",
+      "type": "coBool",
+      "nocli": false,
+      "class": "CLIActionsConfigDef",
+      "min": null,
+      "max": null,
+      "enum_values": [],
+      "enum_dynamic": false,
+      "default": "false",
+      "nullable": false
+    },
+    {
       "key": "supertack_plate_temp",
       "flag": "--supertack-plate-temp",
       "type": "coInts",
@@ -10721,6 +10826,32 @@
       "nullable": false
     },
     {
+      "key": "toolchange_cyclic_first_layer",
+      "flag": "--toolchange-cyclic-first-layer",
+      "type": "coBool",
+      "nocli": false,
+      "class": "PrintConfigDef",
+      "min": null,
+      "max": null,
+      "enum_values": [],
+      "enum_dynamic": false,
+      "default": "false",
+      "nullable": false
+    },
+    {
+      "key": "toolchange_cyclic_order",
+      "flag": "--toolchange-cyclic-order",
+      "type": "coString",
+      "nocli": false,
+      "class": "PrintConfigDef",
+      "min": null,
+      "max": null,
+      "enum_values": [],
+      "enum_dynamic": false,
+      "default": "\"\"",
+      "nullable": false
+    },
+    {
       "key": "toolchange_ordering",
       "flag": "--toolchange-ordering",
       "type": "coEnum",
@@ -11210,6 +11341,19 @@
       "nullable": false
     },
     {
+      "key": "unsupported_wall_last",
+      "flag": "--unsupported-wall-last",
+      "type": "coBool",
+      "nocli": false,
+      "class": "PrintConfigDef",
+      "min": null,
+      "max": null,
+      "enum_values": [],
+      "enum_dynamic": false,
+      "default": "false",
+      "nullable": false
+    },
+    {
       "key": "uptodate",
       "flag": "--uptodate",
       "type": "coBool",
@@ -11503,6 +11647,32 @@
       "enum_values": [],
       "enum_dynamic": false,
       "default": "1.",
+      "nullable": false
+    },
+    {
+      "key": "wipe_inward",
+      "flag": "--wipe-inward",
+      "type": "coBool",
+      "nocli": false,
+      "class": "PrintConfigDef",
+      "min": null,
+      "max": null,
+      "enum_values": [],
+      "enum_dynamic": false,
+      "default": "false",
+      "nullable": false
+    },
+    {
+      "key": "wipe_inward_distance",
+      "flag": "--wipe-inward-distance",
+      "type": "coFloatOrPercent",
+      "nocli": false,
+      "class": "PrintConfigDef",
+      "min": 0.0,
+      "max": 100.0,
+      "enum_values": [],
+      "enum_dynamic": false,
+      "default": "50, true",
       "nullable": false
     },
     {
