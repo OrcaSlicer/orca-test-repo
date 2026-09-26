@@ -10922,7 +10922,7 @@
     {
       "key": "top_solid_infill_flow_ratio",
       "flag": "--top-solid-infill-flow-ratio",
-      "type": "coFloat",
+      "type": "coFloats",
       "nocli": false,
       "class": "PrintConfigDef",
       "min": 0.0,
@@ -10930,7 +10930,7 @@
       "enum_values": [],
       "enum_dynamic": false,
       "default": "1",
-      "nullable": false
+      "nullable": true
     },
     {
       "key": "top_surface_acceleration",
@@ -12201,6 +12201,7 @@
     "sparse_infill_speed",
     "support_interface_speed",
     "support_speed",
+    "top_solid_infill_flow_ratio",
     "top_surface_acceleration",
     "top_surface_jerk",
     "top_surface_speed",
