@@ -238,7 +238,9 @@ def choose_value(meta: dict, current, flip: bool = False) -> tuple[str | None, s
         vals = [scalar(x) for x in cur_list]
         if any(v is None for v in vals):
             return None, "no valid probe for an element"
-        return ",".join(vals), ",".join(vals)
+        # the CLI splits a string vector on ';' (its elements may hold commas), every other vector on ','
+        sep = ";" if t in sc.STRING_VECTOR_TYPES else ","
+        return sep.join(vals), sep.join(vals)
     v = scalar(cur)
     if v is None:
         return None, "no valid probe value"
@@ -370,7 +372,7 @@ def override_results(orca_bin, seeded_data_dir, tmp_path_factory, request):
         if rc != 0 or not (cwd_out / "s.json").exists():
             return False, failure_kind(rc), {}
         got = sc.parse_settings_json((cwd_out / "s.json").read_text())
-        return True, None, {k: k in got and sc.values_match(k, got[k], probes[k].split(",") if isinstance(base[k], list) else probes[k]) for k in keys}
+        return True, None, {k: k in got and sc.values_match(k, got[k], sc.decode_gcode_value(k, probes[k]) if isinstance(base[k], list) else probes[k]) for k in keys}
 
     def gcode_runner(keys):
         (cwd_out := work / f"g{sweep.n}").mkdir(exist_ok=True)
@@ -390,7 +392,7 @@ def override_results(orca_bin, seeded_data_dir, tmp_path_factory, request):
             if k not in got:
                 res[k] = True  # not part of the G-code dump (banned keys); merge stage covers it
             else:
-                res[k] = sc.values_match(k, got[k], probes[k].split(",") if isinstance(base[k], list) else probes[k])
+                res[k] = sc.values_match(k, got[k], sc.decode_gcode_value(k, probes[k]) if isinstance(base[k], list) else probes[k])
         return True, None, res
 
     keys = sorted(probes)
