@@ -48,4 +48,6 @@ notes: >
   need to stay correctly sized for the new filament count or the slice
   fails with an unrelated "Flush volumes matrix do not match to the correct
   size!" error; this fixture accounts for that (flush_volumes_matrix
-  expanded from a 1x1 to a proper 2x2).
+  expanded from a 1x1 to a proper 2x2). inherits_group and
+  different_settings_to_system hold one entry for the process, one per
+  filament and one for the printer, so both have 4 entries.
