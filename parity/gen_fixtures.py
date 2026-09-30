@@ -60,7 +60,7 @@ def make_base_project(binpath, workdir, inputs, name="base_project.3mf"):
              os.path.join(profiles, "machine", "Bambu Lab P1S 0.4 nozzle.json"),
              os.path.join(profiles, "process", "0.20mm Standard @BBL X1C.json")),
          "--load-filaments",
-         os.path.join(profiles, "filament", "Bambu PLA Basic @BBL X1C.json"),
+         os.path.join(profiles, "filament", "Bambu PLA Basic @BBL P1S 0.4 nozzle.json"),
          "--arrange", "1", "--export-3mf", out] + inputs,
         check=True, cwd=workdir, capture_output=True,
     )
