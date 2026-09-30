@@ -7,9 +7,10 @@ the OrcaSlicer checkout (or extracted AppImage) that provides
 divergences are recorded as data, and the run exits 0. Two headline counts:
 *new* divergences — differences not yet documented in the
 `expected_differences.json` ledger — and *errors*, fixtures that could not
-produce the comparison they exist for (a GUI session that would not start, an
-unreadable project, a comparator crash). A run is only clean when both are
-zero: a fixture that checked nothing has no divergences to report.
+produce the comparison they exist for (a GUI session that would not start, a
+lane that did not end as expected, an unreadable project, a comparator crash).
+A run is only clean when both are zero: a fixture that checked nothing has no
+divergences to report.
 
 ## How it works
 
@@ -93,6 +94,9 @@ lanes — step-by-step screenshots for post-mortem.
 - New fixture: add an entry to `fixtures.json` (commit any new model/project
   under `parity/fixtures/`). Project 3mf inputs are sliced with their
   embedded settings; other inputs load the manifest's presets.
+- Outcome-pair fixture (a lane is meant to fail): declare the exit in
+  `expect_exit`, e.g. `{"C": 204}`. Any other lane exit, or a lane that exits
+  0 without an output, counts as an error.
 - Newly discovered *legitimate* difference: add a ledger entry citing where
   it is documented; it then counts as known.
 - CI: the harness is environment-driven (`ORCA_BIN`, `ORCA_SLICER_ROOT`,

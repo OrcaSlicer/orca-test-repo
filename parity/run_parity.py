@@ -3,8 +3,9 @@
 
 Runs each fixture through up to four lanes, all with the same binary and the
 same generated datadir seed, then compares the exports and emits a metrics
-scorecard. Nothing is gated: lane failures and divergences are recorded as
-data, and the process exits 0 unless the harness itself breaks.
+scorecard. Nothing is gated: divergences, and lanes that do not end as the
+fixture expects, are recorded as data, and the process exits 0 unless the
+harness itself breaks.
 
 Lanes:
   G   GUI headless: import -> slice -> export sliced 3mf + save project
@@ -398,6 +399,18 @@ def run_fixture(fx, lanes, display, out, args, repo, ledger):
             flog("gui session stop")
             gui_session_stop(gui_session, display)
 
+    # a lane that did not end as the fixture expects checked nothing: its
+    # comparison is skipped, and without this the fixture scored like a clean
+    # one. Outcome-pair fixtures fail a lane on purpose and declare that exit.
+    for lane, res in entry["lanes"].items():
+        want = fx.get("expect_exit", {}).get(lane, 0)
+        if res["exit"] != want:
+            res["error"] = "exit %s, expected %s" % (res["exit"], want)
+        elif want == 0 and not results[lane].get("output"):
+            res["error"] = "exit 0 but no output"
+        if "error" in res:
+            flog("lane %s: %s" % (lane, res["error"]))
+
     pairs = {"pipeline": ("C", "G"), "engine": ("R", "G"), "gui_load": ("RB", "C")}
     for tag, (la, lb) in pairs.items():
         a = results.get(la, {}).get("output")
@@ -563,6 +576,7 @@ def main():
     )
     errors = sum(
         ("error" in f) + ("error" in f.get("settings_survival", {}))
+        + sum("error" in r for r in f["lanes"].values())
         + sum("error" in c for c in f["comparisons"].values())
         for f in scorecard["fixtures"]
     )
@@ -587,6 +601,8 @@ def main():
             lines.append("- ERROR: %s" % f_["error"])
         for lane, r in f_["lanes"].items():
             lines.append("- lane %s: exit %s (%ss)" % (lane, r["exit"], r["seconds"]))
+            if "error" in r:
+                lines.append("    - ERROR: %s" % r["error"])
         for tag, c in f_["comparisons"].items():
             lines.append(
                 "- %s: gcode_identical=%s similarity=%s known=%d new=%d"
