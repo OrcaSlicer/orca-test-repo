@@ -316,6 +316,7 @@
           "ironing_expansion*",
           "machine_max_junction_deviation*",
           "nozzle_flush_dataset*",
+          "nozzle_type*",
           "outer_wall_jerk*",
           "pellet_flow_coefficient*",
           "pellet_modded_printer*",

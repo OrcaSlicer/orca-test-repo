@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Flatten a vendor profile's `inherits` chain into a single self-contained JSON.
+"""Flatten a vendor profile's `inherits` chain and `include` templates into one self-contained JSON.
 
 The GUI resolves `inherits` through PresetBundle; the CLI's --load-settings /
 --load-filaments read one file with ConfigBase::load_from_json and never walk
@@ -21,6 +21,8 @@ import sys
 # values win and parent values must not leak in.
 LEAF_ONLY = ("name", "from", "setting_id", "filament_id", "instantiation",
              "version", "is_custom", "url")
+# What an included template contributes nothing of: its own bookkeeping.
+NOT_INHERITED = LEAF_ONLY + ("type", "inherits", "include")
 
 
 def find(profiles, vendors, kind, name):
@@ -47,11 +49,21 @@ def flatten(profiles, vendors, kind, name):
 
     merged = {}
     for d in reversed(chain):
+        # `include` is not a config option: only the vendor bundle loader
+        # resolves it, layering each named template's keys over the parent and
+        # under the preset's own. A root preset handed to the CLI has to carry
+        # the result, as a preset saved from the GUI does.
+        includes = d.get("include", [])
+        for inc in [includes] if isinstance(includes, str) else includes:
+            path = find(profiles, vendors, kind, inc)
+            if not path:
+                sys.exit("cannot resolve %s include %r" % (kind, inc))
+            merged.update((k, v) for k, v in json.load(open(path)).items()
+                          if k not in NOT_INHERITED)
         for k, v in d.items():
-            if k == "inherits" or (k in LEAF_ONLY and d is not chain[0]):
+            if k in ("inherits", "include") or (k in LEAF_ONLY and d is not chain[0]):
                 continue
             merged[k] = v
-    merged.pop("inherits", None)
     # a flattened preset stands alone; leave it marked as a system preset so
     # the CLI's `from` check accepts it
     merged.setdefault("from", "system")

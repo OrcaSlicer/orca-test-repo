@@ -18,7 +18,7 @@ Usage:
   make_seed.py --out /path/to/seed \
       --machine "Bambu Lab P1S 0.4 nozzle" \
       --process "0.20mm Standard @BBL X1C" \
-      --filament "Bambu PLA Basic @BBL X1C"
+      --filament "Bambu PLA Basic @BBL P1S 0.4 nozzle"
 
 Stdlib only.
 """
@@ -98,6 +98,10 @@ def build_from_resources(args):
             {"model": model, "nozzle_diameter": nozzle, "vendor": args.vendor[0]}
         ],
         "presets": {"machine": args.machine},
+        # the GUI only offers installed filaments, and on its own installs the
+        # printer model's default_materials, which need not include this one;
+        # an uninstalled selection falls back to another filament
+        "filaments": [args.filament],
         "orca_presets": [
             {
                 # key names from Preset.hpp: PRESET_PRINT_NAME is "process"
@@ -153,7 +157,7 @@ def main():
                     help="vendor bundle(s) to install (default: BBL)")
     ap.add_argument("--machine", default="Bambu Lab P1S 0.4 nozzle")
     ap.add_argument("--process", default="0.20mm Standard @BBL X1C")
-    ap.add_argument("--filament", default="Bambu PLA Basic @BBL X1C")
+    ap.add_argument("--filament", default="Bambu PLA Basic @BBL P1S 0.4 nozzle")
     ap.add_argument("--bed-type", default="1", help="curr_bed_type index")
     ap.add_argument("--force", action="store_true", help="replace existing seed dir")
     args = ap.parse_args()

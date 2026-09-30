@@ -64,7 +64,7 @@ lanes — step-by-step screenshots for post-mortem.
 - `expected_differences.json` — ledger of *known* GUI/CLI differences with
   their documentation reference. Curation, not suppression: known diffs are
   still counted; only undocumented ones raise the `new_divergences` number.
-- `flatten_preset.py` — resolves a vendor profile's `inherits` chain into one
+- `flatten_preset.py` — resolves a vendor profile's `inherits` chain and `include` templates into one
   self-contained JSON. `--load-settings` reads a single file
   (`ConfigBase::load_from_json`) and never walks the chain, so handing lane C a
   leaf vendor profile slices with built-in defaults for every key the parents
