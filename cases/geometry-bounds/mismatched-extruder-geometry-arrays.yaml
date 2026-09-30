@@ -23,7 +23,11 @@ notes: |
   Polygon::operator= on a null polygon). Fixture: toolchanger_4_color.3mf with
   extruder_printable_area set to two non-overlapping halves of the bed (0-175
   and 175-350 in X; they share only an edge) and extruder_printable_height
-  shortened to one entry. Earlier isolation attempts read this as an area/height
+  shortened to one entry. Both keys are listed in the printer entry of
+  different_settings_to_system, so they stay the project's own values when the
+  CLI refreshes unlisted keys from the system preset; unlisted, they would be
+  replaced and the crash path never reached.
+  Earlier isolation attempts read this as an area/height
   length mismatch; the backtrace shows the length mismatch is incidental -- five
   identical full-bed areas with five heights slice fine, and the crash follows
   the areas' empty intersection. Note the height/area size-mismatch safeguard
