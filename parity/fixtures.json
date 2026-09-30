@@ -153,6 +153,10 @@
       "description": "Two objects, one crossing the bed edge (x 238..258 on a 256 bed). Outcome-pair fixture, empirically corrected from catalog 1.5.1: the GUI DISABLES slicing entirely ('laid over the boundary' error, lane G times out by design), the CLI aborts CLI_OBJECTS_PARTLY_INSIDE (-52 = exit 204). Both refuse; the pair documents HOW each refuses.",
       "input": "fixtures/cube_partly_outside.3mf",
       "flags": {},
+      "expect_exit": {
+        "G": 4,
+        "C": 204
+      },
       "lanes": [
         "G",
         "C"
@@ -166,6 +170,9 @@
       "flags": {
         "mtcpp": "5"
       },
+      "expect_exit": {
+        "C": 197
+      },
       "lanes": [
         "G",
         "C"
@@ -176,6 +183,9 @@
       "description": "Outcome-pair fixture: STEP file. GUI imports it (deflection dialog answered by the sweeper); CLI has no STEP loader and errors (catalog 1.2.2). Not bridgeable.",
       "input": "fixtures/utf8_part_names.step",
       "flags": {},
+      "expect_exit": {
+        "C": 250
+      },
       "lanes": [
         "G",
         "C"
