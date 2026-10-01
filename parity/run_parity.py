@@ -149,49 +149,77 @@ def run(cmd, cwd, timeout, logfile, env=None):
     return {"exit": rc, "seconds": round(time.time() - t0, 1)}
 
 
-def project_settings(path):
-    """The flattened project settings of a 3mf, or None if they cannot be read."""
+def raw_project_settings(path):
+    """The project settings of a 3mf as stored, or None if they cannot be read."""
     try:
         with zipfile.ZipFile(path) as z:
-            return cmp3mf.flatten_settings(
-                json.loads(z.read("Metadata/project_settings.config"))
-            )
+            return json.loads(z.read("Metadata/project_settings.config"))
     except (OSError, KeyError, zipfile.BadZipFile, ValueError):
         return None
 
 
+def project_settings(path):
+    """The flattened project settings of a 3mf, or None if they cannot be read."""
+    raw = raw_project_settings(path)
+    return None if raw is None else cmp3mf.flatten_settings(raw)
+
+
+def shape_only(a, b):
+    """True when two values of one key differ in shape but not in value: the
+    key is missing on one side, or both are vectors repeating the same single
+    value at different lengths."""
+    if (a is None) != (b is None):
+        return True
+    if isinstance(a, str) and isinstance(b, str):
+        # the G-code CONFIG_BLOCK joins vectors with ',' (strings with ';')
+        a, b = a.replace(";", ",").split(","), b.replace(";", ",").split(",")
+    if not (isinstance(a, list) and isinstance(b, list)):
+        return False
+    return len(set(map(str, a))) == 1 and set(map(str, a)) == set(map(str, b))
+
+
 # ---------------------------------------------------------------- diff atoms
 
-def atoms_from_comparison(cjson):
-    """Flatten a compare_gcode3mf --json result into (section, key) atoms."""
+def atoms_from_comparison(cjson, settings_a=None, settings_b=None):
+    """Flatten a compare_gcode3mf --json result into (section, key, shape)
+    atoms. shape is True for a settings diff that is a difference in shape
+    only (see shape_only); settings_a/settings_b are the two sides' project
+    settings as stored, needed to tell that for project_settings keys."""
     out = []
     m = cjson.get("members", {})
     for k in m.get("only_a", []) + m.get("only_b", []):
-        out.append(("members", k))
+        out.append(("members", k, False))
     ps = cjson.get("project_settings", {})
     for bucket in ("only_a", "only_b", "changed"):
         for k in ps.get(bucket, {}):
-            out.append(("project_settings", k))
+            base = k.split("[")[0]
+            shape = (settings_a is not None and settings_b is not None
+                     and shape_only(settings_a.get(base), settings_b.get(base)))
+            out.append(("project_settings", k, shape))
     for section in ("model_settings", "slice_info", "plate_json",
                     "gcode_header", "gcode_config"):
         for name, d in cjson.get(section, {}).items():
             for bucket in ("only_a", "only_b", "changed"):
-                for k in d.get(bucket, {}):
-                    out.append((section, k))
+                for k, v in d.get(bucket, {}).items():
+                    shape = section == "gcode_config" and (
+                        bucket != "changed" or shape_only(*v))
+                    out.append((section, k, shape))
     for plate, d in cjson.get("gcode", {}).items():
         if not d.get("identical", True):
-            out.append(("gcode", plate))
+            out.append(("gcode", plate, False))
     if cjson.get("model_identical") is False:
-        out.append(("model", "tree"))
+        out.append(("model", "tree", False))
     return out
 
 
 def classify(atoms, ledger):
     known, new = [], []
-    for section, key in atoms:
+    for section, key, shape in atoms:
         hit = None
         for e in ledger["entries"]:
             globs = e["match"].get("keys") or [e["match"]["key"]]
+            if e["match"].get("shape_only") and not shape:
+                continue
             if fnmatch.fnmatch(section, e["match"]["section"]) and any(
                 fnmatch.fnmatch(key, g) for g in globs
             ):
@@ -429,7 +457,8 @@ def run_fixture(fx, lanes, display, out, args, repo, ledger):
         # deliberately provokes) are treated as known for this fixture only
         fx_ledger = {"entries": ledger["entries"] + [
             {"id": "fixture-expected", "match": m} for m in fx.get("expect", [])]}
-        known, new = classify(atoms_from_comparison(cjson), fx_ledger)
+        known, new = classify(atoms_from_comparison(cjson, raw_project_settings(a),
+                                                    raw_project_settings(b)), fx_ledger)
         gplates = cjson.get("gcode", {})
         entry["comparisons"][tag] = {
             "gcode_identical": all(d.get("identical") for d in gplates.values())
