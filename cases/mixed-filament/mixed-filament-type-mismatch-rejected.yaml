@@ -26,9 +26,11 @@ notes: |
 
   Fixture: mixed_filament.3mf with filament_type[1] set to PETG
   (scripts/patch_3mf.py extract / replace on Metadata/project_settings.config).
-  filament_settings_id[1] still names a PLA preset on purpose: without
-  --load-filaments the CLI reads filament_type from the project config, which
-  is what the gate compares. Do not "fix" the preset name, and do not add
-  --load-filaments here, or the PETG type is replaced and the case goes quiet.
+  filament_settings_id[1] still names a PLA preset on purpose, and
+  filament_type is listed in that filament's different_settings_to_system
+  entry, as a project saved with the type changed by hand would list it. Like
+  the GUI, the CLI refreshes every unlisted key from the system preset, so
+  without the entry the PETG type is reset to PLA and the case goes quiet. Do
+  not "fix" the preset name, drop the entry, or add --load-filaments here.
 
   Fixed on main: the plate is refused with -69 (process exit 187).
