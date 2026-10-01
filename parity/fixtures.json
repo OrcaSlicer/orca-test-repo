@@ -29,9 +29,12 @@
           "section": "*",
           "keys": [
             "close_additional_fan_first_x_layers*",
+            "filament_cooling_before_tower*",
             "filament_cost*",
             "filament_dev_chamber_drying_time*",
             "filament_max_volumetric_speed*",
+            "filament_preheat_temperature_delta*",
+            "filament_retract_length_nc*",
             "filament_retraction_length*",
             "filament_z_hop*"
           ]
@@ -139,9 +142,12 @@
           "section": "*",
           "keys": [
             "close_additional_fan_first_x_layers*",
+            "filament_cooling_before_tower*",
             "filament_cost*",
             "filament_dev_chamber_drying_time*",
             "filament_max_volumetric_speed*",
+            "filament_preheat_temperature_delta*",
+            "filament_retract_length_nc*",
             "filament_retraction_length*",
             "filament_z_hop*"
           ]

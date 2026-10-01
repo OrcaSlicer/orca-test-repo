@@ -8,7 +8,8 @@
     "against the diff key (an archive member name, a settings key, or a",
     "comparator stat name). 'catalog' cites the parity-catalog section or bug",
     "id documenting the difference.",
-    "match.keys (a list of globs) matches any of them, for a family of keys that share one cause."
+    "match.keys (a list of globs) matches any of them, for a family of keys that share one cause.",
+    "match.shape_only limits the entry to diffs in shape, not value: a key one side omits, or a vector repeating the same single value at a different length."
   ],
   "entries": [
     {
@@ -276,6 +277,7 @@
       "id": "cli-config-writer-gap-project",
       "match": {
         "section": "project_settings",
+        "shape_only": true,
         "keys": [
           "activate_air_filtration_during_print*",
           "activate_air_filtration_on_completion*",
@@ -337,6 +339,7 @@
       "id": "cli-config-writer-gap-gcode",
       "match": {
         "section": "gcode_config",
+        "shape_only": true,
         "keys": [
           "activate_air_filtration_during_print*",
           "activate_air_filtration_on_completion*",
