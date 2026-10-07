@@ -97,9 +97,10 @@
       "id": "ams-drying",
       "match": {
         "section": "*",
+        "shape_only": true,
         "key": "filament_dev_ams_*"
       },
-      "catalog": "pilot - device-derived arrays sized differently",
+      "catalog": "pilot - device-derived arrays present or sized differently; a value difference is a finding (BUG-408)",
       "reason": "device-state keys"
     },
     {
