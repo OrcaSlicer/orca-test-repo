@@ -21,25 +21,9 @@
     },
     {
       "id": "cube-project",
-      "description": "Same cube as a project 3mf (CLI-authored, arranged). Exercises the 3mf load path on both sides with embedded settings. The file predates the Bambu profile resync and lists no changed settings, so both pipelines must refresh it from the system presets. The CLI refreshes the printer and process only; the filament values it keeps are the expected diffs, to be dropped once it refreshes filaments too.",
+      "description": "Same cube as a project 3mf (CLI-authored, arranged). Exercises the 3mf load path on both sides with embedded settings. The file predates the Bambu profile resync and lists no changed settings, so both pipelines must refresh it from the system presets, filaments included; a stale filament value here is a finding.",
       "input": "fixtures/cube_project.3mf",
-      "flags": {},
-      "expect": [
-        {
-          "section": "*",
-          "keys": [
-            "close_additional_fan_first_x_layers*",
-            "filament_cooling_before_tower*",
-            "filament_cost*",
-            "filament_dev_chamber_drying_time*",
-            "filament_max_volumetric_speed*",
-            "filament_preheat_temperature_delta*",
-            "filament_retract_length_nc*",
-            "filament_retraction_length*",
-            "filament_z_hop*"
-          ]
-        }
-      ]
+      "flags": {}
     },
     {
       "id": "cube-flag-injection",
@@ -134,25 +118,9 @@
     },
     {
       "id": "sunken-project",
-      "description": "Project with the cube half below the bed (z=-10). Both pipelines should slice only the visible 10mm; any divergence here is a finding (cf. the --rotate/ensure_on_bed truncation class), apart from the stale filament values described under cube-project.",
+      "description": "Project with the cube half below the bed (z=-10). Both pipelines should slice only the visible 10mm; any divergence here is a finding (cf. the --rotate/ensure_on_bed truncation class).",
       "input": "fixtures/cube_sunken.3mf",
-      "flags": {},
-      "expect": [
-        {
-          "section": "*",
-          "keys": [
-            "close_additional_fan_first_x_layers*",
-            "filament_cooling_before_tower*",
-            "filament_cost*",
-            "filament_dev_chamber_drying_time*",
-            "filament_max_volumetric_speed*",
-            "filament_preheat_temperature_delta*",
-            "filament_retract_length_nc*",
-            "filament_retraction_length*",
-            "filament_z_hop*"
-          ]
-        }
-      ]
+      "flags": {}
     },
     {
       "id": "partly-outside-project",
