@@ -127,6 +127,7 @@ jobs:
             > cases/_snapshots/cli_surface_full.json
           git diff --stat -- cases/_snapshots/cli_surface_full.json || true
       - uses: peter-evans/create-pull-request@v6
+        id: pr
         with:
           branch: bot/refresh-cli-surface
           title: "Refresh CLI option surface snapshot from upstream main"
@@ -136,3 +137,18 @@ jobs:
             `scripts/enumerate_cli_options.py` against the current OrcaSlicer `main`.
             Review the diff for new options that deserve a case, then merge.
           delete-branch: true
+      # The PR body's author is the Actions bot, so nobody is notified of it;
+      # a comment with a mention is.
+      - name: Ping the maintainer on the PR
+        if: steps.pr.outputs.pull-request-operation == 'created' || steps.pr.outputs.pull-request-operation == 'updated'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ steps.pr.outputs.pull-request-number }}
+          PR_OPERATION: ${{ steps.pr.outputs.pull-request-operation }}
+        run: |
+          if [ "$PR_OPERATION" = created ]; then
+            what="opened this PR"
+          else
+            what="pushed a new snapshot to this PR"
+          fi
+          gh pr comment "$PR_NUMBER" --body "@HanifKoh the CLI option surface on OrcaSlicer main changed, so the refresh job $what. Review the diff for new options that deserve a case, then merge."
