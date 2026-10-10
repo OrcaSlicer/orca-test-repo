@@ -472,6 +472,128 @@
       "nullable": false
     },
     {
+      "key": "belt_frame_tilt_angle",
+      "flag": "--belt-frame-tilt-angle",
+      "type": "coFloat",
+      "nocli": false,
+      "class": "PrintConfigDef",
+      "min": -89.9,
+      "max": 89.9,
+      "enum_values": [],
+      "enum_dynamic": false,
+      "default": "45.",
+      "nullable": false
+    },
+    {
+      "key": "belt_frame_tilt_decouple",
+      "flag": "--belt-frame-tilt-decouple",
+      "type": "coBool",
+      "nocli": false,
+      "class": "PrintConfigDef",
+      "min": null,
+      "max": null,
+      "enum_values": [],
+      "enum_dynamic": false,
+      "default": "false",
+      "nullable": false
+    },
+    {
+      "key": "belt_printer",
+      "flag": "--belt-printer",
+      "type": "coBool",
+      "nocli": false,
+      "class": "PrintConfigDef",
+      "min": null,
+      "max": null,
+      "enum_values": [],
+      "enum_dynamic": false,
+      "default": "false",
+      "nullable": false
+    },
+    {
+      "key": "belt_printer_infinite_y",
+      "flag": "--belt-printer-infinite-y",
+      "type": "coBool",
+      "nocli": false,
+      "class": "PrintConfigDef",
+      "min": null,
+      "max": null,
+      "enum_values": [],
+      "enum_dynamic": false,
+      "default": "true",
+      "nullable": false
+    },
+    {
+      "key": "belt_purge_tower_object",
+      "flag": "--belt-purge-tower-object",
+      "type": "coBool",
+      "nocli": false,
+      "class": "PrintConfigDef",
+      "min": null,
+      "max": null,
+      "enum_values": [],
+      "enum_dynamic": false,
+      "default": "false",
+      "nullable": false
+    },
+    {
+      "key": "belt_purge_tower_width",
+      "flag": "--belt-purge-tower-width",
+      "type": "coFloat",
+      "nocli": false,
+      "class": "PrintConfigDef",
+      "min": 1.0,
+      "max": null,
+      "enum_values": [],
+      "enum_dynamic": false,
+      "default": "35.",
+      "nullable": false
+    },
+    {
+      "key": "belt_slice_rotation",
+      "flag": "--belt-slice-rotation",
+      "type": "coEnum",
+      "nocli": false,
+      "class": "PrintConfigDef",
+      "min": null,
+      "max": null,
+      "enum_values": [
+        "none",
+        "x",
+        "y",
+        "z"
+      ],
+      "enum_dynamic": false,
+      "default": null,
+      "nullable": false
+    },
+    {
+      "key": "belt_slice_rotation_angle",
+      "flag": "--belt-slice-rotation-angle",
+      "type": "coFloat",
+      "nocli": false,
+      "class": "PrintConfigDef",
+      "min": -180.0,
+      "max": 180.0,
+      "enum_values": [],
+      "enum_dynamic": false,
+      "default": "45.",
+      "nullable": false
+    },
+    {
+      "key": "belt_support_floor_offset",
+      "flag": "--belt-support-floor-offset",
+      "type": "coFloat",
+      "nocli": false,
+      "class": "PrintConfigDef",
+      "min": -500.0,
+      "max": 500.0,
+      "enum_values": [],
+      "enum_dynamic": false,
+      "default": "0",
+      "nullable": false
+    },
+    {
       "key": "best_object_pos",
       "flag": "--best-object-pos",
       "type": "coPoint",
@@ -825,7 +947,8 @@
         "outer_only",
         "inner_only",
         "outer_and_inner",
-        "no_brim"
+        "no_brim",
+        "leading_edge_only"
       ],
       "enum_dynamic": false,
       "default": null,
@@ -852,6 +975,32 @@
       "class": "PrintConfigDef",
       "min": 0.0,
       "max": 100.0,
+      "enum_values": [],
+      "enum_dynamic": false,
+      "default": "0.",
+      "nullable": false
+    },
+    {
+      "key": "build_plate_tilt_x",
+      "flag": "--build-plate-tilt-x",
+      "type": "coFloat",
+      "nocli": false,
+      "class": "PrintConfigDef",
+      "min": -89.0,
+      "max": 89.0,
+      "enum_values": [],
+      "enum_dynamic": false,
+      "default": "0.",
+      "nullable": false
+    },
+    {
+      "key": "build_plate_tilt_y",
+      "flag": "--build-plate-tilt-y",
+      "type": "coFloat",
+      "nocli": false,
+      "class": "PrintConfigDef",
+      "min": -89.0,
+      "max": 89.0,
       "enum_values": [],
       "enum_dynamic": false,
       "default": "0.",
@@ -1709,6 +1858,19 @@
       "nullable": false
     },
     {
+      "key": "enable_belt_purge_tower",
+      "flag": "--enable-belt-purge-tower",
+      "type": "coBool",
+      "nocli": false,
+      "class": "PrintConfigDef",
+      "min": null,
+      "max": null,
+      "enum_values": [],
+      "enum_dynamic": false,
+      "default": "false",
+      "nullable": false
+    },
+    {
       "key": "enable_extra_bridge_layer",
       "flag": "--enable-extra-bridge-layer",
       "type": "coEnum",
@@ -2084,6 +2246,19 @@
       "enum_values": [],
       "enum_dynamic": false,
       "default": "10",
+      "nullable": false
+    },
+    {
+      "key": "extra_brim_width",
+      "flag": "--extra-brim-width",
+      "type": "coFloat",
+      "nocli": false,
+      "class": "PrintConfigDef",
+      "min": 0.0,
+      "max": 100.0,
+      "enum_values": [],
+      "enum_dynamic": false,
+      "default": "0.",
       "nullable": false
     },
     {
@@ -5797,6 +5972,19 @@
       "enum_values": [],
       "enum_dynamic": false,
       "default": "INITIAL_LAYER_HEIGHT",
+      "nullable": false
+    },
+    {
+      "key": "leading_brim_length",
+      "flag": "--leading-brim-length",
+      "type": "coFloat",
+      "nocli": false,
+      "class": "PrintConfigDef",
+      "min": 0.0,
+      "max": 100.0,
+      "enum_values": [],
+      "enum_dynamic": false,
+      "default": "0.",
       "nullable": false
     },
     {
@@ -11111,6 +11299,58 @@
       "enum_dynamic": false,
       "default": "100",
       "nullable": true
+    },
+    {
+      "key": "tpms_adaptive",
+      "flag": "--tpms-adaptive",
+      "type": "coEnum",
+      "nocli": false,
+      "class": "PrintConfigDef",
+      "min": null,
+      "max": null,
+      "enum_values": [
+        "disabled",
+        "distance_warp",
+        "smooth_blend",
+        "stepped_shells",
+        "lobes",
+        "normal_z",
+        "normal_y",
+        "normal_x"
+      ],
+      "enum_dynamic": false,
+      "default": null,
+      "nullable": false
+    },
+    {
+      "key": "tpms_adaptive_gradient",
+      "flag": "--tpms-adaptive-gradient",
+      "type": "coEnum",
+      "nocli": false,
+      "class": "PrintConfigDef",
+      "min": null,
+      "max": null,
+      "enum_values": [
+        "linear",
+        "quadratic",
+        "exponential"
+      ],
+      "enum_dynamic": false,
+      "default": null,
+      "nullable": false
+    },
+    {
+      "key": "tpms_interior_density",
+      "flag": "--tpms-interior-density",
+      "type": "coPercent",
+      "nocli": false,
+      "class": "PrintConfigDef",
+      "min": 1.0,
+      "max": 100.0,
+      "enum_values": [],
+      "enum_dynamic": false,
+      "default": "5",
+      "nullable": false
     },
     {
       "key": "travel_acceleration",
