@@ -1,7 +1,7 @@
 id: load-filaments-count-exceeds-project
 title: "Loading more filaments than the project defines must not crash"
 category: geometry-bounds
-status: open
+status: fixed
 model: Stanford_Bunny.3mf
 args:
   - "--datadir"
@@ -33,3 +33,7 @@ notes: >
   remapping logic (an index that can overrun or start below zero depending
   on the first entry's value) -- worth its own case if/when it's isolated,
   rather than folding it into this assertion.
+
+  Fixed on main: when the project has fewer filament_self_index entries than
+  the loaded filaments, the CLI regenerates them instead of aborting in
+  set_with_restore_2.
