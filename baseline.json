@@ -25,89 +25,89 @@
         "layers": 150,
         "max_z_mm": 30.0,
         "filament_mm": [
-          17894.46,
-          9109.03,
-          10762.78,
-          7100.17
+          17819.16,
+          9117.3,
+          10687.03,
+          7032.33
         ],
         "filament_cm3": [
-          43.04,
-          21.91,
-          25.89,
-          17.08
+          42.86,
+          21.93,
+          25.71,
+          16.91
         ],
         "filament_g": [
-          53.37,
-          27.17,
-          32.1,
-          21.18
+          53.15,
+          27.19,
+          31.87,
+          20.97
         ],
-        "e_sum_mm": 54619.236,
-        "size_bytes": 6720346
+        "e_sum_mm": 54482.219,
+        "size_bytes": 8416865
       },
-      "captured_with": "OrcaSlicer-2.5.0-dev @ 37e1582c4c",
-      "captured_on": "2026-09-08"
+      "captured_with": "OrcaSlicer-2.5.0-dev @ e4142db820",
+      "captured_on": "2026-10-10"
     },
     "p1s_multicolor_3mf.gcode": {
       "metrics": {
         "layers": 150,
         "max_z_mm": 30.0,
-        "print_time_s": 30708,
-        "total_time_s": 31083,
+        "print_time_s": 29973,
+        "total_time_s": 30348,
         "filament_mm": [
-          9380.37,
-          6549.41,
-          5799.47,
-          3651.14
+          8790.5,
+          5852.42,
+          5176.12,
+          3265.2
         ],
         "filament_cm3": [
-          22.56,
-          15.75,
-          13.95,
-          8.78
+          21.14,
+          14.08,
+          12.45,
+          7.85
         ],
         "filament_g": [
-          28.43,
-          19.85,
-          17.58,
-          11.07
+          26.64,
+          17.74,
+          15.69,
+          9.9
         ],
-        "e_sum_mm": 34863.187,
-        "size_bytes": 4911529
+        "e_sum_mm": 33562.242,
+        "size_bytes": 5152444
       },
-      "captured_with": "OrcaSlicer-2.5.0-dev @ 37e1582c4c",
-      "captured_on": "2026-09-08"
+      "captured_with": "OrcaSlicer-2.5.0-dev @ e4142db820",
+      "captured_on": "2026-10-10"
     },
     "toolchanger_4_color_3mf.gcode": {
       "metrics": {
         "layers": 150,
         "max_z_mm": 30.0,
         "filament_mm": [
-          8024.71,
-          2753.61,
-          2127.92,
-          1602.16,
-          1207.97
+          7766.82,
+          2511.72,
+          1937.14,
+          1475.53,
+          1101.97
         ],
         "filament_cm3": [
-          19.3,
-          6.62,
-          5.12,
-          3.85,
-          2.91
+          18.68,
+          6.04,
+          4.66,
+          3.55,
+          2.65
         ],
         "filament_g": [
-          23.93,
-          8.21,
-          6.35,
-          4.78,
-          3.6
+          23.16,
+          7.49,
+          5.78,
+          4.4,
+          3.29
         ],
-        "e_sum_mm": 19957.763,
-        "size_bytes": 6755238
+        "e_sum_mm": 19108.988,
+        "size_bytes": 8355417
       },
-      "captured_with": "OrcaSlicer-2.5.0-dev @ 37e1582c4c",
-      "captured_on": "2026-09-08"
+      "captured_with": "OrcaSlicer-2.5.0-dev @ e4142db820",
+      "captured_on": "2026-10-10"
     }
   }
 }
