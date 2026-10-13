@@ -257,7 +257,7 @@
       "max": null,
       "enum_values": [],
       "enum_dynamic": false,
-      "default": "true",
+      "default": "false",
       "nullable": false
     },
     {
@@ -8900,6 +8900,19 @@
       "enum_values": [],
       "enum_dynamic": false,
       "default": "1.",
+      "nullable": false
+    },
+    {
+      "key": "repair",
+      "flag": "--repair",
+      "type": "coBool",
+      "nocli": false,
+      "class": "CLITransformConfigDef",
+      "min": null,
+      "max": null,
+      "enum_values": [],
+      "enum_dynamic": false,
+      "default": "false",
       "nullable": false
     },
     {
