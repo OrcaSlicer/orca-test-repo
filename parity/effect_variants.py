@@ -17,7 +17,8 @@ and re-balance the shards. A variant nothing routes to is never built.
 
 Measured 2026-09-03/04 against RelWithDebInfo b81c0e30c1: 327 of the 450
 classifiable inert options change the G-code under these fixtures.
-See FIXTURE_MEASUREMENT.md.
+See FIXTURE_MEASUREMENT.md, including the 2026-10-14 re-measurement of the
+overhang fan, overhang speed and infill alignment options.
 """
 import functools
 import json
@@ -98,6 +99,7 @@ def specs(datadir, model_stl, flat_dir=None):
     pla4 = ";".join([pla, str(bf / "Bambu PLA Matte @BBL X1C.json")] * 2)
     fix = REPO / "parity" / "fixtures"
     plate, vase = [fix / "torture.stl"], [fix / "vase.stl"]
+    rotated = [fix / "torture_rot30.3mf"]
     cubes = [fix / "cube_a.stl", fix / "cube_b.stl"]
     proj = REPO / "test_projects"
 
@@ -128,6 +130,14 @@ def specs(datadir, model_stl, flat_dir=None):
                                     "fuzzy_skin_mode": "combined"}),
         "adaptive_pa": dict(settings=x1c, filaments=pla, models=plate,
                             overlay={**SWITCHES, "adaptive_pressure_advance": "1"}),
+        # the PLA profile pins fan_min_speed, fan_max_speed and overhang_fan_speed
+        # all at 100, so the overhang fan has nowhere to go on SWITCHES
+        "fan":        dict(settings=x1c, filaments=pla, models=plate,
+                           overlay={**SWITCHES, "fan_min_speed": "50", "fan_max_speed": "50"}),
+        # align_infill_direction_to_model reads the instance rotation; an STL
+        # arrives unrotated and --rotate bakes into the mesh, so the rotation
+        # has to come in as a project instance transform
+        "rotated":    dict(settings=x1c, filaments=pla, models=rotated, overlay=SWITCHES),
         "spiral":     dict(settings=x1c, filaments=pla, models=vase,
                            overlay={"spiral_mode": "1", "wall_loops": "1",
                                     "top_shell_layers": "0", "sparse_infill_density": "0%",

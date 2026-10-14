@@ -13,6 +13,10 @@ Fixtures produced:
   cube_sunken.3mf         project with the cube half below the bed
   cube_partly_outside.3mf project with the cube half off the bed edge in XY
                           (GUI disables slicing, CLI aborts)
+  torture_rot30.3mf       the torture plate as a project whose instance is
+                          rotated 30 deg about Z -- the only way the CLI keeps
+                          an instance rotation (--rotate bakes it into the
+                          mesh), which align_infill_direction_to_model reads
   presets/0.20mm Deviant @parity.json  user process preset with `inherits` and no
                           compatible_printers (exercises the CLI compat gate)
 
@@ -21,6 +25,7 @@ Stdlib only.
 
 import argparse
 import json
+import math
 import os
 import re
 import shutil
@@ -48,7 +53,9 @@ def transform_stl(src, dst, fn):
                 g.write(line)
 
 
-def make_base_project(binpath, workdir, inputs, name="base_project.3mf"):
+def make_base_project(binpath, workdir, inputs, name="base_project.3mf",
+                      machine="Bambu Lab P1S 0.4 nozzle",
+                      filament="Bambu PLA Basic @BBL P1S 0.4 nozzle"):
     """Export an unsliced project 3mf of the given models via the CLI."""
     out = os.path.join(workdir, name)
     profiles = os.path.join(SLICER_ROOT, "resources", "profiles", "BBL")
@@ -57,14 +64,26 @@ def make_base_project(binpath, workdir, inputs, name="base_project.3mf"):
     subprocess.run(
         [binpath, "--datadir", datadir,
          "--load-settings", "%s;%s" % (
-             os.path.join(profiles, "machine", "Bambu Lab P1S 0.4 nozzle.json"),
+             os.path.join(profiles, "machine", machine + ".json"),
              os.path.join(profiles, "process", "0.20mm Standard @BBL X1C.json")),
          "--load-filaments",
-         os.path.join(profiles, "filament", "Bambu PLA Basic @BBL P1S 0.4 nozzle.json"),
+         os.path.join(profiles, "filament", filament + ".json"),
          "--arrange", "1", "--export-3mf", out] + inputs,
         check=True, cwd=workdir, capture_output=True,
     )
     return out
+
+
+def patch_project_model(src_3mf, dst_3mf, patch):
+    """Copy a 3mf with its build file (3D/3dmodel.model) passed through patch."""
+    with zipfile.ZipFile(src_3mf) as zin, zipfile.ZipFile(
+        dst_3mf, "w", zipfile.ZIP_DEFLATED
+    ) as zout:
+        for info in zin.infolist():
+            data = zin.read(info.filename)
+            if info.filename == "3D/3dmodel.model":
+                data = patch(data.decode()).encode()
+            zout.writestr(info, data)
 
 
 def retransform_project(src_3mf, dst_3mf, dx=0.0, dy=0.0, dz=0.0, only_item=None):
@@ -89,14 +108,46 @@ def retransform_project(src_3mf, dst_3mf, dx=0.0, dy=0.0, dz=0.0, only_item=None
             r'(<item [^>]*transform=")([^"]+)("[^>]*/>)', sub, xml
         )
 
-    with zipfile.ZipFile(src_3mf) as zin, zipfile.ZipFile(
-        dst_3mf, "w", zipfile.ZIP_DEFLATED
-    ) as zout:
-        for info in zin.infolist():
-            data = zin.read(info.filename)
-            if info.filename == "3D/3dmodel.model":
-                data = patch(data.decode()).encode()
-            zout.writestr(info, data)
+    patch_project_model(src_3mf, dst_3mf, patch)
+
+
+def _mat3(v):
+    return [v[0:3], v[3:6], v[6:9]]
+
+
+def _mul3(a, b):
+    return [[sum(a[i][k] * b[k][j] for k in range(3)) for j in range(3)] for i in range(3)]
+
+
+def _row_mul(v, m):
+    return [sum(v[k] * m[k][j] for k in range(3)) for j in range(3)]
+
+
+def rotate_project_item(src_3mf, dst_3mf, degrees):
+    """Copy a 3mf, rotating its single build item about Z while leaving the
+    object where arrange put it. 3mf transforms are row-major with the
+    translation last and apply as p * M + t, so the mesh origin sits at
+    component_t * item_M + item_t; the new item translation keeps that point
+    fixed under the rotated item matrix."""
+
+    def patch(xml):
+        items = re.findall(r'<item [^>]*transform="([^"]+)"', xml)
+        comps = re.findall(r'<component [^>]*transform="([^"]+)"', xml)
+        if len(items) != 1 or len(comps) > 1:
+            sys.exit("%s: expected one build item with at most one component" % src_3mf)
+        iv = [float(x) for x in items[0].split()]
+        comp_t = [float(x) for x in comps[0].split()][9:12] if comps else [0.0, 0.0, 0.0]
+        a = math.radians(degrees)
+        rot = [[math.cos(a), math.sin(a), 0.0], [-math.sin(a), math.cos(a), 0.0], [0.0, 0.0, 1.0]]
+        item_m = _mat3(iv)
+        pivot = [p + t for p, t in zip(_row_mul(comp_t, item_m), iv[9:12])]
+        new_m = _mul3(item_m, rot)
+        new_t = [p - q for p, q in zip(pivot, _row_mul(comp_t, new_m))]
+        transform = " ".join("%.6f" % x for x in sum(new_m, []) + new_t)
+        return re.sub(r'(<item [^>]*transform=")[^"]+(")',
+                      lambda m: m.group(1) + transform + m.group(2), xml)
+
+    patch_project_model(src_3mf, dst_3mf, patch)
 
 
 def write_user_presets():
@@ -150,6 +201,12 @@ def main():
             base2, os.path.join(OUT, "cube_partly_outside.3mf"),
             dx=130.0, only_item=1,
         )
+        # the effect stage slices this one with the X1C presets, so export it
+        # with them too
+        plate = make_base_project(args.bin, wd, [os.path.join(OUT, "torture.stl")],
+                                  name="torture.3mf", machine="Bambu Lab X1 Carbon 0.4 nozzle",
+                                  filament="Bambu PLA Basic @BBL X1C")
+        rotate_project_item(plate, os.path.join(OUT, "torture_rot30.3mf"), 30.0)
     print("wrote project fixtures to %s" % OUT)
 
 

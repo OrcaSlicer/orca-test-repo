@@ -215,3 +215,43 @@ system preset file, against the 60-minute timeout. The shards are disjoint and
 cover every landed option exactly once; options with no recorded fixture are
 spread round-robin so a newly added option is never silently dropped from every
 shard.
+
+## Re-measured 2026-10-14: three options the arc-fitting bug had been showing
+
+Measured against Release af29e4d553. Three options that the September pass
+counted effective turned inert on the October nightlies, and the slicer was
+right both times:
+
+* `enable_overhang_bridge_fan` and `enable_overhang_speed` had only ever been
+  "effective" through a bug: with the overhang fan enabled, every path was
+  emitted point by point, and the sweep read that emission-mode change as the
+  option's effect. Once segments were only split on real speed or fan
+  transitions, the probe matched the baseline. The fan itself never had room
+  to show: the PLA profile pins `fan_min_speed`, `fan_max_speed` and
+  `overhang_fan_speed` all at 100.
+* `align_infill_direction_to_model` reads the instance rotation. The CLI used
+  to rotate STL input while arranging it; it no longer does, so the plate
+  arrives unrotated and there is nothing to align to. `--rotate` cannot
+  substitute: it bakes the rotation into the mesh and leaves the instance at 0.
+
+Two fixtures restore them without touching the SWITCHES baseline that 98
+options are measured against:
+
+| fixture | model / overlay | unlocks |
+|---|---|---|
+| `fan` | torture + SWITCHES + `fan_min_speed`/`fan_max_speed` 50 | `enable_overhang_bridge_fan`, `overhang_fan_speed`, `overhang_fan_threshold` (the last two were inert on the cube too) |
+| `rotated` | `fixtures/torture_rot30.3mf` + SWITCHES | `align_infill_direction_to_model` |
+| `switches` | unchanged | `enable_overhang_speed` moves here from the cube: the plate has overhangs, the cube has none |
+
+`torture_rot30.3mf` is the torture plate exported as a project and its build
+item rotated 30 degrees about Z around the object's own position
+(`gen_fixtures.py`). A project plate is never re-arranged, so the rotation
+survives loading as an instance transform; rotating about the bed origin
+instead throws the plate off the bed (exit 206). Each new baseline and probe
+sliced three times to the same normalised stream.
+
+Still inert on the `fan` fixture, with gates of their own: `fan_speedup_overhangs`,
+`fan_cooling_layer_time`, `first_x_layer_fan_speed`, `initial_layer_fan_speed`,
+`during_print_exhaust_fan_speed`, `complete_print_exhaust_fan_speed`,
+`additional_fan_full_speed_layer`, `close_additional_fan_first_x_layers`,
+`adaptive_pressure_advance_bridges`.
