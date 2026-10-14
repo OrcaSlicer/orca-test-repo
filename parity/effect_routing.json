@@ -16,7 +16,7 @@
   "adaptive_pressure_advance_model": "switches",
   "adaptive_pressure_advance_overhangs": "klipper",
   "additional_cooling_fan_speed": "switches",
-  "align_infill_direction_to_model": "switches",
+  "align_infill_direction_to_model": "rotated",
   "alternate_extra_wall": "cube",
   "auxiliary_fan": "cube",
   "bed_mesh_max": "klipper",
@@ -75,8 +75,8 @@
   "enable_extra_bridge_layer": "switches",
   "enable_filament_ramming": "mf_klipper",
   "enable_long_retraction_when_cut": "mf_bbl",
-  "enable_overhang_bridge_fan": "switches",
-  "enable_overhang_speed": "cube",
+  "enable_overhang_bridge_fan": "fan",
+  "enable_overhang_speed": "switches",
   "enable_power_loss_recovery": "cube",
   "enable_pre_heating": "mf_toolchanger",
   "enable_support": "switches",
@@ -277,8 +277,8 @@
   "overhang_2_4_speed": "switches",
   "overhang_3_4_speed": "switches",
   "overhang_4_4_speed": "switches",
-  "overhang_fan_speed": "cube",
-  "overhang_fan_threshold": "cube",
+  "overhang_fan_speed": "fan",
+  "overhang_fan_threshold": "fan",
   "overhang_flow_ratio": "switches",
   "overhang_reverse": "switches",
   "overhang_reverse_internal_only": "switches",
@@ -592,7 +592,6 @@
     "adaptive_pressure_advance_bridges",
     "adaptive_pressure_advance_model",
     "additional_cooling_fan_speed",
-    "align_infill_direction_to_model",
     "bottom_surface_pattern",
     "bridge_angle",
     "bridge_density",
@@ -612,7 +611,7 @@
     "during_print_exhaust_fan_speed",
     "elefant_foot_compensation_layers",
     "enable_extra_bridge_layer",
-    "enable_overhang_bridge_fan",
+    "enable_overhang_speed",
     "enable_support",
     "extra_perimeters_on_overhangs",
     "extra_solid_infills",
@@ -742,7 +741,6 @@
     "elefant_foot_layers_density",
     "emit_machine_limits_to_gcode",
     "enable_arc_fitting",
-    "enable_overhang_speed",
     "enable_power_loss_recovery",
     "enable_wrapping_detection",
     "ensure_vertical_shell_thickness",
@@ -817,8 +815,6 @@
     "outer_wall_acceleration",
     "outer_wall_line_width",
     "outer_wall_speed",
-    "overhang_fan_speed",
-    "overhang_fan_threshold",
     "precise_outer_wall",
     "print_flow_ratio",
     "print_sequence",
@@ -882,6 +878,11 @@
    ],
    "draftshield": [
     "single_loop_draft_shield"
+   ],
+   "fan": [
+    "enable_overhang_bridge_fan",
+    "overhang_fan_speed",
+    "overhang_fan_threshold"
    ],
    "gyroid": [
     "gyroid_optimized"
@@ -998,6 +999,9 @@
     "wipe_tower_extra_spacing",
     "wipe_tower_type",
     "wipe_tower_wall_type"
+   ],
+   "rotated": [
+    "align_infill_direction_to_model"
    ],
    "spiral": [
     "spiral_finishing_flow_ratio",
