@@ -2210,6 +2210,19 @@
       "nullable": false
     },
     {
+      "key": "export_statistics",
+      "flag": "--export-statistics",
+      "type": "coBool",
+      "nocli": false,
+      "class": "CLIMiscConfigDef",
+      "min": null,
+      "max": null,
+      "enum_values": [],
+      "enum_dynamic": false,
+      "default": "false",
+      "nullable": false
+    },
+    {
       "key": "export_stl",
       "flag": "--export-stl",
       "type": "coBool",
