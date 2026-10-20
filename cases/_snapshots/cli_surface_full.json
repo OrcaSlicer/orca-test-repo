@@ -105,6 +105,58 @@
       "nullable": false
     },
     {
+      "key": "adaptive_infill_gradient",
+      "flag": "--adaptive-infill-gradient",
+      "type": "coEnum",
+      "nocli": false,
+      "class": "PrintConfigDef",
+      "min": null,
+      "max": null,
+      "enum_values": [
+        "linear",
+        "quadratic",
+        "exponential"
+      ],
+      "enum_dynamic": false,
+      "default": null,
+      "nullable": false
+    },
+    {
+      "key": "adaptive_infill_interior_density",
+      "flag": "--adaptive-infill-interior-density",
+      "type": "coPercent",
+      "nocli": false,
+      "class": "PrintConfigDef",
+      "min": 1.0,
+      "max": 100.0,
+      "enum_values": [],
+      "enum_dynamic": false,
+      "default": "5",
+      "nullable": false
+    },
+    {
+      "key": "adaptive_infill_mode",
+      "flag": "--adaptive-infill-mode",
+      "type": "coEnum",
+      "nocli": false,
+      "class": "PrintConfigDef",
+      "min": null,
+      "max": null,
+      "enum_values": [
+        "disabled",
+        "distance_warp",
+        "smooth_blend",
+        "stepped_shells",
+        "lobes",
+        "normal_z",
+        "normal_y",
+        "normal_x"
+      ],
+      "enum_dynamic": false,
+      "default": null,
+      "nullable": false
+    },
+    {
       "key": "adaptive_pressure_advance",
       "flag": "--adaptive-pressure-advance",
       "type": "coBools",
@@ -2168,6 +2220,19 @@
       "enum_values": [],
       "enum_dynamic": false,
       "default": "false",
+      "nullable": false
+    },
+    {
+      "key": "exclude_object_tolerance",
+      "flag": "--exclude-object-tolerance",
+      "type": "coFloat",
+      "nocli": false,
+      "class": "PrintConfigDef",
+      "min": 0.0,
+      "max": 5.0,
+      "enum_values": [],
+      "enum_dynamic": false,
+      "default": "0.1",
       "nullable": false
     },
     {
@@ -11517,58 +11582,6 @@
       "enum_dynamic": false,
       "default": "100",
       "nullable": true
-    },
-    {
-      "key": "tpms_adaptive",
-      "flag": "--tpms-adaptive",
-      "type": "coEnum",
-      "nocli": false,
-      "class": "PrintConfigDef",
-      "min": null,
-      "max": null,
-      "enum_values": [
-        "disabled",
-        "distance_warp",
-        "smooth_blend",
-        "stepped_shells",
-        "lobes",
-        "normal_z",
-        "normal_y",
-        "normal_x"
-      ],
-      "enum_dynamic": false,
-      "default": null,
-      "nullable": false
-    },
-    {
-      "key": "tpms_adaptive_gradient",
-      "flag": "--tpms-adaptive-gradient",
-      "type": "coEnum",
-      "nocli": false,
-      "class": "PrintConfigDef",
-      "min": null,
-      "max": null,
-      "enum_values": [
-        "linear",
-        "quadratic",
-        "exponential"
-      ],
-      "enum_dynamic": false,
-      "default": null,
-      "nullable": false
-    },
-    {
-      "key": "tpms_interior_density",
-      "flag": "--tpms-interior-density",
-      "type": "coPercent",
-      "nocli": false,
-      "class": "PrintConfigDef",
-      "min": 1.0,
-      "max": 100.0,
-      "enum_values": [],
-      "enum_dynamic": false,
-      "default": "5",
-      "nullable": false
     },
     {
       "key": "travel_acceleration",
