@@ -456,6 +456,36 @@
       "nullable": false
     },
     {
+      "key": "bed_exclude_volume_mode",
+      "flag": "--bed-exclude-volume-mode",
+      "type": "coEnum",
+      "nocli": false,
+      "class": "PrintConfigDef",
+      "min": null,
+      "max": null,
+      "enum_values": [
+        "shared",
+        "toolhead_offset",
+        "per_extruder"
+      ],
+      "enum_dynamic": false,
+      "default": null,
+      "nullable": false
+    },
+    {
+      "key": "bed_exclude_volumes",
+      "flag": "--bed-exclude-volumes",
+      "type": "coString",
+      "nocli": false,
+      "class": "PrintConfigDef",
+      "min": null,
+      "max": null,
+      "enum_values": [],
+      "enum_dynamic": false,
+      "default": "",
+      "nullable": false
+    },
+    {
       "key": "bed_mesh_max",
       "flag": "--bed-mesh-max",
       "type": "coPoint",
@@ -1899,14 +1929,18 @@
     {
       "key": "enable_arc_fitting",
       "flag": "--enable-arc-fitting",
-      "type": "coBool",
+      "type": "coEnum",
       "nocli": false,
       "class": "PrintConfigDef",
       "min": null,
       "max": null,
-      "enum_values": [],
+      "enum_values": [
+        "disabled",
+        "enabled",
+        "sparse_infill"
+      ],
       "enum_dynamic": false,
-      "default": "0",
+      "default": null,
       "nullable": false
     },
     {
@@ -2402,6 +2436,19 @@
       "enum_values": [],
       "enum_dynamic": false,
       "default": "",
+      "nullable": false
+    },
+    {
+      "key": "extruder_bed_exclude_volumes",
+      "flag": "--extruder-bed-exclude-volumes",
+      "type": "coStrings",
+      "nocli": false,
+      "class": "PrintConfigDef",
+      "min": null,
+      "max": null,
+      "enum_values": [],
+      "enum_dynamic": false,
+      "default": "\"\"",
       "nullable": false
     },
     {
