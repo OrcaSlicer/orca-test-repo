@@ -728,6 +728,19 @@
       "nullable": false
     },
     {
+      "key": "bottom_color_penetration_layers",
+      "flag": "--bottom-color-penetration-layers",
+      "type": "coInt",
+      "nocli": false,
+      "class": "PrintConfigDef",
+      "min": 0.0,
+      "max": null,
+      "enum_values": [],
+      "enum_dynamic": false,
+      "default": "0",
+      "nullable": false
+    },
+    {
       "key": "bottom_layer_direction",
       "flag": "--bottom-layer-direction",
       "type": "coFloat",
@@ -9563,19 +9576,6 @@
       "nullable": false
     },
     {
-      "key": "silent_mode",
-      "flag": "--silent-mode",
-      "type": "coBool",
-      "nocli": false,
-      "class": "PrintConfigDef",
-      "min": null,
-      "max": null,
-      "enum_values": [],
-      "enum_dynamic": false,
-      "default": "false",
-      "nullable": false
-    },
-    {
       "key": "single_extruder_multi_material",
       "flag": "--single-extruder-multi-material",
       "type": "coBool",
@@ -11415,6 +11415,19 @@
       "enum_values": [],
       "enum_dynamic": false,
       "default": "25",
+      "nullable": false
+    },
+    {
+      "key": "top_color_penetration_layers",
+      "flag": "--top-color-penetration-layers",
+      "type": "coInt",
+      "nocli": false,
+      "class": "PrintConfigDef",
+      "min": 0.0,
+      "max": null,
+      "enum_values": [],
+      "enum_dynamic": false,
+      "default": "0",
       "nullable": false
     },
     {
