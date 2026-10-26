@@ -4892,6 +4892,19 @@
       "nullable": false
     },
     {
+      "key": "high_precision_gcode",
+      "flag": "--high-precision-gcode",
+      "type": "coBool",
+      "nocli": false,
+      "class": "PrintConfigDef",
+      "min": null,
+      "max": null,
+      "enum_values": [],
+      "enum_dynamic": false,
+      "default": "false",
+      "nullable": false
+    },
+    {
       "key": "hole_to_polyhole",
       "flag": "--hole-to-polyhole",
       "type": "coBool",
