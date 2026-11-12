@@ -12788,6 +12788,8 @@
     "slowdown_for_curled_perimeters",
     "small_perimeter_speed",
     "small_perimeter_threshold",
+    "small_support_perimeter_speed",
+    "small_support_perimeter_threshold",
     "sparse_infill_acceleration",
     "sparse_infill_speed",
     "support_interface_speed",
