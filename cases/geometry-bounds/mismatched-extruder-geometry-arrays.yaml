@@ -1,7 +1,7 @@
 id: mismatched-extruder-geometry-arrays
 title: Per-extruder printable areas whose intersection is empty must not crash the CLI
 category: geometry-bounds
-status: open
+status: fixed
 model: synthetic/mismatched_extruder_arrays.3mf
 args:
 - --datadir
