@@ -9119,6 +9119,19 @@
       "nullable": false
     },
     {
+      "key": "retract_after_outer_wall",
+      "flag": "--retract-after-outer-wall",
+      "type": "coBool",
+      "nocli": false,
+      "class": "PrintConfigDef",
+      "min": null,
+      "max": null,
+      "enum_values": [],
+      "enum_dynamic": false,
+      "default": "true",
+      "nullable": false
+    },
+    {
       "key": "retract_after_wipe",
       "flag": "--retract-after-wipe",
       "type": "coPercents",
