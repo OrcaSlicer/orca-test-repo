@@ -950,6 +950,19 @@
       "nullable": true
     },
     {
+      "key": "bridge_volumetric_flow",
+      "flag": "--bridge-volumetric-flow",
+      "type": "coFloatsOrPercents",
+      "nocli": false,
+      "class": "PrintConfigDef",
+      "min": 0.1,
+      "max": null,
+      "enum_values": [],
+      "enum_dynamic": false,
+      "default": "FloatOrPercent(25, true)",
+      "nullable": true
+    },
+    {
       "key": "brim_ears",
       "flag": "--brim-ears",
       "type": "coBool",
@@ -2174,6 +2187,19 @@
       "nullable": false
     },
     {
+      "key": "enable_volumetric_speeds",
+      "flag": "--enable-volumetric-speeds",
+      "type": "coBool",
+      "nocli": false,
+      "class": "PrintConfigDef",
+      "min": null,
+      "max": null,
+      "enum_values": [],
+      "enum_dynamic": false,
+      "default": "false",
+      "nullable": false
+    },
+    {
       "key": "enable_wrapping_detection",
       "flag": "--enable-wrapping-detection",
       "type": "coBool",
@@ -3366,6 +3392,19 @@
       ],
       "enum_dynamic": false,
       "default": null,
+      "nullable": false
+    },
+    {
+      "key": "filament_max_external_volumetric_speed",
+      "flag": "--filament-max-external-volumetric-speed",
+      "type": "coFloats",
+      "nocli": false,
+      "class": "PrintConfigDef",
+      "min": 0.0,
+      "max": null,
+      "enum_values": [],
+      "enum_dynamic": false,
+      "default": "0.",
       "nullable": false
     },
     {
@@ -4665,6 +4704,19 @@
       "nullable": true
     },
     {
+      "key": "gap_infill_volumetric_flow",
+      "flag": "--gap-infill-volumetric-flow",
+      "type": "coFloatsOrPercents",
+      "nocli": false,
+      "class": "PrintConfigDef",
+      "min": 0.1,
+      "max": null,
+      "enum_values": [],
+      "enum_dynamic": false,
+      "default": "FloatOrPercent(50, true)",
+      "nullable": true
+    },
+    {
       "key": "gcode_add_line_number",
       "flag": "--gcode-add-line-number",
       "type": "coBool",
@@ -5558,6 +5610,19 @@
       "nullable": true
     },
     {
+      "key": "initial_layer_infill_volumetric_flow",
+      "flag": "--initial-layer-infill-volumetric-flow",
+      "type": "coFloatsOrPercents",
+      "nocli": false,
+      "class": "PrintConfigDef",
+      "min": 0.1,
+      "max": null,
+      "enum_values": [],
+      "enum_dynamic": false,
+      "default": "FloatOrPercent(50, true)",
+      "nullable": true
+    },
+    {
       "key": "initial_layer_jerk",
       "flag": "--initial-layer-jerk",
       "type": "coFloats",
@@ -5662,6 +5727,19 @@
       "nullable": true
     },
     {
+      "key": "initial_layer_volumetric_flow",
+      "flag": "--initial-layer-volumetric-flow",
+      "type": "coFloatsOrPercents",
+      "nocli": false,
+      "class": "PrintConfigDef",
+      "min": 0.1,
+      "max": null,
+      "enum_values": [],
+      "enum_dynamic": false,
+      "default": "FloatOrPercent(25, true)",
+      "nullable": true
+    },
+    {
       "key": "inner_wall_acceleration",
       "flag": "--inner-wall-acceleration",
       "type": "coFloats",
@@ -5737,6 +5815,19 @@
       "enum_values": [],
       "enum_dynamic": false,
       "default": "60",
+      "nullable": true
+    },
+    {
+      "key": "inner_wall_volumetric_flow",
+      "flag": "--inner-wall-volumetric-flow",
+      "type": "coFloatsOrPercents",
+      "nocli": false,
+      "class": "PrintConfigDef",
+      "min": 0.1,
+      "max": null,
+      "enum_values": [],
+      "enum_dynamic": false,
+      "default": "FloatOrPercent(100, true)",
       "nullable": true
     },
     {
@@ -6014,6 +6105,19 @@
       "nullable": true
     },
     {
+      "key": "internal_bridge_volumetric_flow",
+      "flag": "--internal-bridge-volumetric-flow",
+      "type": "coFloatsOrPercents",
+      "nocli": false,
+      "class": "PrintConfigDef",
+      "min": 0.1,
+      "max": null,
+      "enum_values": [],
+      "enum_dynamic": false,
+      "default": "FloatOrPercent(40, true)",
+      "nullable": true
+    },
+    {
       "key": "internal_solid_filament_id",
       "flag": "--internal-solid-filament-id",
       "type": "coInt",
@@ -6099,6 +6203,19 @@
       "enum_values": [],
       "enum_dynamic": false,
       "default": "100",
+      "nullable": true
+    },
+    {
+      "key": "internal_solid_infill_volumetric_flow",
+      "flag": "--internal-solid-infill-volumetric-flow",
+      "type": "coFloatsOrPercents",
+      "nocli": false,
+      "class": "PrintConfigDef",
+      "min": 0.1,
+      "max": null,
+      "enum_values": [],
+      "enum_dynamic": false,
+      "default": "FloatOrPercent(100, true)",
       "nullable": true
     },
     {
@@ -7796,6 +7913,19 @@
       "enum_values": [],
       "enum_dynamic": false,
       "default": "60",
+      "nullable": true
+    },
+    {
+      "key": "outer_wall_volumetric_flow",
+      "flag": "--outer-wall-volumetric-flow",
+      "type": "coFloatsOrPercents",
+      "nocli": false,
+      "class": "PrintConfigDef",
+      "min": 0.1,
+      "max": null,
+      "enum_values": [],
+      "enum_dynamic": false,
+      "default": "FloatOrPercent(50, true)",
       "nullable": true
     },
     {
@@ -10221,6 +10351,19 @@
       "nullable": true
     },
     {
+      "key": "sparse_infill_volumetric_flow",
+      "flag": "--sparse-infill-volumetric-flow",
+      "type": "coFloatsOrPercents",
+      "nocli": false,
+      "class": "PrintConfigDef",
+      "min": 0.1,
+      "max": null,
+      "enum_values": [],
+      "enum_dynamic": false,
+      "default": "FloatOrPercent(100, true)",
+      "nullable": true
+    },
+    {
       "key": "spiral_finishing_flow_ratio",
       "flag": "--spiral-finishing-flow-ratio",
       "type": "coFloat",
@@ -10775,6 +10918,19 @@
       "nullable": false
     },
     {
+      "key": "support_interface_volumetric_flow",
+      "flag": "--support-interface-volumetric-flow",
+      "type": "coFloatsOrPercents",
+      "nocli": false,
+      "class": "PrintConfigDef",
+      "min": 0.1,
+      "max": null,
+      "enum_values": [],
+      "enum_dynamic": false,
+      "default": "FloatOrPercent(50, true)",
+      "nullable": true
+    },
+    {
       "key": "support_ironing",
       "flag": "--support-ironing",
       "type": "coBool",
@@ -11170,6 +11326,19 @@
       "enum_dynamic": false,
       "default": null,
       "nullable": false
+    },
+    {
+      "key": "support_volumetric_flow",
+      "flag": "--support-volumetric-flow",
+      "type": "coFloatsOrPercents",
+      "nocli": false,
+      "class": "PrintConfigDef",
+      "min": 0.1,
+      "max": null,
+      "enum_values": [],
+      "enum_dynamic": false,
+      "default": "FloatOrPercent(100, true)",
+      "nullable": true
     },
     {
       "key": "supports_enable",
@@ -11667,6 +11836,19 @@
       "enum_values": [],
       "enum_dynamic": false,
       "default": "100",
+      "nullable": true
+    },
+    {
+      "key": "top_surface_volumetric_flow",
+      "flag": "--top-surface-volumetric-flow",
+      "type": "coFloatsOrPercents",
+      "nocli": false,
+      "class": "PrintConfigDef",
+      "min": 0.1,
+      "max": null,
+      "enum_values": [],
+      "enum_dynamic": false,
+      "default": "FloatOrPercent(50, true)",
       "nullable": true
     },
     {
@@ -12678,6 +12860,7 @@
     "additional_cooling_fan_speed",
     "bridge_acceleration",
     "bridge_speed",
+    "bridge_volumetric_flow",
     "complete_print_exhaust_fan_speed",
     "default_acceleration",
     "default_jerk",
@@ -12700,6 +12883,7 @@
     "filament_ironing_spacing",
     "filament_ironing_speed",
     "filament_long_retractions_when_cut",
+    "filament_max_external_volumetric_speed",
     "filament_max_volumetric_speed",
     "filament_minimal_purge_on_wipe_tower",
     "filament_multitool_ramming",
@@ -12731,22 +12915,28 @@
     "filament_z_hop",
     "filament_z_hop_types",
     "gap_infill_speed",
+    "gap_infill_volumetric_flow",
     "hotend_cooling_rate",
     "hotend_heating_rate",
     "infill_jerk",
     "initial_layer_acceleration",
     "initial_layer_infill_speed",
+    "initial_layer_infill_volumetric_flow",
     "initial_layer_jerk",
     "initial_layer_speed",
     "initial_layer_travel_acceleration",
     "initial_layer_travel_jerk",
     "initial_layer_travel_speed",
+    "initial_layer_volumetric_flow",
     "inner_wall_acceleration",
     "inner_wall_jerk",
     "inner_wall_speed",
+    "inner_wall_volumetric_flow",
     "internal_bridge_speed",
+    "internal_bridge_volumetric_flow",
     "internal_solid_infill_acceleration",
     "internal_solid_infill_speed",
+    "internal_solid_infill_volumetric_flow",
     "long_retractions_when_cut",
     "long_retractions_when_ec",
     "machine_max_acceleration_e",
@@ -12775,6 +12965,7 @@
     "outer_wall_acceleration",
     "outer_wall_jerk",
     "outer_wall_speed",
+    "outer_wall_volumetric_flow",
     "overhang_1_4_speed",
     "overhang_2_4_speed",
     "overhang_3_4_speed",
@@ -12805,12 +12996,16 @@
     "small_support_perimeter_threshold",
     "sparse_infill_acceleration",
     "sparse_infill_speed",
+    "sparse_infill_volumetric_flow",
     "support_interface_speed",
+    "support_interface_volumetric_flow",
     "support_speed",
+    "support_volumetric_flow",
     "top_solid_infill_flow_ratio",
     "top_surface_acceleration",
     "top_surface_jerk",
     "top_surface_speed",
+    "top_surface_volumetric_flow",
     "travel_acceleration",
     "travel_jerk",
     "travel_slope",
