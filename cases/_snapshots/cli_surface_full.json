@@ -1015,6 +1015,19 @@
       "nullable": false
     },
     {
+      "key": "brim_filament_id",
+      "flag": "--brim-filament-id",
+      "type": "coInt",
+      "nocli": false,
+      "class": "PrintConfigDef",
+      "min": 0.0,
+      "max": null,
+      "enum_values": [],
+      "enum_dynamic": false,
+      "default": "0",
+      "nullable": false
+    },
+    {
       "key": "brim_flow_ratio",
       "flag": "--brim-flow-ratio",
       "type": "coFloat",
@@ -10349,6 +10362,23 @@
       "enum_dynamic": false,
       "default": "100",
       "nullable": true
+    },
+    {
+      "key": "sparse_infill_strategy",
+      "flag": "--sparse-infill-strategy",
+      "type": "coEnum",
+      "nocli": false,
+      "class": "PrintConfigDef",
+      "min": null,
+      "max": null,
+      "enum_values": [
+        "default",
+        "crossing",
+        "non_crossing"
+      ],
+      "enum_dynamic": false,
+      "default": null,
+      "nullable": false
     },
     {
       "key": "sparse_infill_volumetric_flow",
