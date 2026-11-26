@@ -1128,6 +1128,19 @@
       "nullable": false
     },
     {
+      "key": "cad",
+      "flag": "--cad",
+      "type": "coBool",
+      "nocli": false,
+      "class": "CLIMiscConfigDef",
+      "min": null,
+      "max": null,
+      "enum_values": [],
+      "enum_dynamic": false,
+      "default": "false",
+      "nullable": false
+    },
+    {
       "key": "calib_flowrate_topinfill_special_order",
       "flag": "--calib-flowrate-topinfill-special-order",
       "type": "coBool",
@@ -7341,6 +7354,45 @@
       "nullable": false
     },
     {
+      "key": "mcp",
+      "flag": "--mcp",
+      "type": "coBool",
+      "nocli": false,
+      "class": "CLIMiscConfigDef",
+      "min": null,
+      "max": null,
+      "enum_values": [],
+      "enum_dynamic": false,
+      "default": "false",
+      "nullable": false
+    },
+    {
+      "key": "mcp_port",
+      "flag": "--mcp-port",
+      "type": "coInt",
+      "nocli": false,
+      "class": "CLIMiscConfigDef",
+      "min": 0.0,
+      "max": 65535.0,
+      "enum_values": [],
+      "enum_dynamic": false,
+      "default": "0",
+      "nullable": false
+    },
+    {
+      "key": "mcp_stdio",
+      "flag": "--mcp-stdio",
+      "type": "coBool",
+      "nocli": false,
+      "class": "CLIMiscConfigDef",
+      "min": null,
+      "max": null,
+      "enum_values": [],
+      "enum_dynamic": false,
+      "default": "false",
+      "nullable": false
+    },
+    {
       "key": "metadata_name",
       "flag": "--metadata-name",
       "type": "coStrings",
@@ -9511,6 +9563,19 @@
       "enum_values": [],
       "enum_dynamic": false,
       "default": "0",
+      "nullable": false
+    },
+    {
+      "key": "run",
+      "flag": "--run",
+      "type": "coString",
+      "nocli": false,
+      "class": "CLIMiscConfigDef",
+      "min": null,
+      "max": null,
+      "enum_values": [],
+      "enum_dynamic": false,
+      "default": "",
       "nullable": false
     },
     {
@@ -12121,6 +12186,19 @@
       "type": "coBool",
       "nocli": false,
       "class": "PrintConfigDef",
+      "min": null,
+      "max": null,
+      "enum_values": [],
+      "enum_dynamic": false,
+      "default": "false",
+      "nullable": false
+    },
+    {
+      "key": "unrestricted_scripts",
+      "flag": "--unrestricted-scripts",
+      "type": "coBool",
+      "nocli": false,
+      "class": "CLIMiscConfigDef",
       "min": null,
       "max": null,
       "enum_values": [],
